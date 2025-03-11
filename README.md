@@ -55,9 +55,7 @@ The system has been validated through rigorous testing:
 - Cross-validation using multiple AI systems and manual exploratory testing
 
 ## InferESG Roadmap & Docs
-InferESG is based on InferGPT/LLM - more details below:
-
-Want more context about how it works, our roadmap and documentation? Check out the [wiki](https://github.com/WaitThatShouldntWork/InferGPT/wiki)
+InferESG is based on InferGPT/LLM
 
 We are very keen to integration further use of the Knowledge Graph as we believe this will help manage a lot of the risks and improve it's capabilities.
 
