@@ -57,7 +57,7 @@ The system has been validated through rigorous testing:
 ## InferESG Roadmap & Docs
 InferESG is based on InferGPT/LLM
 
-We are very keen to integration further use of the Knowledge Graph as we believe this will help manage a lot of the risks and improve it's capabilities.
+We are very keen to integrate further use of the Knowledge Graph as we believe this will help manage a lot of the risks and improve it's capabilities.
 
 For further reading on InferLLMs's components, see the [InferLLM Github](https://github.com/ScottLogic/InferLLM)
 
