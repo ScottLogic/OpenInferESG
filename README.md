@@ -41,10 +41,13 @@ InferESG employs a sophisticated multi-agent architecture:
 
 - Integration with key frameworks (TNFD, GRI)
 - Materiality assessment capabilities
-- Greenwashing detection
+- Greenwashing and Greenhushing flagging
 - Interactive query system
 - Evidence trail generation
 - Multi-source validation
+
+## Case Study & Blogs
+See our case study: https://www.scottlogic.com/our-work/inferesg-agentic-ai-due-diligence and [blogs](https://blog.scottlogic.com/2025/03/20/inferesg-overview.html)
 
 ## 📈 Validation & Testing
 
