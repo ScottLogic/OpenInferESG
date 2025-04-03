@@ -46,8 +46,10 @@ InferESG employs a sophisticated multi-agent architecture:
 - Evidence trail generation
 - Multi-source validation
 
-## Case Study & Blogs
-See our case study: https://www.scottlogic.com/our-work/inferesg-agentic-ai-due-diligence and [blogs](https://blog.scottlogic.com/2025/03/20/inferesg-overview.html)
+## Demo, Case Study & Blogs
+- We have recorded a demo: https://www.youtube.com/watch?v=sg3Lf0UODEQ 
+- Case study is available: https://www.scottlogic.com/our-work/inferesg-agentic-ai-due-diligence 
+- [Blogs](https://blog.scottlogic.com/2025/03/20/inferesg-overview.html)
 
 ## 📈 Validation & Testing
 
