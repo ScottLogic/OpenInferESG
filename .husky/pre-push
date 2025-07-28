@@ -1,7 +1,5 @@
 #!/bin/bash
 
-echo $PATH
-
 branch_name=$(git rev-parse --abbrev-ref HEAD)
 pattern="^OSAI-[0-9]+/[a-z0-9._-]+$"
 
