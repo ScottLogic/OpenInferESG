@@ -3,7 +3,6 @@ from contextlib import asynccontextmanager
 import json
 import logging.config
 import os
-from typing import NoReturn
 import uuid
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Response, WebSocket, UploadFile
 from fastapi.responses import JSONResponse
