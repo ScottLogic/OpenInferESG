@@ -62,8 +62,8 @@ async def mock_utterance_tool(user_question: str, llm, model) -> ToolActionSucce
     return ToolActionSuccess(user_question)
 
 
-def agent_desc(arg: ChatAgent) -> str:
-    return f"A test agent called {arg.name}"
+def agent_desc(agent: ChatAgent) -> str:
+    return f"A test agent called {agent.name}"
 
 mock_agent_description = agent_desc 
 mock_agent_name = "Mock Agent"
