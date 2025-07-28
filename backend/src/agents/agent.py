@@ -87,12 +87,15 @@ class ChatAgent(Agent):
 T = TypeVar('T', bound=ChatAgent)
 
 
-def chat_agent(name: str, description: str | Callable, tools: List[Tool]):
+def chat_agent(name: str, description: str | Callable[[], str], tools: List[Tool]):
 
     def decorator(_chat_agent: Type[T]) -> Type[T]:
-        _chat_agent.name = name
-        _chat_agent.description = description
-        _chat_agent.tools = tools
+        setattr(_chat_agent, "name", name)
+        if callable(description):
+            setattr(_chat_agent, "description", classmethod(description))
+        else:
+            setattr(_chat_agent, "description", description)
+        setattr(_chat_agent, "tools", tools)
         return _chat_agent
 
     return decorator
