@@ -222,7 +222,7 @@ async def fetch_file(id: str):
 
 
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket) -> NoReturn:
+async def websocket_endpoint(websocket: WebSocket):
     await connection_manager.connect(websocket)
     try:
         while True:
