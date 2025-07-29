@@ -3,7 +3,6 @@ from contextlib import asynccontextmanager
 import json
 import logging.config
 import os
-from typing import NoReturn
 import uuid
 from fastapi import BackgroundTasks, FastAPI, HTTPException, Response, WebSocket, UploadFile
 from fastapi.responses import JSONResponse
@@ -222,7 +221,7 @@ async def fetch_file(id: str):
 
 
 @app.websocket("/ws")
-async def websocket_endpoint(websocket: WebSocket) -> NoReturn:
+async def websocket_endpoint(websocket: WebSocket) -> None:  # Changed from NoReturn to None
     await connection_manager.connect(websocket)
     try:
         while True:

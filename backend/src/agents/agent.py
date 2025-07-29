@@ -40,9 +40,9 @@ class ChatAgentFailure:
 
 
 class ChatAgent(Agent):
-    name: str
-    description: str | Callable[[], str]
-    tools: List[Tool]
+    name: str = ""  # Default values to make class attributes
+    description: str | Callable[[], str] = ""
+    tools: List[Tool] = []
 
     async def invoke(
         self, utterance: str, tool_name: str, parameters: dict[str, Any]
@@ -89,10 +89,11 @@ T = TypeVar('T', bound=ChatAgent)
 
 def chat_agent(name: str, description: str | Callable, tools: List[Tool]):
 
-    def decorator(_chat_agent: Type[T]) -> Type[T]:
-        _chat_agent.name = name
-        _chat_agent.description = description
-        _chat_agent.tools = tools
-        return _chat_agent
+    def decorator(cls: Type[T]) -> Type[T]:
+        # Set attributes at the class level using setattr to avoid type issues
+        setattr(cls, "name", name)
+        setattr(cls, "description", description)
+        setattr(cls, "tools", tools)
+        return cls
 
     return decorator
