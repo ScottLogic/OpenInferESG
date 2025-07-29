@@ -45,6 +45,6 @@ docker build -t {my-data-image-name} .
 docker run -e NEO4J_AUTH=neo4j/password -p 7474:7474 -p 7687:7687 {my-data-image-name}
 ```
 
-> Replace `neo4j/password` with your chosen username and password (seperated by a `/`).
+> Replace `neo4j/password` with your chosen username and password (separated by a `/`).
 
 3. Check neo4j is running at [http://localhost:7474/](http://localhost:7474/)
