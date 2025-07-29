@@ -5,6 +5,8 @@ from src.session.file_uploads import get_file_content_for_filename, set_file_con
 from src.utils.file_utils import extract_text
 from src.utils import Config
 from .llm import LLM, LLMFile
+from openai import NOT_GIVEN, AsyncOpenAI, OpenAIError
+from typing import List
 
 logger = logging.getLogger(__name__)
 config = Config()
@@ -14,27 +16,50 @@ class Mistral(LLM):
     client = MistralApi(api_key=config.mistral_key)
 
     async def chat(self, model, system_prompt: str, user_prompt: str, return_json=False) -> str:
-        logger.debug("Called llm. Waiting on response model with prompt {0}.".format(str([system_prompt, user_prompt])))
-        response = await self.client.chat.complete_async(
-            model=model,
-            messages=[
-                SystemMessage(content=system_prompt),
-                UserMessage(content=user_prompt),
-            ],
-            temperature=0,
-            response_format={"type": "json_object"} if return_json else None,
+        logger.debug(
+            "##### Called open ai chat ... llm. Waiting on response model with prompt {0}.".format(
+                str([system_prompt, user_prompt])
+            )
         )
-        if not response or not response.choices:
-            logger.error("Call to Mistral API failed: No valid response or choices received")
-            return "An error occurred while processing the request."
+        try:
+            openAiClient = AsyncOpenAI(api_key="lm-studio", base_url="http://172.22.48.1:1234/v1")
+            response = await openAiClient.chat.completions.create(
+                model="liquid/lfm2-1.2b",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                temperature=0,
+                response_format={
+                    "type": "json_schema",
+                    "json_schema": {
+                        "strict": "false",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "suggestions": {
+                                   "type": "array",
+				                    "items": {
+					                    "type": "string" 
+				                    }
+                                }
+                            }
+                        }
+                    }
+                } if return_json else NOT_GIVEN,
+            )
+            content = response.choices[0].message.content
+            logger.info(f"Mistral response: Finish reason: {response.choices[0].finish_reason}, Content: {content}")
+            logger.debug(f"Token data: {response.usage}")
 
-        content = response.choices[0].message.content
-        if not content:
-            logger.error("Call to Mistral API failed: message content is None or Unset")
-            return "An error occurred while processing the request."
+            if not content:
+                logger.error("Call to Mistral API failed: message content is None")
+                return "An error occurred while processing the request."
 
-        logger.debug('{0} response : "{1}"'.format(model, content))
-        return content
+            return content
+        except Exception as e:
+            logger.error(f"Error calling Mistral model: {e}")
+            return "An error occurred while processing the request."
 
     async def chat_with_file(
         self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json=False
