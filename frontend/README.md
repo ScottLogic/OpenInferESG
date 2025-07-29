@@ -45,13 +45,13 @@ docker build -t {my-frontend-image-name} .
 docker run --env-file ../.env -p 8650:8650 {my-frontend-image-name}
 ```
 
-> Note that we pass in the entire environment file that contains all our application's configuration. This means some unneccessary configuration is also being passed in. This is fine when testing locally. In production, we must limit this to only the essential frontend configuration (see environment configuration within [Docker Compose](../compose.yml)).
+> Note that we pass in the entire environment file that contains all our application's configuration. This means some unnecessary configuration is also being passed in. This is fine when testing locally. In production, we must limit this to only the essential frontend configuration (see environment configuration within [Docker Compose](../compose.yml)).
 
 Check the frontend app is running at [http://localhost:8650](http://localhost:8650)
 
 ## Frontend Linting
 
-We have set up ESLint for the frontend ccode. To run the linter, use the following command:
+We have set up ESLint for the frontend code. To run the linter, use the following command:
 
 ```bash
 npm run lint

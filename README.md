@@ -111,7 +111,7 @@ There are a few ways to run the application:
 
 For ease of use, we would recommended that you run the application using **Docker Compose**.
 
-For instructions on how to run indivdual components locally or within Docker containers, refer to appropriate READMEs:
+For instructions on how to run individual components locally or within Docker containers, refer to appropriate READMEs:
 
 - [frontend README](frontend/README.md)
 - [backend README](backend/README.md)
@@ -140,7 +140,7 @@ We've designed and tested the current initial workflow with an ESG analyst team.
 - Save me time wading through the noise to find the right signals to investigate
 
   **Process:**
-- To get started upload a Sustainability report PDF for an organistion. Be patient as a lot of processing is done initially (plan is to make this more efficient, async and notify the user when done)
+- To get started upload a Sustainability report PDF for an organisation. Be patient as a lot of processing is done initially (plan is to make this more efficient, async and notify the user when done)
 - Once the report has been analysed you can click a button to view it in the canvas or download it
 - You can then ask questions chat bot style. Behind the scenes InferESG works out whether to use data from the report, web searches, materiality documents, LLM generalist content or a mix
 - If you want to see how it's created its output to a question you can click a button and it will (at the time of writing) give you a JSON dump of what agent, queries and source URLs it has used - although the source URLs should also be included in the friendlier UI output

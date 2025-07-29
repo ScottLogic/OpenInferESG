@@ -112,3 +112,10 @@ async def test_chat_agent_tool_failure(
         await mock_agent_instance.invoke("Mock task to solve", mock_tool_a_name, input_params)
 
         assert str(error.value) == expected
+
+
+def test_generate_callable_description(mocker):
+    agent = MockChatAgent("mockllm", "mock_model")
+
+    assert callable(agent.description)
+    assert agent.description() == "A test agent called Mock Agent"
