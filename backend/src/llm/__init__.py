@@ -8,4 +8,14 @@ from .lmstudio_intent import LmStudioIntent
 from .lmstudio_suggestions import LmStudioSuggestions
 from .lmstudio_web import LmStudioWeb
 
-__all__ = ["count_calls", "get_llm", "LLM", "LLMFile", "Mistral", "OpenAI", "LmStudioAnswer", "LmStudioIntent", "LmStudioSuggestions", "LmStudioWeb"]
+__all__ = [
+    "count_calls",
+    "get_llm",
+    "LLM",
+    "LLMFile",
+    "Mistral",
+    "OpenAI",
+    "LmStudioAnswer",
+    "LmStudioIntent",
+    "LmStudioSuggestions",
+    "LmStudioWeb"]

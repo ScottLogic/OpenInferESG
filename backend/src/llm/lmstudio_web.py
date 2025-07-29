@@ -1,12 +1,10 @@
 from fastapi import HTTPException
-from mistralai import Mistral as MistralApi, UserMessage, SystemMessage
 import logging
 from src.session.file_uploads import get_file_content_for_filename, set_file_content_for_filename
 from src.utils.file_utils import extract_text
 from src.utils import Config
 from .llm import LLM, LLMFile
-from openai import NOT_GIVEN, AsyncOpenAI, OpenAIError
-from typing import List
+from openai import NOT_GIVEN, AsyncOpenAI
 
 logger = logging.getLogger(__name__)
 config = Config()
@@ -20,8 +18,8 @@ class LmStudioWeb(LLM):
             )
         )
         try:
-            lmStudioClient = AsyncOpenAI(api_key="lm-studio", base_url="http://host.docker.internal:1234/v1")
-            response = await lmStudioClient.chat.completions.create(
+            lm_studio_client = AsyncOpenAI(api_key="lm-studio", base_url="http://host.docker.internal:1234/v1")
+            response = await lm_studio_client.chat.completions.create(
                 model=model,
                 messages=[
                     {"role": "system", "content": system_prompt},
