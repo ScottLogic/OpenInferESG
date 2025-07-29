@@ -15,6 +15,13 @@ Python service for the InferESG backend.
 
 > Note: You will need to configure a LLM to run the service.
 
+### LM Studio Configuration
+
+When using LM Studio as your LLM provider, you can configure the following environment variables:
+
+- `LMSTUDIO_URL`: URL for your LM Studio server (default: http://host.docker.internal:1234)
+- `LMSTUDIO_MODEL`: The model name to use (default: local-model)
+
 This README covers instructions on how to run the application:
 
 - Locally

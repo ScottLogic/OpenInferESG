@@ -13,6 +13,8 @@ class Config(object):
         self.mistral_key = None
         self.mistral_model = None
         self.openai_key = None
+        self.lmstudio_url = None
+        self.lmstudio_model = None
         self.neo4j_uri = default_neo4j_uri
         self.neo4j_user = None
         self.neo4j_password = None
@@ -53,6 +55,8 @@ class Config(object):
             self.mistral_key = os.getenv("MISTRAL_KEY")
             self.mistral_model = os.getenv("MODEL")
             self.openai_key = os.getenv("OPENAI_KEY")
+            self.lmstudio_url = os.getenv("LMSTUDIO_URL")
+            self.lmstudio_model = os.getenv("LMSTUDIO_MODEL")
             self.neo4j_uri = os.getenv("NEO4J_URI", default_neo4j_uri)
             self.neo4j_user = os.getenv("NEO4J_USERNAME")
             self.neo4j_password = os.getenv("NEO4J_PASSWORD")

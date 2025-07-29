@@ -31,6 +31,7 @@ async def generate_suggestions() -> List[str]:
     )
     try:
         response_json = json.loads(response)
+        logger.info(f"Parsed suggestions from JSON: {response_json}")
     except json.JSONDecodeError:
         response_json = {"suggestions": []}
     return response_json["suggestions"]
