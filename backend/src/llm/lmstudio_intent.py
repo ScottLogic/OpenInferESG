@@ -29,6 +29,7 @@ class LmStudioIntent(LLM):
                 response_format={
                     "type": "json_schema",
                     "json_schema": {
+                        "name": "IntentResponse",
                         "strict": "false",
                         "schema": {
                             "type": "object",
