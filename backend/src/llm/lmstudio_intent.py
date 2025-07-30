@@ -26,7 +26,7 @@ class LmStudioIntent(LLM):
                     {"role": "user", "content": user_prompt},
                 ],
                 temperature=0,
-                response_format={
+                response_format={ # type: ignore
                     "type": "json_schema",
                     "json_schema": {
                         "name": "IntentResponse",
