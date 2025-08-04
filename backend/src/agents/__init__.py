@@ -42,12 +42,27 @@ def get_generalist_agent() -> GeneralistAgent:
 
 
 def get_chat_agents() -> List[ChatAgent]:
-    return [
-        DatastoreAgent(config.datastore_agent_llm, config.datastore_agent_model),
-        WebAgent(config.web_agent_llm, config.web_agent_model),
-        get_materiality_agent(),
-        FileAgent(config.file_agent_llm, config.file_agent_model)
-    ]
+    allowed_agents = config.allowed_chat_agents
+    if allowed_agents:
+        agents = []
+        if "datastore" in allowed_agents:
+            agents.append(DatastoreAgent(config.datastore_agent_llm, config.datastore_agent_model))
+        if "web" in allowed_agents:
+            agents.append(WebAgent(config.web_agent_llm, config.web_agent_model))
+        if "materiality" in allowed_agents:
+            agents.append(get_materiality_agent())
+        if "file" in allowed_agents:
+            agents.append(FileAgent(config.file_agent_llm, config.file_agent_model))
+        return agents
+
+    # Default agents if no specific agents are allowed
+    if not allowed_agents:
+        return [
+            DatastoreAgent(config.datastore_agent_llm, config.datastore_agent_model),
+            WebAgent(config.web_agent_llm, config.web_agent_model),
+            get_materiality_agent(),
+            FileAgent(config.file_agent_llm, config.file_agent_model)
+        ]
 
 
 __all__ = [
