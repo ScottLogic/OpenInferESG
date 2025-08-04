@@ -54,9 +54,8 @@ def get_chat_agents() -> List[ChatAgent]:
         if "file" in allowed_agents:
             agents.append(FileAgent(config.file_agent_llm, config.file_agent_model))
         return agents
-
-    # Default agents if no specific agents are allowed
-    if not allowed_agents:
+    else:
+        # Default agents if no specific agents are allowed
         return [
             DatastoreAgent(config.datastore_agent_llm, config.datastore_agent_model),
             WebAgent(config.web_agent_llm, config.web_agent_model),
