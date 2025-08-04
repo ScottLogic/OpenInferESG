@@ -1,9 +1,10 @@
-#!/bin/bash
+#!/bin/sh
+
 branch_name=$(git rev-parse --abbrev-ref HEAD)
-pattern="^FS-[0-9]+/[a-z0-9._-]+$"
+pattern="^OSAI-[0-9]+/[a-z0-9._-]+$"
 
 if ! [[ $branch_name =~ $pattern ]]; then
-    echo "Branch name '$branch_name' does not follow the naming convention 'FS-<number>/<branch-name>', please rename using the following regex pattern and try again."
+    echo "Branch name '$branch_name' does not follow the naming convention 'OSAI-<number>/<branch-name>', please rename using the following regex pattern and try again."
     echo -e "\e[94m$pattern\e[0m"
     exit 1
 fi

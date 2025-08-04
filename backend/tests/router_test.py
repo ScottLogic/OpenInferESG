@@ -64,4 +64,4 @@ async def test_select_agent_for_task_given_agent_failed_only_once_then_selects_t
     assert agent is mock_agent_2
     assert "ChatAgentFailure(agent_name='Mock Agent', reason='failure'" not in spy_chat_user_prompt_args
     assert "ChatAgentFailure(agent_name='mock_agent_2', reason='failure'" in spy_chat_user_prompt_args
-    assert "[{'agent': 'mock_agent_2', 'description': 'A test agent'" in spy_chat_user_prompt_args
+    assert "[{'agent': 'mock_agent_2', 'description': 'A test agent called Mock Agent'" in spy_chat_user_prompt_args

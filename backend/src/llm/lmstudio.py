@@ -21,7 +21,7 @@ class LMStudio(LLM):
 
     async def chat(self, model, system_prompt: str, user_prompt: str, return_json=False) -> str:
         logger.debug("Called LMStudio llm. Waiting on response with prompt {0}."
-                     .format(str([system_prompt, user_prompt])))
+                .format(str([system_prompt, user_prompt])))
 
         url = config.lmstudio_url
         if url is None:
@@ -38,11 +38,11 @@ class LMStudio(LLM):
             "Content-Type": "application/json",
             "Authorization": "Bearer not-needed"  # Some LM Studio versions may require this
         }
-
         # If JSON is requested, modify the system prompt to ensure valid JSON response
         if return_json:
-            system_prompt = (system_prompt + 
-                      "\nIMPORTANT: You must respond with valid JSON only. Format your entire response as a proper JSON object.")
+            system_prompt = (system_prompt +
+                "\nIMPORTANT: You must respond with valid JSON only. Format your entire response as a "
+                "proper JSON object.")
 
         payload = {
             "model": model or config.lmstudio_model or "local-model",
@@ -56,9 +56,8 @@ class LMStudio(LLM):
 
         # Log the complete payload for debugging
         logger.debug(f"LM Studio API request payload: {json.dumps(payload, indent=2)}")
-
         logger.info(f"Sending direct HTTP request to LM Studio at {url}")
-        
+
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(url, json=payload, headers=headers) as response:
@@ -86,20 +85,16 @@ class LMStudio(LLM):
                     except json.JSONDecodeError as json_error:
                         logger.error(f"Failed to parse response as JSON: {str(json_error)}")
                         return f"The LLM server returned an invalid JSON response: {response_text[:100]}..."
-                    
                     if "choices" not in result or not result["choices"]:
                         logger.error(f"No choices in LM Studio response: {result}")
                         return "The LLM server returned an incomplete response."
-
                     if "message" not in result["choices"][0]:
                         logger.error(f"No message in first choice: {result['choices'][0]}")
                         return "The LLM server returned an invalid response format."
-
                     content = result["choices"][0]["message"].get("content")
                     if not content:
                         logger.error("No content in message")
                         return "The LLM server returned an empty response."
-
                     logger.info(f"Successfully got response from LM Studio: {content[:100]}...")
 
                     # If JSON was requested, validate and clean the content
@@ -114,10 +109,10 @@ class LMStudio(LLM):
                             # Extract just the JSON content without the code block markers
                             cleaned_content = code_block_match.group(1).strip()
                             logger.info(f"Extracted JSON from markdown code block: {cleaned_content[:100]}...")
-                        
+
                         try:
                             # Try to parse the content as JSON to validate it
-                            json_content = json.loads(cleaned_content)
+                            _ = json.loads(cleaned_content)
                             logger.debug("Successfully validated JSON response")
                             # Return the cleaned JSON content
                             return cleaned_content
@@ -129,17 +124,16 @@ class LMStudio(LLM):
                                 json_match = re.search(json_pattern, cleaned_content)
                                 if json_match:
                                     potential_json = json_match.group(1)
-                                    # Validate JSON but we don't need to store the result
+                                    # Validate JSON
                                     json.loads(potential_json)
                                     logger.info("Found and extracted valid JSON object using regex")
                                     return potential_json
                             except (json.JSONDecodeError, Exception) as nested_error:
                                 logger.debug(f"Second JSON extraction attempt failed: {str(nested_error)}")
-
                             logger.warning("LM Studio returned non-JSON response when JSON was requested")
                             logger.debug(f"Invalid JSON response: {content}")
                             return f"Error: The LLM returned invalid JSON format: {content[:100]}..."
-                    
+
                     return content
         except Exception as e:
             logger.error(f"Error in HTTP request: {str(e)}")

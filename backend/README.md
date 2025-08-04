@@ -71,7 +71,7 @@ docker build -t {my-backend-image-name} .
 docker run --env-file ../.env -p 8250:8250 {my-backend-image-name}
 ```
 
-> Note that we pass in the entire environment file that contains all our application's configuration. This means some unneccessary configuration is also being passed in. This is fine when testing locally. In production, we must limit this to only the essential backend configuration (see environment configuration within [Docker Compose](../compose.yml)).
+> Note that we pass in the entire environment file that contains all our application's configuration. This means some unnecessary configuration is also being passed in. This is fine when testing locally. In production, we must limit this to only the essential backend configuration (see environment configuration within [Docker Compose](../compose.yml)).
 
 3. Check the backend app is running at [http://localhost:8250/health](http://localhost:8250/health)
 
@@ -111,7 +111,7 @@ The ruff vscode plugin can also be installed from the store to show linting erro
 
 Currently there are 4 rule groups selected in`ruff.toml`. All rule groups can be found [here](https://docs.astral.sh/ruff/rules/).
 
-To add further rules, these are added to `ruff.toml` by using the letter asssigned to the rules as in the docs linked above. ie. pep8-naming uses the letter "N".
+To add further rules, these are added to `ruff.toml` by using the letter assigned to the rules as in the docs linked above. ie. pep8-naming uses the letter "N".
 
 ## Test
 
