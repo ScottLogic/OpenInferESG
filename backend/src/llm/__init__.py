@@ -10,7 +10,7 @@ from .lmstudio_suggestions import LmStudioSuggestions
 from .lmstudio_web import LmStudioWeb
 
 __all__ = ["count_calls",
-         "get_llm", 
+         "get_llm",
          "LLM",
          "LLMFile",
          "Mistral",
