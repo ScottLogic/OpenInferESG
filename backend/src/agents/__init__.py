@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from src.utils import Config
@@ -15,6 +16,7 @@ from src.agents.generalist_agent import GeneralistAgent
 
 
 config = Config()
+logger = logging.getLogger(__name__)
 
 
 def get_validator_agent() -> ValidatorAgent:
@@ -44,22 +46,34 @@ def get_generalist_agent() -> GeneralistAgent:
 def get_chat_agents() -> List[ChatAgent]:
     allowed_agents = config.allowed_chat_agents
     if allowed_agents:
+        allowed_agents = list(dict.fromkeys(allowed_agents)) # remove any duplicates
         agents = []
-        if "datastore" in allowed_agents:
-            agents.append(DatastoreAgent(config.datastore_agent_llm, config.datastore_agent_model))
-        if "web" in allowed_agents:
-            agents.append(WebAgent(config.web_agent_llm, config.web_agent_model))
-        if "materiality" in allowed_agents:
-            agents.append(get_materiality_agent())
-        if "file" in allowed_agents:
-            agents.append(FileAgent(config.file_agent_llm, config.file_agent_model))
-        return agents
+        skipped_agents = []
+        for agent_name in allowed_agents:
+            match agent_name.lower():
+                case "datastoreagent":
+                    agents.append(DatastoreAgent(config.datastore_agent_llm, config.datastore_agent_model))
+                case "webagent":
+                    agents.append(WebAgent(config.web_agent_llm, config.web_agent_model))
+                case "materialityagent":
+                    agents.append(MaterialityAgent(config.materiality_agent_llm, config.materiality_agent_model))
+                case "fileagent":
+                    agents.append(FileAgent(config.file_agent_llm, config.file_agent_model))
+                case _:
+                    skipped_agents.append(agent_name)
+        if skipped_agents:
+            logger.warning(f"Skipped invalid chat agents: {', '.join(skipped_agents)}")
+        if not agents:
+            raise Exception("No valid chat agents found in ALLOWED_CHAT_AGENTS configuration.")
+        else:
+            logger.info(f"Using allowed chat agents: {', '.join([agent.__class__.__name__ for agent in agents])}")
+            return agents
     else:
         # Default agents if no specific agents are allowed
         return [
             DatastoreAgent(config.datastore_agent_llm, config.datastore_agent_model),
             WebAgent(config.web_agent_llm, config.web_agent_model),
-            get_materiality_agent(),
+            MaterialityAgent(config.materiality_agent_llm, config.materiality_agent_model),
             FileAgent(config.file_agent_llm, config.file_agent_model)
         ]
 
