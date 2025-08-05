@@ -4,7 +4,7 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import { ColDef } from 'ag-grid-community';
-import styles from './data-grid.module.css';
+import * as styles from './data-grid.module.css';
 
 const dateFormatter = (params: any) => {
   const date = new Date(params.value);

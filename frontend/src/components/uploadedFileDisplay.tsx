@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import styles from './uploadedFileDisplay.module.css';
+import * as styles from './uploadedFileDisplay.module.css';
 import AttachmentIcon from '../icons/attachment.svg';
 import { Tooltip } from './tooltip';
 

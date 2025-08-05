@@ -5,7 +5,7 @@ import closeIcon from '../icons/close.svg';
 import { IconButton } from './icon-button';
 import { DataGrid } from './data-grid';
 
-import styles from './sidebar.module.css';
+import * as styles from './sidebar.module.css';
 
 interface SidebarProps {
   selectedMessage: Message;
@@ -29,7 +29,7 @@ export const Sidebar = ({ selectedMessage, selectMessage }: SidebarProps) => {
           </div>
           <hr className={styles.custom_hr} />
           <div className={styles.sidepanel}>
-            <div className={styles.markdown_container}>
+            <div className={styles.close_container}>
               <Markdown>{String(report)}</Markdown>
             </div>
           </div>

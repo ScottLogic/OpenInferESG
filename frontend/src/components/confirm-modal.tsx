@@ -1,4 +1,4 @@
-import Styles from './confirm-modal.module.css';
+import * as Styles from './confirm-modal.module.css';
 import { useEffect, useRef } from 'react';
 import { Message, MessageType } from '../session/websocket-context';
 import React from 'react';

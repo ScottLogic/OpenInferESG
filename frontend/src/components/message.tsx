@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import React, { useState } from 'react';
 import Markdown from 'react-markdown';
-import styles from './message.module.css';
+import * as styles from './message.module.css';
 import UserIcon from '../icons/account-circle.svg';
 import BotIcon from '../icons/logomark.svg';
 import ChevronIcon from '../icons/chevron.svg';
