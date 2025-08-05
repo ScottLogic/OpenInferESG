@@ -63,7 +63,9 @@ export const MessageComponent = ({
     <div className={classNames(styles.container, roleClass)}>
       <div className={styles.message_container}>
         <img src={icon} className={styles.iconStyle} />
-        <Markdown className={styles.messageStyle}>{String(content)}</Markdown>
+        <div className={styles.messageStyle}>
+          <Markdown>{String(content)}</Markdown>
+        </div>
       </div>
       {(report || dataset) && (
         <div className={styles.selectMessage}>
