@@ -1,7 +1,10 @@
 import os
 import asyncio
+from dotenv import load_dotenv
 
-open_api_key = os.getenv("OPENAI_KEY")
+load_dotenv()
+open_api_key = os.getenv("OPENAI_KEY") 
+
 os.environ["OPENAI_API_KEY"] = open_api_key if open_api_key else ""
 
 from ragas.llms import LangchainLLMWrapper
@@ -17,7 +20,7 @@ evaluator_embeddings = LangchainEmbeddingsWrapper(OpenAIEmbeddings())
 
 est_data = {
     "user_input": "What is the percentage of reduction of the baseline emissions for Scope 1 and Scope 2?",
-    "response": "Scott Logic has set a target of 100% to achieve a reduction in their baseline emissions for Scope 1 and Scope 2 by the year 2026",
+    "response": "Scott Logic has set a target of 10% to achieve a reduction in their baseline emissions for Scope 1 and Scope 2 by the year 2026",
 }
 
 metric = AspectCritic(name="summary_accuracy",llm=evaluator_llm, definition="Verify if the summary is accurate.")
