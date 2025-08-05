@@ -43,7 +43,7 @@
     "webpack-dev-server": "^5.0.4"
   },
   "dependencies": {
-    "ag-grid-react": "^32.3.3",
+    "ag-grid-react": "^34.1.1",
     "classnames": "^2.5.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
