@@ -23,7 +23,6 @@
     "@stylistic/eslint-plugin-js": "^1.7.0",
     "@types/react": "^18.2.70",
     "@types/react-dom": "^18.2.22",
-    "@types/webpack-dev-server": "^4.7.2",
     "@typescript-eslint/eslint-plugin": "^7.4.0",
     "@typescript-eslint/parser": "^7.4.0",
     "css-loader": "^6.10.0",
