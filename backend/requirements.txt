@@ -21,8 +21,9 @@ redis==6.3.0
 pytest==8.3.4 # Tests fail when updated further
 pytest-mock==3.14.1
 pytest-asyncio==0.25.1
-pytest-bdd==7.3.0 # Tests failed when updated further
+pytest-bdd==8.1.0
 ragas==0.3.0
+
 
 # dev dependencies
 pycodestyle==2.14.0
