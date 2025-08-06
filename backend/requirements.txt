@@ -23,6 +23,7 @@ pytest-mock==3.14.1
 pytest-asyncio==1.1.0
 pytest-bdd==8.1.0
 ragas==0.3.0
+sacrebleu==2.5.1
 
 
 # dev dependencies
