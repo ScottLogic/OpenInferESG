@@ -34,6 +34,7 @@ def get_response(context):
     assert context.get("health_check_passed", False)
 
 
+@pytest.mark.asyncio
 @then(parsers.parse("the response to this '{prompt}' should match the '{expected_response}'"))
 async def check_response_includes_expected_response(context, prompt, expected_response):
     response = await send_prompt(prompt)
@@ -82,6 +83,7 @@ async def check_response_includes_expected_response(context, prompt, expected_re
         )
 
 
+@pytest.mark.asyncio
 @then(parsers.parse("the response to this '{prompt}' should give a confident answer"))
 async def check_bot_response_confidence(prompt):
     response = await send_prompt(prompt)
