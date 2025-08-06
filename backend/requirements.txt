@@ -20,7 +20,7 @@ redis==6.3.0
 # tests
 pytest==8.3.4 # Tests fail when updated further
 pytest-mock==3.14.1
-pytest-asyncio==0.25.1
+pytest-asyncio==1.1.0
 pytest-bdd==8.1.0
 ragas==0.3.0
 
