@@ -23,7 +23,7 @@ est_data = {
     "response": "Scott Logic has set a target of 10% to achieve a reduction in their baseline emissions for Scope 1 and Scope 2 by the year 2026",
 }
 
-metric = AspectCritic(name="summary_accuracy",llm=evaluator_llm, definition="Verify if the summary is accurate.")
+metric = AspectCritic(name="summary_accuracy", llm=evaluator_llm, definition="Verify if the summary is accurate.")
 test_data = SingleTurnSample(**est_data)
 
 
