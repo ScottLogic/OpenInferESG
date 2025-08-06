@@ -29,9 +29,7 @@ export const Sidebar = ({ selectedMessage, selectMessage }: SidebarProps) => {
           </div>
           <hr className={styles.custom_hr} />
           <div className={styles.sidepanel}>
-            <div className={styles.close_container}>
-              <Markdown>{String(report)}</Markdown>
-            </div>
+            <Markdown>{String(report)}</Markdown>
           </div>
         </>
       )}
