@@ -4,9 +4,13 @@ from unittest.mock import patch
 from src.agents import get_chat_agents, config
 
 config.web_agent_llm = "openai"
+config.web_agent_model = "web_agent_model"
 config.file_agent_llm = "openai"
+config.file_agent_model = "file_agent_model"
 config.datastore_agent_llm = "openai"
+config.datastore_agent_model = "datastore_agent_model"
 config.materiality_agent_llm = "openai"
+config.materiality_agent_model = "materiality_agent_model"
 
 def test_get_chat_agents_given_config_returns_list():
     config.allowed_chat_agents = ["WebAgent", "FileAgent"]
