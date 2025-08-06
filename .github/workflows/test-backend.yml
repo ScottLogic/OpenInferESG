@@ -20,7 +20,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: "3.13"
 
       - name: Install dependencies
         run: |
@@ -34,5 +34,5 @@ jobs:
           emoji: true
           verbose: true
           job-summary: true
-          custom-arguments: '--ignore=backend/tests/BDD'
-          report-title: 'Backend Test Report'
+          custom-arguments: "--ignore=backend/tests/BDD"
+          report-title: "Backend Test Report"
