@@ -24,8 +24,9 @@ test_data = {
     "user_input": "What is the percentage of reduction of the baseline emissions for Scope 1 and Scope 2?",
     "response": "Scott Logic has set a target of to achieve a reduction in their baseline emissions for Scope 1 and Scope 2 by the year 2026",
 }
-# Define a Custom Metric
-metric = AspectCritic(name="summary_accuracy",llm=evaluator_llm, definition="Verify if the summary is accurate.")
+
+metric = AspectCritic(name="summary_accuracy", llm=evaluator_llm, definition="Verify if the summary is accurate.")
+test_data = SingleTurnSample(**est_data)
 
 # Create a Single Evaluation Sample
 test_data = SingleTurnSample(**test_data)
