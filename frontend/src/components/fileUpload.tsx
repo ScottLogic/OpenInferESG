@@ -1,5 +1,5 @@
 import React, { ChangeEvent, useState } from 'react';
-import styles from './fileUpload.module.css';
+import * as styles from './fileUpload.module.css';
 import UploadIcon from '../icons/upload.svg';
 import UploadInProgressIcon from '../icons/upload-in-progress.svg';
 import CheckCircleIcon from '../icons/check-circle.svg';

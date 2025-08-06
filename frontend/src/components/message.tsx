@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import React, { useState } from 'react';
 import Markdown from 'react-markdown';
-import styles from './message.module.css';
+import * as styles from './message.module.css';
 import UserIcon from '../icons/account-circle.svg';
 import BotIcon from '../icons/logomark.svg';
 import ChevronIcon from '../icons/chevron.svg';
@@ -63,7 +63,9 @@ export const MessageComponent = ({
     <div className={classNames(styles.container, roleClass)}>
       <div className={styles.message_container}>
         <img src={icon} className={styles.iconStyle} />
-        <Markdown className={styles.messageStyle}>{String(content)}</Markdown>
+        <div className={styles.messageStyle}>
+          <Markdown>{String(content)}</Markdown>
+        </div>
       </div>
       {(report || dataset) && (
         <div className={styles.selectMessage}>

@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import styles from './suggestions.module.css';
+import * as styles from './suggestions.module.css';
 
 export interface SuggestionsProps {
   suggestions: string[];

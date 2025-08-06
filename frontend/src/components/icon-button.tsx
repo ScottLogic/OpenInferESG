@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './icon-button.module.css';
+import * as styles from './icon-button.module.css';
 
 interface IconButtonProps {
   altText?: string;
