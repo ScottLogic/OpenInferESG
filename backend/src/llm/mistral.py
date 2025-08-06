@@ -34,7 +34,7 @@ class Mistral(LLM):
             return "An error occurred while processing the request."
 
         logger.debug('{0} response : "{1}"'.format(model, content))
-        return content
+        return str(content)
 
     async def chat_with_file(
         self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json=False
