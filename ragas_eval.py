@@ -5,7 +5,9 @@ from dotenv import load_dotenv
 #Load OpenAI API Key
 load_dotenv()
 open_api_key = os.getenv("OPENAI_KEY") 
-os.environ["OPENAI_API_KEY"] = open_api_key if open_api_key else ""
+if not open_api_key:
+    raise RuntimeError("OPENAI_KEY environment variable not found. Please set it in your environment or .env file.")
+os.environ["OPENAI_API_KEY"] = open_api_key
 
 #Set up LLM and Embeddings
 from ragas.llms import LangchainLLMWrapper
