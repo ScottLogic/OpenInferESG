@@ -1,8 +1,8 @@
 fastapi==0.116.1
 uvicorn==0.35.0
-mistralai==1.9.3
+mistralai==1.1.0
 python-dotenv==1.1.1
-neo4j==5.28.2
+neo4j==5.18.0
 jinja2==3.1.6
 openai==1.99.1
 beautifulsoup4==4.13.4
