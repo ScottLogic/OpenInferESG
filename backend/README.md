@@ -30,7 +30,7 @@ Unless otherwise stated all of the commands mentioned in this README should be r
 
 Follow the instructions below to run the backend locally. Change directory to `/backend`, then follow the instructions below.
 
-1. Set-up a virtual environment
+1. Set-up a virtual environment using Python 3.13
 
 > It's recommended (though not technically required) to create a virtual environment for the project by running `python -m venv venv` to create it and `source venv/Scripts/activate` to activate it in your active terminal.
 
