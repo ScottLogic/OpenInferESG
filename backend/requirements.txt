@@ -4,7 +4,7 @@ mistralai==1.9.3
 python-dotenv==1.1.1
 neo4j==5.28.2
 jinja2==3.1.6
-websockets==15.0.1
+websockets==15.0.1 # Cant find any evidence to suggest this package is used
 cryptography==45.0.6  # Can't find any evidence to suggest this package is used
 isodate==0.7.2  # Cant find any evidence to suggest this package is used
 pycparser==2.22  # Can't find any evidence to suggest  this package is used
