@@ -1,22 +1,20 @@
 fastapi==0.116.1
 uvicorn==0.35.0
-mistralai==1.1.0
-pycodestyle==2.14.0
-python-dotenv==1.0.1
-neo4j==5.18.0
-ruff==0.12.7
-jinja2==3.1.3
-websockets==12.0
-cryptography==42.0.7
-isodate==0.6.1
-pycparser==2.22
-openai==1.52.1
-beautifulsoup4==4.12.3
-aiohttp==3.9.5
+mistralai==1.9.3
+python-dotenv==1.1.1
+neo4j==5.28.2
+jinja2==3.1.6
+websockets==15.0.1
+cryptography==45.0.6  # Can't find any evidence to suggest this package is used
+isodate==0.7.2  # Cant find any evidence to suggest this package is used
+pycparser==2.22  # Can't find any evidence to suggest  this package is used
+openai==1.99.1
+beautifulsoup4==4.13.4
+aiohttp==3.12.15
 googlesearch-python==1.3.0
-matplotlib==3.10.3
-langchain==0.3.4
-langchain-openai==0.2.3
+matplotlib==3.10.5
+langchain==0.3.27
+langchain-openai==0.3.28
 python-multipart==0.0.20
 pillow==11.3.0
 pypdf==5.9.0
@@ -29,3 +27,7 @@ pytest-mock==3.14.1
 pytest-asyncio==0.25.1
 pytest-bdd==7.3.0 # Tests failed when updated further
 ragas==0.3.0
+
+# dev dependencies
+pycodestyle==2.14.0
+ruff==0.12.7
