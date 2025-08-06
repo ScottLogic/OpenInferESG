@@ -46,11 +46,11 @@ def get_generalist_agent() -> GeneralistAgent:
 def get_chat_agents() -> List[ChatAgent]:
     allowed_agents = config.allowed_chat_agents
     if allowed_agents:
-        allowed_agents = list(dict.fromkeys(allowed_agents)) # remove any duplicates
+        allowed_agents = set(a.lower() for a in allowed_agents)
         agents = []
         skipped_agents = []
         for agent_name in allowed_agents:
-            match agent_name.lower():
+            match agent_name:
                 case "datastoreagent":
                     agents.append(DatastoreAgent(config.datastore_agent_llm, config.datastore_agent_model))
                 case "webagent":
