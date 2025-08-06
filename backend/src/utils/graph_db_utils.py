@@ -7,7 +7,7 @@ logger = logging.getLogger(__name__)
 config = Config()
 
 URI = config.neo4j_uri
-AUTH = (config.neo4j_user, config.neo4j_password) if config.neo4j_user and config.neo4j_password else None
+AUTH = (config.neo4j_user, config.neo4j_password)
 driver = GraphDatabase.driver(URI, auth=AUTH)
 
 
