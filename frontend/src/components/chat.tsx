@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Message, MessageComponent } from './message';
-import styles from './chat.module.css';
+import * as styles from './chat.module.css';
 import { Waiting } from './waiting';
 import {
   WebsocketContext,

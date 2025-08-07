@@ -8,7 +8,7 @@ import React, {
   useContext,
   useEffect,
 } from 'react';
-import styles from './input.module.css';
+import * as styles from './input.module.css';
 import RightArrowIcon from '../icons/send.svg';
 import { FileUpload } from './fileUpload';
 import { UploadedFileDisplay } from './uploadedFileDisplay';

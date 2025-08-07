@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 from src.utils import Config
@@ -15,6 +16,7 @@ from src.agents.generalist_agent import GeneralistAgent
 
 
 config = Config()
+logger = logging.getLogger(__name__)
 
 
 def get_validator_agent() -> ValidatorAgent:
@@ -42,12 +44,38 @@ def get_generalist_agent() -> GeneralistAgent:
 
 
 def get_chat_agents() -> List[ChatAgent]:
-    return [
-        DatastoreAgent(config.datastore_agent_llm, config.datastore_agent_model),
-        WebAgent(config.web_agent_llm, config.web_agent_model),
-        get_materiality_agent(),
-        FileAgent(config.file_agent_llm, config.file_agent_model)
-    ]
+    allowed_agents = config.allowed_chat_agents
+    if allowed_agents:
+        allowed_agents = set(a.lower() for a in allowed_agents)
+        agents = []
+        skipped_agents = []
+        for agent_name in allowed_agents:
+            match agent_name:
+                case "datastoreagent":
+                    agents.append(DatastoreAgent(config.datastore_agent_llm, config.datastore_agent_model))
+                case "webagent":
+                    agents.append(WebAgent(config.web_agent_llm, config.web_agent_model))
+                case "materialityagent":
+                    agents.append(MaterialityAgent(config.materiality_agent_llm, config.materiality_agent_model))
+                case "fileagent":
+                    agents.append(FileAgent(config.file_agent_llm, config.file_agent_model))
+                case _:
+                    skipped_agents.append(agent_name)
+        if skipped_agents:
+            logger.warning(f"Skipped invalid chat agents: {', '.join(skipped_agents)}")
+        if not agents:
+            raise Exception("No valid chat agents found in ALLOWED_CHAT_AGENTS configuration.")
+        else:
+            logger.info(f"Using allowed chat agents: {', '.join([agent.__class__.__name__ for agent in agents])}")
+            return agents
+    else:
+        # Default agents if no specific agents are allowed
+        return [
+            DatastoreAgent(config.datastore_agent_llm, config.datastore_agent_model),
+            WebAgent(config.web_agent_llm, config.web_agent_model),
+            MaterialityAgent(config.materiality_agent_llm, config.materiality_agent_model),
+            FileAgent(config.file_agent_llm, config.file_agent_model)
+        ]
 
 
 __all__ = [

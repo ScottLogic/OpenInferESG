@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import styles from './app.module.css';
+import * as styles from './app.module.css';
 import { Chat } from './components/chat';
 import { Input } from './components/input';
 import { useMessages } from './useMessages';

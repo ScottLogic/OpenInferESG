@@ -20,10 +20,12 @@ pytest-bdd==7.3.0
 langchain==0.3.4
 langchain-openai==0.2.3
 python-multipart==0.0.17
-pillow==10.4.0
 pypdf==4.3.1
 hiredis==3.0.0
 redis==5.0.8
+pillow==11.3.0
+sacrebleu==2.5.1
+ragas==0.3.0
 
 # tests
 pytest==8.3.4

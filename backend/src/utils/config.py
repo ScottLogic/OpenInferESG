@@ -42,6 +42,7 @@ class Config(object):
         self.redis_host = default_redis_host
         self.suggestions_model = None
         self.dynamic_knowledge_graph_model = None
+        self.allowed_chat_agents = None
         self.load_env()
 
     def load_env(self):
@@ -85,6 +86,9 @@ class Config(object):
             self.suggestions_model = os.getenv("SUGGESTIONS_MODEL")
             self.dynamic_knowledge_graph_model = os.getenv("DYNAMIC_KNOWLEDGE_GRAPH_MODEL")
             self.file_agent_model = os.getenv("FILE_AGENT_MODEL")
+            self.allowed_chat_agents = (
+                os.getenv("ALLOWED_CHAT_AGENTS", "").split(",") if os.getenv("ALLOWED_CHAT_AGENTS") else None
+            )
         except FileNotFoundError:
             raise FileNotFoundError("Please provide a .env file. See the Getting Started guide on the README.md")
         except Exception:

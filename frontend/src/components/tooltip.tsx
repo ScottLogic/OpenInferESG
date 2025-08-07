@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './tooltip.module.css';
+import * as styles from './tooltip.module.css';
 
 interface Props {
   children: React.ReactNode;

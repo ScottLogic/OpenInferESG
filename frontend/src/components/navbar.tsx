@@ -1,5 +1,5 @@
 import React from 'react';
-import styles from './navbar.module.css';
+import * as styles from './navbar.module.css';
 import ChatIcon from '../icons/chat.svg';
 import { Button } from './button';
 import logo from '../icons/primary-logo-dark.svg';
