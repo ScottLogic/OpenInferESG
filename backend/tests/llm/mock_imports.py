@@ -9,7 +9,7 @@ from unittest.mock import MagicMock
 MOCK_MODULES = ['fastapi', 'aiohttp']
 
 # Add any classes or functions that need to be available from these modules
-class MockHTTPException(Exception):
+class MockHTTPExceptionError(Exception):
     """Mock HTTPException for testing"""
     def __init__(self, status_code=500, detail="Test error"):
         self.status_code = status_code
@@ -22,5 +22,5 @@ for mod_name in MOCK_MODULES:
         mock = MagicMock()
         # Add any specific attributes or functions needed
         if mod_name == 'fastapi':
-            mock.HTTPException = MockHTTPException
+            mock.HTTPException = MockHTTPExceptionError
         sys.modules[mod_name] = mock

@@ -21,12 +21,13 @@ class LMStudio(LLM):
 
     async def chat(self, model, system_prompt: str, user_prompt: str, return_json=False) -> str:
         logger.debug("Called LMStudio llm. Waiting on response with prompt {0}."
-                .format(str([system_prompt, user_prompt])))
+                 .format(str([system_prompt, user_prompt])))
 
         url = config.lmstudio_url
         if url is None:
             logger.error("LMSTUDIO_URL configuration is missing")
-            raise ValueError("LMSTUDIO_URL is not configured. Please set this in your environment variables or .env file.")
+            raise ValueError("LMSTUDIO_URL is not configured. "
+                            "Please set this in your environment variables or .env file.")
 
         # Make sure we have a clean URL without trailing slash
         if url.endswith("/"):
@@ -107,11 +108,11 @@ class LMStudio(LLM):
         """
         Process and validate JSON content from the LLM response.
         Extracts JSON from markdown code blocks if present and validates the JSON format.
-        
+
         Args:
             content: The raw content from the LLM response
             return_json: Whether JSON validation is required
-            
+
         Returns:
             The validated and cleaned JSON content as a string, or an error message
         """
