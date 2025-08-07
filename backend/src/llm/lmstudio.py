@@ -25,7 +25,8 @@ class LMStudio(LLM):
 
         url = config.lmstudio_url
         if url is None:
-            url = "http://host.docker.internal:1234"
+            logger.error("LMSTUDIO_URL configuration is missing")
+            raise ValueError("LMSTUDIO_URL is not configured. Please set this in your environment variables or .env file.")
 
         # Make sure we have a clean URL without trailing slash
         if url.endswith("/"):
@@ -35,8 +36,7 @@ class LMStudio(LLM):
         url = f"{url}/v1/chat/completions"
 
         headers = {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer not-needed"  # Some LM Studio versions may require this
+            "Content-Type": "application/json"
         }
         # If JSON is requested, modify the system prompt to ensure valid JSON response
         if return_json:
@@ -51,7 +51,7 @@ class LMStudio(LLM):
                 {"role": "user", "content": user_prompt}
             ],
             "temperature": 0,
-            "max_tokens": 1024  # Default number of tokens to generate
+            "max_tokens": config.lmstudio_max_tokens  # Get token limit from config
         }
 
         # Log the complete payload for debugging
@@ -97,48 +97,58 @@ class LMStudio(LLM):
                         return "The LLM server returned an empty response."
                     logger.info(f"Successfully got response from LM Studio: {content[:100]}...")
 
-                    # If JSON was requested, validate and clean the content
-                    if return_json:
-                        # First, check if the response is wrapped in markdown code blocks
-                        cleaned_content = content
-
-                        # Check for markdown code block format: ```json ... ```
-                        code_block_pattern = r'```(?:json)?\s*([\s\S]*?)\s*```'
-                        code_block_match = re.search(code_block_pattern, content)
-                        if code_block_match:
-                            # Extract just the JSON content without the code block markers
-                            cleaned_content = code_block_match.group(1).strip()
-                            logger.info(f"Extracted JSON from markdown code block: {cleaned_content[:100]}...")
-
-                        try:
-                            # Try to parse the content as JSON to validate it
-                            _ = json.loads(cleaned_content)
-                            logger.debug("Successfully validated JSON response")
-                            # Return the cleaned JSON content
-                            return cleaned_content
-                        except json.JSONDecodeError:
-                            # Try one more approach - sometimes there might be extra text before or after
-                            try:
-                                # Look for patterns that might be JSON objects
-                                json_pattern = r'(\{[\s\S]*\})'
-                                json_match = re.search(json_pattern, cleaned_content)
-                                if json_match:
-                                    potential_json = json_match.group(1)
-                                    # Validate JSON
-                                    json.loads(potential_json)
-                                    logger.info("Found and extracted valid JSON object using regex")
-                                    return potential_json
-                            except (json.JSONDecodeError, Exception) as nested_error:
-                                logger.debug(f"Second JSON extraction attempt failed: {str(nested_error)}")
-                            logger.warning("LM Studio returned non-JSON response when JSON was requested")
-                            logger.debug(f"Invalid JSON response: {content}")
-                            return f"Error: The LLM returned invalid JSON format: {content[:100]}..."
-
-                    return content
+                    # Return either raw content or validated JSON
+                    return self._process_content(content, return_json) if return_json else content
         except Exception as e:
             logger.error(f"Error in HTTP request: {str(e)}")
             return f"Error connecting to the local LLM server: {str(e)}"
 
+    def _process_content(self, content: str, return_json: bool) -> str:
+        """
+        Process and validate JSON content from the LLM response.
+        Extracts JSON from markdown code blocks if present and validates the JSON format.
+        
+        Args:
+            content: The raw content from the LLM response
+            return_json: Whether JSON validation is required
+            
+        Returns:
+            The validated and cleaned JSON content as a string, or an error message
+        """
+        # First, check if the response is wrapped in markdown code blocks
+        cleaned_content = content
+
+        # Check for markdown code block format: ```json ... ```
+        code_block_pattern = r'```(?:json)?\s*([\s\S]*?)\s*```'
+        code_block_match = re.search(code_block_pattern, content)
+        if code_block_match:
+            # Extract just the JSON content without the code block markers
+            cleaned_content = code_block_match.group(1).strip()
+            logger.info(f"Extracted JSON from markdown code block: {cleaned_content[:100]}...")
+
+        try:
+            # Try to parse the content as JSON to validate it
+            _ = json.loads(cleaned_content)
+            logger.debug("Successfully validated JSON response")
+            # Return the cleaned JSON content
+            return cleaned_content
+        except json.JSONDecodeError:
+            # Try one more approach - sometimes there might be extra text before or after
+            try:
+                # Look for patterns that might be JSON objects
+                json_pattern = r'(\{[\s\S]*\})'
+                json_match = re.search(json_pattern, cleaned_content)
+                if json_match:
+                    potential_json = json_match.group(1)
+                    # Validate JSON
+                    json.loads(potential_json)
+                    logger.info("Found and extracted valid JSON object using regex")
+                    return potential_json
+            except (json.JSONDecodeError, Exception) as nested_error:
+                logger.debug(f"Second JSON extraction attempt failed: {str(nested_error)}")
+            logger.warning("LM Studio returned non-JSON response when JSON was requested")
+            logger.debug(f"Invalid JSON response: {content}")
+            return f"Error: The LLM returned invalid JSON format: {content[:100]}..."
 
     async def chat_with_file(
         self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json=False
