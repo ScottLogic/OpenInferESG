@@ -1,5 +1,5 @@
 # Choose our version of Python
-FROM python:3.12
+FROM python:3.13
 
 # Set up a working directory
 WORKDIR /backend

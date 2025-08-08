@@ -1,3 +1,5 @@
+Feature: InferESG information and confidence checks
+
 @database_agent @ESG
 Scenario Outline: When a user asks InferESG for information about their transaction history
     Given  a prompt to InferESG

@@ -72,7 +72,7 @@ async def test_chat_response_none_logs_error(mocker, caplog):
 async def test_chat_response_choices_none_logs_error(mocker, caplog):
     mistral.client = mocker.AsyncMock(return_value=mock_client)
     chat_response = create_mock_chat_response(content_response)
-    chat_response.choices = None
+    chat_response.choices = []
     mistral.client.chat.complete_async.return_value = chat_response
 
     response = await mistral.chat(mock_model, system_prompt, user_prompt)

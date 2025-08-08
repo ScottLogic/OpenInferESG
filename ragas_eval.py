@@ -28,16 +28,15 @@ test_data = {
 }
 
 metric = AspectCritic(name="summary_accuracy", llm=evaluator_llm, definition="Verify if the summary is accurate.")
-test_data = SingleTurnSample(**est_data)
 
 # Create a Single Evaluation Sample
-test_data = SingleTurnSample(**test_data)
+single_turn_sample = SingleTurnSample(user_input=test_data["user_input"], response=test_data["response"])
 
 
 # Define a Custom Metric
-async def evaluate_summary():
-    result = await metric.single_turn_ascore(test_data)
+async def evaluate_summary(data):
+    result = await metric.single_turn_ascore(data)
     print(f"Result: {result}")
 
 # Run the async function
-asyncio.run(evaluate_summary())
+asyncio.run(evaluate_summary(single_turn_sample))
