@@ -3,6 +3,7 @@ from .factory import get_llm
 from .mistral import Mistral
 from .count_calls import count_calls
 from .openai import OpenAI
+from .lmstudio import LMStudio
 from .lmstudio_answer import LmStudioAnswer
 from .lmstudio_intent import LmStudioIntent
 from .lmstudio_suggestions import LmStudioSuggestions
@@ -15,7 +16,9 @@ __all__ = [
     "LLMFile",
     "Mistral",
     "OpenAI",
+    "LMStudio",
     "LmStudioAnswer",
     "LmStudioIntent",
     "LmStudioSuggestions",
-    "LmStudioWeb"]
+    "LmStudioWeb"
+]

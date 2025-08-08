@@ -15,6 +15,13 @@ Python service for the InferESG backend.
 
 > Note: You will need to configure a LLM to run the service.
 
+### LM Studio Configuration
+
+When using LM Studio as your LLM provider, you can configure the following environment variables:
+
+- `LMSTUDIO_URL`: URL for your LM Studio server (default: http://host.docker.internal:1234)
+- `LMSTUDIO_MODEL`: The model name to use (default: local-model)
+
 This README covers instructions on how to run the application:
 
 - Locally
@@ -42,13 +49,21 @@ pip install -r requirements.txt
 
 > (VsCode) You may run into some issues with compiling python packages from requirements.txt. To resolve this ensure you have downloaded and installed the "Desktop development with C++" workload from your Visual Studio installer. Details on this can be found https://matplotlib.org/devdocs/install/dependencies.html#compiled-extensions
 
-3. Run the app
+3. Configure LM Studio (if using)
+
+If you're using LM Studio as your LLM provider, ensure it's running locally and set the environment variable:
+
+```bash
+set LMSTUDIO_URL=http://localhost:1234
+```
+
+4. Run the app
 
 ```bash
 uvicorn src.api:app --port 8250
 ```
 
-4. Check the backend app is running at [http://localhost:8250/health](http://localhost:8250/health)
+5. Check the backend app is running at [http://localhost:8250/health](http://localhost:8250/health)
 
 ## Running in a Docker Container
 
@@ -65,6 +80,8 @@ docker run --env-file ../.env -p 8250:8250 {my-backend-image-name}
 ```
 
 > Note that we pass in the entire environment file that contains all our application's configuration. This means some unnecessary configuration is also being passed in. This is fine when testing locally. In production, we must limit this to only the essential backend configuration (see environment configuration within [Docker Compose](../compose.yml)).
+>
+> When using LM Studio with Docker, the `LMSTUDIO_URL` should be set to `http://host.docker.internal:1234` in your `.env` file (which is the default, as mentioned in the [LM Studio Configuration](#lm-studio-configuration) section) rather than `http://localhost:1234`, since `localhost` inside the container would refer to the container itself and not your host machine.
 
 3. Check the backend app is running at [http://localhost:8250/health](http://localhost:8250/health)
 
