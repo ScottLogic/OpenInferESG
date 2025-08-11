@@ -1,9 +1,10 @@
 #!/bin/sh
-sleep 30s
+
+sleep 5
 
 response=$(curl -s -X "GET" "http://host.docker.internal:5540/api/databases/")
 
-if [[ "$response" == "[]" ]] ; then
+if [ "$response" == "[]" ] ; then
   echo "Creating Redis connection"
 
   curl -s -X "POST" "http://host.docker.internal:5540/api/databases/" \

@@ -1,5 +1,6 @@
 FROM curlimages/curl:latest
 
-COPY setup-connection.sh /usr/local/bin/setup-connection.sh
+COPY setup-connection.sh setup-connection.sh
+RUN dos2unix setup-connection.sh
 
-ENTRYPOINT []
+ENTRYPOINT ["sh", "setup-connection.sh"]
