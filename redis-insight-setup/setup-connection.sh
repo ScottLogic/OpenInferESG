@@ -1,4 +1,4 @@
-#!/bin/sh -
+#!/bin/sh
 sleep 30s
 
 response=$(curl -s -X "GET" "http://host.docker.internal:5540/api/databases/")
