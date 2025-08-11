@@ -1,5 +1,8 @@
 FROM curlimages/curl:latest
 
-COPY setup-connection.sh /usr/local/bin/setup-connection.sh
+COPY setup-connection.sh setup-connection.sh
 
-ENTRYPOINT []
+# Remove any non-compliant line endings
+RUN  sed -i 's/\r$//' setup-connection.sh
+
+ENTRYPOINT ["sh", "setup-connection.sh"]
