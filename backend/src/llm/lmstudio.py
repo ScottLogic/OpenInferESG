@@ -3,6 +3,7 @@ import logging
 import json
 import aiohttp
 import re
+import time
 from src.utils import Config
 from src.session.file_uploads import get_file_content_for_filename, set_file_content_for_filename
 from src.utils.file_utils import extract_text
@@ -59,10 +60,12 @@ class LMStudio(LLM):
         logger.debug(f"LM Studio API request payload: {json.dumps(payload, indent=2)}")
         logger.info(f"Sending direct HTTP request to LM Studio at {url}")
 
+        start_time = time.time()
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(url, json=payload, headers=headers) as response:
                     response_text = await response.text()
+                    duration = time.time() - start_time
                     logger.debug(f"LM Studio API raw response: {response_text}")
 
                     if response.status != 200:
@@ -96,7 +99,26 @@ class LMStudio(LLM):
                     if not content:
                         logger.error("No content in message")
                         return "The LLM server returned an empty response."
+                    
+                    # Log usage data if available
+                    token_info = {}
+                    if "usage" in result:
+                        token_info = {
+                            "prompt_tokens": result["usage"].get("prompt_tokens", "N/A"),
+                            "completion_tokens": result["usage"].get("completion_tokens", "N/A"),
+                            "total_tokens": result["usage"].get("total_tokens", "N/A")
+                        }
+                        
+                        # Log to CSV
+                        self.log_usage_to_csv(
+                            model=model or config.lmstudio_model or "local-model",
+                            token_usage=token_info,
+                            duration=duration,
+                            request_type="chat"
+                        )
+                    
                     logger.info(f"Successfully got response from LM Studio: {content[:100]}...")
+                    logger.debug(f"Duration: {duration:.2f}s, Token usage: {token_info}")
 
                     # Return either raw content or validated JSON
                     return self._process_content(content, return_json) if return_json else content
@@ -155,6 +177,8 @@ class LMStudio(LLM):
         self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json=False
     ) -> str:
         try:
+            start_time = time.time()
+            
             file_contents = []
             for file in files:
                 extracted_content = get_file_content_for_filename(file.filename)
@@ -173,7 +197,18 @@ class LMStudio(LLM):
 
             logger.info(f"Sending request with {len(files)} files attached to the prompt")
 
-            return await self.chat(model, system_prompt, user_prompt, return_json)
+            result = await self.chat(model, system_prompt, user_prompt, return_json)
+            
+            duration = time.time() - start_time
+            # Log the full file chat duration (separate from the chat API call itself)
+            self.log_usage_to_csv(
+                model=model or config.lmstudio_model or "local-model",
+                token_usage="See chat logs",  # Token usage already logged in the chat method
+                duration=duration,
+                request_type="file_chat"
+            )
+            
+            return result
         except Exception as file_error:
             logger.exception(file_error)
             raise HTTPException(status_code=500, detail=f"Failed to process files: {file_error}") from file_error

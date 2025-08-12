@@ -33,6 +33,7 @@ class OpenAI(LLM):
         )
         try:
             client = AsyncOpenAI(api_key=config.openai_key)
+            start_time = time.time()
             response = await client.chat.completions.create(
                 model=model,
                 messages=[
@@ -42,9 +43,31 @@ class OpenAI(LLM):
                 temperature=0,
                 response_format={"type": "json_object"} if return_json else NOT_GIVEN,
             )
+            duration = time.time() - start_time
             content = response.choices[0].message.content
-            logger.info(f"OpenAI response: Finish reason: {response.choices[0].finish_reason}, Content: {content}")
-            logger.debug(f"Token data: {response.usage}")
+            
+            # Prepare token usage data for logging
+            token_info = "N/A"
+            if response.usage:
+                token_info = {
+                    "prompt_tokens": response.usage.prompt_tokens,
+                    "completion_tokens": response.usage.completion_tokens,
+                    "total_tokens": response.usage.total_tokens
+                }
+                
+                # Log to CSV file using base class method
+                self.log_usage_to_csv(
+                    model=model,
+                    token_usage=token_info,
+                    duration=duration,
+                    request_type="chat"
+                )
+            
+            logger.info(
+                f"OpenAI response: Finish reason: {response.choices[0].finish_reason}, "
+                f"Content: {content}"
+            )
+            logger.debug(f"Token data: {response.usage}, Duration: {duration:.2f}s")
 
             if not content:
                 logger.error("Call to Open API failed: message content is None")
@@ -59,6 +82,8 @@ class OpenAI(LLM):
         self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json=False
     ) -> str:
         client = AsyncOpenAI(api_key=config.openai_key)
+        start_time = time.time()
+        
         file_ids = await OpenAILLMFileUploadManager().upload_files(files)
 
         file_assistant = await client.beta.assistants.create(
@@ -95,8 +120,28 @@ class OpenAI(LLM):
             message = messages.data[0].content[0].to_json()
 
         await client.beta.threads.delete(thread.id)
+        
+        duration = time.time() - start_time
+        
+        # For Assistants API, token usage is available in the run.usage
+        usage_info = {}
+        if hasattr(run, "usage") and run.usage:
+            usage_info = {
+                "prompt_tokens": getattr(run.usage, "prompt_tokens", "N/A"),
+                "completion_tokens": getattr(run.usage, "completion_tokens", "N/A"),
+                "total_tokens": getattr(run.usage, "total_tokens", "N/A")
+            }
+            
+            # Log to CSV file using base class method
+            self.log_usage_to_csv(
+                model=model,
+                token_usage=usage_info,
+                duration=duration,
+                request_type="file_chat"
+            )
 
-        logger.info(f"OpenAI response: {message}")
+        logger.info(f"OpenAI file-based response: Message length: {len(message) if message else 0}")
+        logger.debug(f"Token usage: {usage_info}, Duration: {duration:.2f}s")
         return message
 
 
