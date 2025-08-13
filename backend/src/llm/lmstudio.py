@@ -20,7 +20,7 @@ class LMStudio(LLM):
     This implementation uses aiohttp to directly call LM Studio's API endpoints.
     """
 
-    async def chat(self, model, system_prompt: str, user_prompt: str, agent: str="lmstudio", return_json=False) -> str:
+    async def chat(self, model, system_prompt: str, user_prompt: str, agent: str, return_json=False) -> str:
         logger.debug(
             "Called LMStudio llm. Waiting on response with prompt {0}.".format(str([system_prompt, user_prompt]))
         )

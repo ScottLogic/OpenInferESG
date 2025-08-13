@@ -14,7 +14,7 @@ config = Config()
 class Mistral(LLM):
     client = MistralApi(api_key=config.mistral_key)
 
-    async def chat(self, model, system_prompt: str, user_prompt: str, agent: str = "mistral", return_json=False) -> str:
+    async def chat(self, model, system_prompt: str, user_prompt: str, agent: str, return_json=False) -> str:
         logger.debug("Called llm. Waiting on response model with prompt {0}.".format(str([system_prompt, user_prompt])))
 
         start_time = time.time()

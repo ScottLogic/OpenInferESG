@@ -63,7 +63,7 @@ class LLM(ABC, metaclass=LLMMeta):
 
     @abstractmethod
     def chat(
-        self, model: str, system_prompt: str, user_prompt: str, agent: str = "default", return_json: bool = False
+        self, model: str, system_prompt: str, user_prompt: str, agent: str, return_json: bool = False
     ) -> Coroutine[Any, Any, str]:
         pass
 
