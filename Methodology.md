@@ -108,10 +108,10 @@ U_{\text{non-GPU\_total}} = \frac{G \cdot D_{\text{non-GPU}}}{N \cdot B}
 - $D_{\text{non-GPU}}$ = Per non-GPU utilization fraction
   Standard value of 0.5 (50%) based on paper findings.
 
-- $U_{\text{GPU\_total}}$ = Aggregate GPU utilization fraction
+- $`U_{\text{GPU\_total}}`$ = Aggregate GPU utilization fraction
   Calculated value, must be between 0 and 1.
 
-- $U_{\text{non-GPU\_total}}$ = Aggregate non-GPU utilization fraction
+- $`U_{\text{non-GPU\_total}}`$ = Aggregate non-GPU utilization fraction
   Calculated value, must be between 0 and 1.
 
 ---
@@ -183,5 +183,9 @@ Matches the ≈ **1.788 Wh** per-query in the paper for long GPT-4o prompts.
 ## 5. References
 
 1. Jegham, N., Abdelatti, M., Elmoubarki, L., Hendawi, A. "How Hungry is AI? A Systematic Methodology for Empirical Energy and Water Consumption Analysis of Large Language Models." arXiv:2505.09598 [cs.CY]. https://arxiv.org/abs/2505.09598
+
+2. Noelle Walsh. How microsoft measures datacenter water and energy use to improve azure
+cloud sustainability. https://azure.microsoft.com/en-us/blog/how-microsoft-measures-datacenter-water-and-energy-use-to-improve-azure-cloud-sustainability/,
+April 2022. Microsoft Azure Blog.
 
 ---
