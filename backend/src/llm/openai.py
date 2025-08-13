@@ -47,18 +47,23 @@ class OpenAI(LLM):
             content = response.choices[0].message.content
 
             # Prepare token usage data for logging
-            token_info = "N/A"
-            if response.usage:
+            if response.usage is not None:
                 token_info = {
                     "prompt_tokens": response.usage.prompt_tokens,
                     "completion_tokens": response.usage.completion_tokens,
                     "total_tokens": response.usage.total_tokens,
                 }
-
-                # Log to CSV file using base class method
-                self.log_usage_to_csv(model=model, token_usage=token_info, duration=duration, request_type="chat")
+            else:
+                token_info = {
+                    "prompt_tokens": "N/A",
+                    "completion_tokens": "N/A",
+                    "total_tokens": "N/A",
+                }
+            
+            self.record_usage(model=model, token_usage=token_info, duration=duration, request_type="chat")
 
             logger.info(f"OpenAI response: Finish reason: {response.choices[0].finish_reason}, Content: {content}")
+            logger.info(f"Response Usage: {response.usage}")
             logger.debug(f"Token data: {response.usage}, Duration: {duration:.2f}s")
 
             if not content:
@@ -125,7 +130,7 @@ class OpenAI(LLM):
             }
 
             # Log to CSV file using base class method
-            self.log_usage_to_csv(model=model, token_usage=usage_info, duration=duration, request_type="file_chat")
+            self.record_usage(model=model, token_usage=usage_info, duration=duration, request_type="file_chat")
 
         logger.info(f"OpenAI file-based response: Message length: {len(message) if message else 0}")
         logger.debug(f"Token usage: {usage_info}, Duration: {duration:.2f}s")

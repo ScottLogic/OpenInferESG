@@ -16,7 +16,7 @@ class Mistral(LLM):
 
     async def chat(self, model, system_prompt: str, user_prompt: str, return_json=False) -> str:
         logger.debug("Called llm. Waiting on response model with prompt {0}.".format(str([system_prompt, user_prompt])))
-
+        
         start_time = time.time()
         response = await self.client.chat.complete_async(
             model=model,
@@ -28,7 +28,7 @@ class Mistral(LLM):
             response_format={"type": "json_object"} if return_json else None,
         )
         duration = time.time() - start_time
-
+        
         if not response or not response.choices:
             logger.error("Call to Mistral API failed: No valid response or choices received")
             return "An error occurred while processing the request."
@@ -40,44 +40,42 @@ class Mistral(LLM):
 
         # Log token usage if available
         if hasattr(response, "usage") and response.usage:
+            
+            logger.error(response.usage)
+            
             token_info = {
                 "prompt_tokens": getattr(response.usage, "prompt_tokens", "N/A"),
                 "completion_tokens": getattr(response.usage, "completion_tokens", "N/A"),
-                "total_tokens": getattr(response.usage, "total_tokens", "N/A"),
+                "total_tokens": getattr(response.usage, "total_tokens", "N/A")
             }
-
+            
             # Log to CSV file
-            self.log_usage_to_csv(model=model, token_usage=token_info, duration=duration, request_type="chat")
-
+            self.record_usage(
+                model=model,
+                token_usage=token_info,
+                duration=duration,
+                request_type="chat"
+            )
+            
             logger.debug(f"Token data: {response.usage}, Duration: {duration:.2f}s")
 
         logger.debug('{0} response : "{1}"'.format(model, content))
         return str(content)
 
     async def chat_with_file(
-        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json=False
+        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json=False, agent_type="undefined"
     ) -> str:
         try:
-            start_time = time.time()
-
+            
             for file in files:
                 extracted_content = get_file_content_for_filename(file.filename)
                 if not extracted_content:
                     extracted_content = extract_text(file)
                     set_file_content_for_filename(file.filename, extracted_content)
                 user_prompt += f"\n\nDocument:\n{extracted_content}"
-
-            result = await self.chat(model, system_prompt, user_prompt, return_json)
-
-            duration = time.time() - start_time
-            # Log the full file chat duration (separate from the chat API call itself)
-            self.log_usage_to_csv(
-                model=model,
-                token_usage="See chat logs",  # Token usage already logged in the chat method
-                duration=duration,
-                request_type="file_chat",
-            )
-
+                
+            result = await self.chat(model, system_prompt, user_prompt, return_json)        
+            
             return result
         except Exception as file_error:
             logger.exception(file_error)

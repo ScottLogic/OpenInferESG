@@ -108,7 +108,7 @@ class LMStudio(LLM):
                         }
 
                         # Log to CSV
-                        self.log_usage_to_csv(
+                        self.record_usage(
                             model=model or config.lmstudio_model or "local-model",
                             token_usage=token_info,
                             duration=duration,
@@ -199,8 +199,8 @@ class LMStudio(LLM):
 
             duration = time.time() - start_time
             # Log the full file chat duration (separate from the chat API call itself)
-            self.log_usage_to_csv(
-                model=model or config.lmstudio_model or "local-model",
+            self.record_usage(
+                model=model,
                 token_usage="See chat logs",  # Token usage already logged in the chat method
                 duration=duration,
                 request_type="file_chat",

@@ -10,8 +10,6 @@ from .count_calls import count_calls
 
 count_calls_of_functions = ["chat", "chat_with_file"]
 
-# Default CSV settings
-
 
 @dataclass
 class LLMFile(ABC):
@@ -43,15 +41,15 @@ class LLM(ABC, metaclass=LLMMeta):
     def get_instances(cls):
         return cls.instances
 
-    def log_usage_to_csv(
+    def record_usage(
         self,
         model: str,
-        token_usage: Optional[Union[Dict, str]] = None,
+        token_usage: Optional[Union[Dict, str]],
         duration: float = 0.0,
         request_type: str = "chat",
     ) -> None:
         """
-        Log LLM usage information to a CSV file.
+        Record usage information
 
         Args:
             model: The model name used for the request
