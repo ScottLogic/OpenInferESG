@@ -38,7 +38,6 @@ class Mistral(LLM):
             logger.error("Call to Mistral API failed: message content is None or Unset")
             return "An error occurred while processing the request."
 
-
         if hasattr(response, "usage") and response.usage is not None:
             token_info = {
                 "prompt_tokens": response.usage.prompt_tokens,
@@ -53,17 +52,24 @@ class Mistral(LLM):
                 "total_tokens": "N/A",
             }
 
-        self.record_usage(model=model, provider="mistral", token_usage=token_info, duration=duration, request_type="file_chat")
+        self.record_usage(
+            model=model, provider="mistral", token_usage=token_info, duration=duration, request_type="file_chat"
+        )
         logger.debug(f"Token data: {response.usage}, Duration: {duration:.2f}s")
         logger.debug('{0} response : "{1}"'.format(model, content))
 
         return str(content)
 
     async def chat_with_file(
-        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json=False, agent_type="undefined"
+        self,
+        model: str,
+        system_prompt: str,
+        user_prompt: str,
+        files: list[LLMFile],
+        return_json=False,
+        agent_type="undefined",
     ) -> str:
         try:
-
             for file in files:
                 extracted_content = get_file_content_for_filename(file.filename)
                 if not extracted_content:

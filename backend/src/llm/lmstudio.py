@@ -183,8 +183,6 @@ class LMStudio(LLM):
         self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json=False
     ) -> str:
         try:
-            start_time = time.time()
-
             file_contents = []
             for file in files:
                 extracted_content = get_file_content_for_filename(file.filename)
