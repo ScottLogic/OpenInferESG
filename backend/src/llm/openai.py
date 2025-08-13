@@ -120,20 +120,26 @@ class OpenAI(LLM):
 
         duration = time.time() - start_time
 
-        # For Assistants API, token usage is available in the run.usage
-        usage_info = {}
-        if hasattr(run, "usage") and run.usage:
-            usage_info = {
-                "prompt_tokens": getattr(run.usage, "prompt_tokens", "N/A"),
-                "completion_tokens": getattr(run.usage, "completion_tokens", "N/A"),
-                "total_tokens": getattr(run.usage, "total_tokens", "N/A"),
+
+        if run.usage is not None:
+            token_info = {
+                "prompt_tokens": run.usage.prompt_tokens,
+                "completion_tokens": run.usage.completion_tokens,
+                "total_tokens": run.usage.total_tokens,
+            }
+        else:
+            token_info = {
+                "prompt_tokens": "N/A",
+                "completion_tokens": "N/A",
+                "total_tokens": "N/A",
             }
 
+  
             # Log to CSV file using base class method
-            self.record_usage(model=model, token_usage=usage_info, duration=duration, request_type="file_chat")
+        self.record_usage(model=model, token_usage=token_info, duration=duration, request_type="file_chat")
 
         logger.info(f"OpenAI file-based response: Message length: {len(message) if message else 0}")
-        logger.debug(f"Token usage: {usage_info}, Duration: {duration:.2f}s")
+        logger.debug(f"Token usage: {token_info}, Duration: {duration:.2f}s")
         return message
 
 

@@ -38,28 +38,24 @@ class Mistral(LLM):
             logger.error("Call to Mistral API failed: message content is None or Unset")
             return "An error occurred while processing the request."
 
-        # Log token usage if available
-        if hasattr(response, "usage") and response.usage:
-            
-            logger.error(response.usage)
-            
+
+        if response.usage is not None:
             token_info = {
-                "prompt_tokens": getattr(response.usage, "prompt_tokens", "N/A"),
-                "completion_tokens": getattr(response.usage, "completion_tokens", "N/A"),
-                "total_tokens": getattr(response.usage, "total_tokens", "N/A")
+                "prompt_tokens": response.usage.prompt_tokens,
+                "completion_tokens": response.usage.completion_tokens,
+                "total_tokens": response.usage.total_tokens,
+            }
+        else:
+            token_info = {
+                "prompt_tokens": "N/A",
+                "completion_tokens": "N/A",
+                "total_tokens": "N/A",
             }
             
-            # Log to CSV file
-            self.record_usage(
-                model=model,
-                token_usage=token_info,
-                duration=duration,
-                request_type="chat"
-            )
-            
-            logger.debug(f"Token data: {response.usage}, Duration: {duration:.2f}s")
-
+        self.record_usage(model=model, token_usage=token_info, duration=duration, request_type="file_chat")    
+        logger.debug(f"Token data: {response.usage}, Duration: {duration:.2f}s")
         logger.debug('{0} response : "{1}"'.format(model, content))
+        
         return str(content)
 
     async def chat_with_file(
