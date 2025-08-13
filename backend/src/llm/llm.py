@@ -44,6 +44,7 @@ class LLM(ABC, metaclass=LLMMeta):
     def record_usage(
         self,
         model: str,
+        provider: str,
         token_usage: Optional[Union[Dict, str]],
         duration: float = 0.0,
         request_type: str = "chat",
@@ -53,11 +54,12 @@ class LLM(ABC, metaclass=LLMMeta):
 
         Args:
             model: The model name used for the request
+            provider: The provider name used for the request
             token_usage: Dictionary containing token usage information
             duration: Time taken for the request in seconds
             request_type: Type of request (chat, file-chat, etc.)
         """
-        self.usage_recorder.record_activity(model, token_usage, duration, request_type)
+        self.usage_recorder.record_activity(model, provider, token_usage, duration, request_type)
 
     @abstractmethod
     def chat(

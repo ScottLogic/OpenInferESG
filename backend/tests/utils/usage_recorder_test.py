@@ -13,7 +13,7 @@ def test_console_usage_recorder_record_activity(caplog):
     # Test with dictionary token usage
     with caplog.at_level("INFO"):
         token_usage = {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30}
-        recorder.record_activity(model="test-model", token_usage=token_usage, duration=1.5, request_type="test-request")
+        recorder.record_activity(model="test-model", provider="test-provider", token_usage=token_usage, duration=1.5, request_type="test-request")
 
         assert "test-model" in caplog.text
         assert str(token_usage) in caplog.text
@@ -33,7 +33,7 @@ def test_csv_usage_recorder_record_activity(mocker):
         recorder = CSVUsageRecorder()
         token_usage = {"prompt_tokens": 10, "completion_tokens": 20, "total_tokens": 30}
 
-        recorder.record_activity(model="test-model", token_usage=token_usage, duration=1.5, request_type="test-request")
+        recorder.record_activity(model="test-model", provider="test-provider", token_usage=token_usage, duration=1.5, request_type="test-request")
 
         # Reset the StringIO position to read from the beginning
         csv_output.seek(0)

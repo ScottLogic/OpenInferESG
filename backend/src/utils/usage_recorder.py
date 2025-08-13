@@ -13,6 +13,7 @@ DEFAULT_CSV_FILENAME = "llm_usage.csv"
 CSV_HEADERS = [
     "timestamp",
     "model",
+    "provider",
     "prompt_tokens",
     "completion_tokens",
     "total_tokens",
@@ -35,6 +36,7 @@ class UsageRecorder(ABC):
     def record_activity(
         self,
         model: str,
+        provider: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
         request_type: str = "chat",
@@ -50,11 +52,12 @@ class ConsoleUsageRecorder(UsageRecorder):
     def record_activity(
         self,
         model: str,
+        provider: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
         request_type: str = "chat",
     ):
-        logger.info({"model": model, "token_usage": token_usage, "duration": duration, "request_type": request_type})
+        logger.info({"model": model, "provider": provider, "token_usage": token_usage, "duration": duration, "request_type": request_type})
 
 
 class CSVUsageRecorder(UsageRecorder):
@@ -69,6 +72,7 @@ class CSVUsageRecorder(UsageRecorder):
     def record_activity(
         self,
         model: str,
+        provider: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
         request_type: str = "chat",
@@ -109,6 +113,7 @@ class CSVUsageRecorder(UsageRecorder):
                 [
                     timestamp,
                     model,
+                    provider,
                     prompt_tokens,
                     completion_tokens,
                     total_tokens,
@@ -117,4 +122,4 @@ class CSVUsageRecorder(UsageRecorder):
                 ]
             )
 
-        logger.debug(f"Logged {model} usage data to {self.csv_file_path}")
+        logger.debug(f"Logged {model} / {provider} usage data to {self.csv_file_path}")

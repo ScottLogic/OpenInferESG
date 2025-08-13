@@ -107,6 +107,7 @@ class LMStudio(LLM):
                             "total_tokens": result["usage"].get("total_tokens", "N/A"),
                         }
                     else:
+                        logger.warning("No usage data in LM Studio response")
                         token_info = {
                             "prompt_tokens": "N/A",
                             "completion_tokens": "N/A",
@@ -116,6 +117,7 @@ class LMStudio(LLM):
                         # Log to CSV
                     self.record_usage(
                         model="local_model",
+                        provider="lmstudio",
                         token_usage=token_info,
                         duration=duration,
                         request_type="chat",
