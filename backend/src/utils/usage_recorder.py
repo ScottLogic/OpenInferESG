@@ -43,10 +43,10 @@ class UsageRecorder(ABC):
 
 
 class ConsoleUsageRecorder(UsageRecorder):
-    
+
     def __init__(self):
-        logger.info(f"Usage will be logged to the console")
-    
+        logger.info("Usage will be logged to the console")
+
     def record_activity(
         self,
         model: str,
@@ -58,14 +58,14 @@ class ConsoleUsageRecorder(UsageRecorder):
 
 
 class CSVUsageRecorder(UsageRecorder):
-    
+
     def __init__(self):
                 # Get the configured CSV filename, or use default if not set
         csv_filename = config.llm_usage_log_filename or DEFAULT_CSV_FILENAME
         self.csv_file_path = CSV_DIR / csv_filename
-        
+
         logger.info(f"Usage logs will be saved to the following path: {self.csv_file_path}")
-    
+
     def record_activity(
         self,
         model: str,
