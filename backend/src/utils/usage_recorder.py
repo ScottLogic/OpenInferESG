@@ -37,7 +37,7 @@ class UsageRecorder(ABC):
         self,
         model: str,
         provider: str,
-        agent: str = "default",
+        agent: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
     ):
@@ -53,7 +53,7 @@ class ConsoleUsageRecorder(UsageRecorder):
         self,
         model: str,
         provider: str,
-        agent: str = "default",
+        agent: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
     ):
@@ -73,7 +73,7 @@ class CSVUsageRecorder(UsageRecorder):
         self,
         model: str,
         provider: str,
-        agent: str = "default",
+        agent: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
     ) -> None:

@@ -45,7 +45,8 @@ class LLM(ABC, metaclass=LLMMeta):
         self,
         model: str,
         provider: str,
-        token_usage: Optional[Union[Dict, str]],
+        agent: str = "default",
+        token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0
     ) -> None:
         """
@@ -54,10 +55,11 @@ class LLM(ABC, metaclass=LLMMeta):
         Args:
             model: The model name used for the request
             provider: The provider name used for the request
+            agent: The name of the agent making the call
             token_usage: Dictionary containing token usage information
             duration: Time taken for the request in seconds
         """
-        self.usage_recorder.record_activity(model, provider, token_usage, duration)
+        self.usage_recorder.record_activity(model, provider, agent, token_usage, duration)
 
     @abstractmethod
     def chat(
