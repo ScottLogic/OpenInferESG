@@ -22,6 +22,7 @@ class ReportAgent(Agent):
                     system_prompt=engine.load_prompt("create-report-overview"),
                     user_prompt="Generate an ESG report about the attached document.",
                     files=[file],
+                    agent="report"
                 ),
             )
 
@@ -35,6 +36,7 @@ class ReportAgent(Agent):
                                 system_prompt=engine.load_prompt("report-question-system-prompt"),
                                 user_prompt=question["prompt"],
                                 files=[file],
+                                agent="report"
                             ),
                         ),
                     }
@@ -49,6 +51,7 @@ class ReportAgent(Agent):
                     system_prompt=engine.load_prompt("create-report-materiality"),
                     user_prompt=engine.load_prompt("create-report-materiality-user-prompt", materiality=materiality),
                     files=[file],
+                    agent="report"
                 ),
             )
 
@@ -80,5 +83,6 @@ class ReportAgent(Agent):
             user_prompt=engine.load_prompt("find-company-name-from-file-user-prompt"),
             files=[file],
             return_json=True,
+            agent="report"
         )
         return json.loads(response)["company_name"]

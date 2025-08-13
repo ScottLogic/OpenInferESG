@@ -57,7 +57,8 @@ async def answer_materiality_question(
             model,
             system_prompt=engine.load_prompt("answer-materiality-question"),
             user_prompt=user_question,
-            files=create_llm_files(materiality_files)
+            files=create_llm_files(materiality_files),
+            agent="materiality"
         )
     else:
         return ToolActionFailure(
@@ -85,5 +86,6 @@ class MaterialityAgent(BaseChatAgent):
             user_prompt=f"What topics are material for {company_name}?",
             files=create_llm_files(materiality_files),
             return_json=True,
+            agent="materiality"
         )
         return json.loads(materiality_topics)["material_topics"]
