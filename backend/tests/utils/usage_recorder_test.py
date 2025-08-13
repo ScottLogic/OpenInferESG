@@ -2,7 +2,7 @@ import csv
 import datetime
 from io import StringIO
 
-from unittest.mock import MagicMock, mock_open
+from unittest.mock import mock_open
 
 from src.utils.usage_recorder import CSV_HEADERS, ConsoleUsageRecorder, CSVUsageRecorder
 
