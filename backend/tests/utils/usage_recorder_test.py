@@ -45,7 +45,7 @@ def test_csv_usage_recorder_record_activity(mocker):
         assert rows[0] == CSV_HEADERS
 
         # Second row should be the data
-        assert  "test-model" in rows[1]
+        assert "test-model" in rows[1]
         assert "10" in rows[1]
         assert "20" in rows[1]
         assert "30" in rows[1]

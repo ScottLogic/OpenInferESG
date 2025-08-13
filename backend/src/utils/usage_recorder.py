@@ -60,7 +60,7 @@ class ConsoleUsageRecorder(UsageRecorder):
 class CSVUsageRecorder(UsageRecorder):
 
     def __init__(self):
-                # Get the configured CSV filename, or use default if not set
+        # Get the configured CSV filename, or use default if not set
         csv_filename = config.llm_usage_log_filename or DEFAULT_CSV_FILENAME
         self.csv_file_path = CSV_DIR / csv_filename
 

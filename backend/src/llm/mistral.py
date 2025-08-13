@@ -52,9 +52,7 @@ class Mistral(LLM):
                 "total_tokens": "N/A",
             }
 
-        self.record_usage(
-            model=model, provider="mistral", token_usage=token_info, duration=duration
-        )
+        self.record_usage(model=model, provider="mistral", token_usage=token_info, duration=duration)
         logger.debug(f"Token data: {response.usage}, Duration: {duration:.2f}s")
         logger.debug('{0} response : "{1}"'.format(model, content))
 
