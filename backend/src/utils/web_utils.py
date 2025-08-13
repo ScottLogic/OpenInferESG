@@ -96,7 +96,7 @@ async def summarise_content(search_query, contents, llm, model) -> str | None:
 async def summarise_pdf_content(contents, llm, model) -> str:
     try:
         summariser_prompt = engine.load_prompt("pdf-summariser", content=contents)
-        response = await llm.chat(model, summariser_prompt, "", return_json=True)
+        response = await llm.chat(model, summariser_prompt, "", agent="pdf-summariser", return_json=True)
         return json.dumps(
             {
                 "status": "success",
@@ -118,7 +118,7 @@ async def summarise_pdf_content(contents, llm, model) -> str:
 async def perform_math_operation_util(math_query, llm, model) -> str:
     try:
         math_prompt = engine.load_prompt("math-solver", query=math_query)
-        response = await llm.chat(model, math_prompt, "", return_json=True)
+        response = await llm.chat(model, math_prompt, "", agent="math-solver", return_json=True)
         logger.info(f"Math operation response: {response}")
         return json.dumps(
             {

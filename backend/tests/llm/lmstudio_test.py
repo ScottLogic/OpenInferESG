@@ -147,7 +147,7 @@ async def test_chat_with_file(lmstudio_instance):
 async def test_chat_request_json(lmstudio_instance):
     """Test requesting JSON response"""
     # Our mock implementation directly returns JSON when return_json=True
-    response = await lmstudio_instance.chat("model", "system prompt", "user prompt", return_json=True)
+    response = await lmstudio_instance.chat("model", "system prompt", "user prompt", agent="test-agent", return_json=True)
 
     # Just check that we get a valid JSON response
     assert '{"result": "success"}' == response

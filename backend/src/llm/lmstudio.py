@@ -20,7 +20,7 @@ class LMStudio(LLM):
     This implementation uses aiohttp to directly call LM Studio's API endpoints.
     """
 
-    async def chat(self, model, system_prompt: str, user_prompt: str, return_json=False, agent: str="lmstudio") -> str:
+    async def chat(self, model, system_prompt: str, user_prompt: str, agent: str="lmstudio", return_json=False) -> str:
         logger.debug(
             "Called LMStudio llm. Waiting on response with prompt {0}.".format(str([system_prompt, user_prompt]))
         )
@@ -200,7 +200,7 @@ class LMStudio(LLM):
             user_prompt += combined_content
 
             logger.info(f"Sending request with {len(files)} files attached to the prompt")
-            result = await self.chat(model, system_prompt, user_prompt, return_json, agent)
+            result = await self.chat(model, system_prompt, user_prompt, agent, return_json)
 
             return result
         except Exception as file_error:

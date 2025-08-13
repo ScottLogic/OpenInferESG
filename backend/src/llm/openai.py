@@ -25,7 +25,7 @@ def remove_citations(message: Text):
 
 
 class OpenAI(LLM):
-    async def chat(self, model, system_prompt: str, user_prompt: str, return_json=False, agent: str="openai") -> str:
+    async def chat(self, model, system_prompt: str, user_prompt: str, agent: str="openai", return_json=False) -> str:
         logger.debug(
             "##### Called open ai chat ... llm. Waiting on response model with prompt {0}.".format(
                 str([system_prompt, user_prompt])
