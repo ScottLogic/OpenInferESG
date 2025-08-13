@@ -14,6 +14,7 @@ CSV_HEADERS = [
     "timestamp",
     "model",
     "provider",
+    "agent",
     "prompt_tokens",
     "completion_tokens",
     "total_tokens",
@@ -36,6 +37,7 @@ class UsageRecorder(ABC):
         self,
         model: str,
         provider: str,
+        agent: str = "default",
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
     ):
@@ -51,6 +53,7 @@ class ConsoleUsageRecorder(UsageRecorder):
         self,
         model: str,
         provider: str,
+        agent: str = "default",
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
     ):
@@ -70,6 +73,7 @@ class CSVUsageRecorder(UsageRecorder):
         self,
         model: str,
         provider: str,
+        agent: str = "default",
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
     ) -> None:
@@ -79,6 +83,7 @@ class CSVUsageRecorder(UsageRecorder):
         Args:
             model: The model name used for the request
             provider: The provider name used for the request
+            agent: The name of the agent making the request
             token_usage: Dictionary containing token usage information
             duration: Time taken for the request in seconds
         """
@@ -110,6 +115,7 @@ class CSVUsageRecorder(UsageRecorder):
                     timestamp,
                     model,
                     provider,
+                    agent,
                     prompt_tokens,
                     completion_tokens,
                     total_tokens,
