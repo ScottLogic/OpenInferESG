@@ -14,7 +14,9 @@ engine = PromptEngine()
 
 class GeneralistAgent(Agent):
     async def generalist_answer(self, utterance: str) -> ChatAgentSuccess | ChatAgentFailure:
-        answer = await self.llm.chat(self.model, engine.load_prompt("generalist-answer", question=utterance), "", agent="generalist")
+        answer = await self.llm.chat(
+            self.model, engine.load_prompt("generalist-answer", question=utterance), "", agent="generalist"
+        )
         validator_agent = ValidatorAgent(config.validator_agent_llm, config.validator_agent_model)
         validation = (await validator_agent.validate(f"Task: {utterance}  Answer: {answer}")).lower() == "true"
         if validation:

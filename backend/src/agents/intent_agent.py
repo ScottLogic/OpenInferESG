@@ -39,5 +39,6 @@ class IntentAgent(Agent):
                 "intent",
                 question=utterance
             ),
+            agent="intent",
             return_json=True
         )

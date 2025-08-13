@@ -5,11 +5,13 @@ from unittest.mock import MagicMock
 # Import our mock implementation
 from tests.llm.mock_lmstudio import MockLMStudio
 
+
 # Mock Config class
 class MockConfig:
     def __init__(self):
         self.lmstudio_url = "http://test-lmstudio:1234"
         self.lmstudio_model = "test-model"
+
 
 # Use the MockLMStudio class for our tests
 LMStudio = MockLMStudio
@@ -121,7 +123,7 @@ async def test_process_content_json_regex_extraction():
 async def test_process_content_invalid_json():
     """Test handling completely invalid JSON content"""
     lmstudio = LMStudio()
-    invalid_json = 'This is not JSON at all'
+    invalid_json = "This is not JSON at all"
     result = lmstudio._process_content(invalid_json, True)
 
     assert "Error: The LLM returned invalid JSON format" in result
@@ -147,7 +149,9 @@ async def test_chat_with_file(lmstudio_instance):
 async def test_chat_request_json(lmstudio_instance):
     """Test requesting JSON response"""
     # Our mock implementation directly returns JSON when return_json=True
-    response = await lmstudio_instance.chat("model", "system prompt", "user prompt", agent="test-agent", return_json=True)
+    response = await lmstudio_instance.chat(
+        "model", "system prompt", "user prompt", agent="test-agent", return_json=True
+    )
 
     # Just check that we get a valid JSON response
     assert '{"result": "success"}' == response

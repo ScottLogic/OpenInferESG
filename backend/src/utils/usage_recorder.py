@@ -45,7 +45,6 @@ class UsageRecorder(ABC):
 
 
 class ConsoleUsageRecorder(UsageRecorder):
-
     def __init__(self):
         logger.info("Usage will be logged to the console")
 
@@ -57,11 +56,12 @@ class ConsoleUsageRecorder(UsageRecorder):
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
     ):
-        logger.info({"model": model, "provider": provider, "agent": agent, "token_usage": token_usage, "duration": duration})
+        logger.info(
+            {"model": model, "provider": provider, "agent": agent, "token_usage": token_usage, "duration": duration}
+        )
 
 
 class CSVUsageRecorder(UsageRecorder):
-
     def __init__(self):
         # Get the configured CSV filename, or use default if not set
         csv_filename = config.llm_usage_log_filename or DEFAULT_CSV_FILENAME

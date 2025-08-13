@@ -99,7 +99,9 @@ async def enrich_relationships(llm, model, finalised_graph_structure, agent):
 async def enrich_nodes(llm, model, finalised_graph_structure, agent):
     neo4j_data = finalised_graph_structure["nodes"]
     print(f"neo4j data: {neo4j_data}")
-    enriched_nodes = await llm.chat(model, neo4j_nodes_understanding_prompt, str(neo4j_data), agent=agent, return_json=True)
+    enriched_nodes = await llm.chat(
+        model, neo4j_nodes_understanding_prompt, str(neo4j_data), agent=agent, return_json=True
+    )
     enriched_nodes = json.loads(enriched_nodes)
     json.dumps(enriched_nodes)
     finalised_graph_structure["nodes"] = enriched_nodes
@@ -122,7 +124,7 @@ async def enriched_rel_properties(llm, model, finalised_graph_structure, agent):
     json.dumps(rel_properties_neo4j)
 
     enriched_rel_properties = await llm.chat(
-        model, neo4j_relationship_property_prompt, str(rel_properties_neo4j), agent=agent ,return_json=True
+        model, neo4j_relationship_property_prompt, str(rel_properties_neo4j), agent=agent, return_json=True
     )
     enriched_rel_properties = json.loads(enriched_rel_properties)
 

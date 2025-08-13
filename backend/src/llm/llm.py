@@ -47,7 +47,7 @@ class LLM(ABC, metaclass=LLMMeta):
         provider: str,
         agent: str,
         token_usage: Optional[Union[Dict, str]] = None,
-        duration: float = 0.0
+        duration: float = 0.0,
     ) -> None:
         """
         Record usage information
@@ -69,7 +69,13 @@ class LLM(ABC, metaclass=LLMMeta):
 
     @abstractmethod
     def chat_with_file(
-        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], agent: str, return_json: bool = False
+        self,
+        model: str,
+        system_prompt: str,
+        user_prompt: str,
+        files: list[LLMFile],
+        agent: str,
+        return_json: bool = False,
     ) -> Coroutine:
         pass
 
