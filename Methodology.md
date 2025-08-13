@@ -6,19 +6,17 @@ This methodology is based on the research paper by Jegham et al. (2025) *"How Hu
 
 ## Table of Contents
 - [Introduction](#introduction)
-- [0. Hardware Specifications](#0-cloud-hardware-specifications-for-openai-models)
-- [1. Core Concept](#1-core-concept)
-- [2. Core Equations and Variables](#2-core-equations-and-variables)
-- [3. Utilization Model](#3-utilization-model)
-- [4. Practical Example: GPT-4o](#4-practical-example-gpt-4o)
-- [5. Practical Considerations](#5-practical-considerations)
-- [6. References](#6-references)
+- [1. Hardware Specifications](#hardware-specifications)
+- [2. Core Concept](#core-concept)
+- [3. Core Equations and Variables](#core-equations-and-variables)
+- [4. Practical Example: GPT-4o](#practical-example-gpt-4o)
+- [5. References](#references)
 
 ## Introduction
 
 This methodology is based on the research paper by Jegham et al. (2025) *"How Hungry is AI? A Systematic Methodology for Empirical Energy and Water Consumption Analysis of Large Language Models"* [1] which presents a framework for estimating the energy consumption of Large Language Models (LLMs) during inference in data center environments. The approach provides a systematic way to calculate per-query energy usage, taking into account various hardware and deployment factors. Section 0 provides current hardware specifications for major cloud LLM deployments, which can be used as reference values in the calculations.
 
-## 0. Cloud Hardware Specifications for OpenAI Models
+## 1. Hardware Specifications
 
 This section provides reference values for hardware configurations used in major cloud LLM deployments. These specifications can be used as input parameters for the energy calculations detailed in the following sections.
 
@@ -32,14 +30,14 @@ This section provides reference values for hardware configurations used in major
 | GPT-4o mini, GPT-4 Turbo, GPT-4                                                                           | Jul 2024 – Mar 2023 | Microsoft Azure | DGX A100*           | 6.50                | 1.12 |
 
 
-## 1. Core Concept
+## 2. Core Concept
 
 The methodology estimates energy consumption per query through three key steps:
 1. Calculate the inference time for the request (in hours)
 2. Multiply by the **effective system power** (combining GPU and non-GPU components)
 3. Scale by the data center's Power Usage Effectiveness (PUE)
 
-## 2. Core Equations and Variables
+## 3. Core Equations and Variables
 
 ### 2.1 Energy Consumption Formula
 
@@ -173,27 +171,7 @@ $$
 
 Matches the ≈ **1.788 Wh** per-query in the paper for long GPT-4o prompts.
 
-## 5. Practical Considerations
-
-When implementing this methodology, consider:
-
-1. **Data Availability**
-   - Some parameters may require estimation or benchmarking
-   - Actual GPU utilization may vary based on implementation
-
-2. **System Variations**
-   - Different hardware configurations will affect calculations
-   - Cloud providers may have different PUE values
-
-3. **Workload Patterns**
-   - Batch processing may affect real-world energy consumption
-   - Consider peak vs. average utilization
-
-4. **Monitoring and Validation**
-   - Implement monitoring to validate calculations
-   - Regularly update parameters based on real measurements
-
-## 6. References
+## 5. References
 
 1. Jegham, N., Abdelatti, M., Elmoubarki, L., Hendawi, A. "How Hungry is AI? A Systematic Methodology for Empirical Energy and Water Consumption Analysis of Large Language Models." arXiv:2505.09598 [cs.CY]. https://arxiv.org/abs/2505.09598
 
