@@ -6,11 +6,12 @@ import pytest
 from src.agents.agent import ChatAgentFailure
 from tests.agents import MockChatAgent, mock_tool_a_name
 from tests.llm.mock_llm import MockLLM
+from src.utils.usage_recorder import ConsoleUsageRecorder
 from src.router import select_tool_for_question
 
 
 mock_model = "mockmodel"
-mock_llm = MockLLM()
+mock_llm = MockLLM(ConsoleUsageRecorder())
 mock_agent_1 = MockChatAgent("mockllm", mock_model)
 mock_agent_2 = MockChatAgent("mockllm", mock_model)
 mock_agent_2.name = "mock_agent_2"

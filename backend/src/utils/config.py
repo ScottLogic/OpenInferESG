@@ -44,6 +44,7 @@ class Config(object):
         self.suggestions_model = None
         self.dynamic_knowledge_graph_model = None
         self.allowed_chat_agents = None
+        self.llm_usage_log_filename = "llm_usage.csv"
         self.load_env()
 
     def load_env(self):
@@ -90,6 +91,7 @@ class Config(object):
             self.suggestions_model = os.getenv("SUGGESTIONS_MODEL")
             self.dynamic_knowledge_graph_model = os.getenv("DYNAMIC_KNOWLEDGE_GRAPH_MODEL")
             self.file_agent_model = os.getenv("FILE_AGENT_MODEL")
+            self.llm_usage_log_filename = os.getenv("LLM_USAGE_LOG_FILENAME", "llm_usage.csv")
             self.allowed_chat_agents = (
                 os.getenv("ALLOWED_CHAT_AGENTS", "").split(",") if os.getenv("ALLOWED_CHAT_AGENTS") else None
             )

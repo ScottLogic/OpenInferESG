@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from mistralai import Mistral as MistralApi, UserMessage, SystemMessage
 import logging
+import time
 from src.session.file_uploads import get_file_content_for_filename, set_file_content_for_filename
 from src.utils.file_utils import extract_text
 from src.utils import Config
@@ -15,6 +16,8 @@ class Mistral(LLM):
 
     async def chat(self, model, system_prompt: str, user_prompt: str, return_json=False) -> str:
         logger.debug("Called llm. Waiting on response model with prompt {0}.".format(str([system_prompt, user_prompt])))
+
+        start_time = time.time()
         response = await self.client.chat.complete_async(
             model=model,
             messages=[
@@ -24,6 +27,8 @@ class Mistral(LLM):
             temperature=0,
             response_format={"type": "json_object"} if return_json else None,
         )
+        duration = time.time() - start_time
+
         if not response or not response.choices:
             logger.error("Call to Mistral API failed: No valid response or choices received")
             return "An error occurred while processing the request."
@@ -33,11 +38,33 @@ class Mistral(LLM):
             logger.error("Call to Mistral API failed: message content is None or Unset")
             return "An error occurred while processing the request."
 
+        if hasattr(response, "usage") and response.usage is not None:
+            token_info = {
+                "prompt_tokens": response.usage.prompt_tokens,
+                "completion_tokens": response.usage.completion_tokens,
+                "total_tokens": response.usage.total_tokens,
+            }
+        else:
+            logger.warning("No usage data in Mistral response")
+            token_info = {
+                "prompt_tokens": "N/A",
+                "completion_tokens": "N/A",
+                "total_tokens": "N/A",
+            }
+
+        self.record_usage(model=model, provider="mistral", token_usage=token_info, duration=duration)
+        logger.debug(f"Token data: {response.usage}, Duration: {duration:.2f}s")
         logger.debug('{0} response : "{1}"'.format(model, content))
+
         return str(content)
 
     async def chat_with_file(
-        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json=False
+        self,
+        model: str,
+        system_prompt: str,
+        user_prompt: str,
+        files: list[LLMFile],
+        return_json=False,
     ) -> str:
         try:
             for file in files:
@@ -46,7 +73,10 @@ class Mistral(LLM):
                     extracted_content = extract_text(file)
                     set_file_content_for_filename(file.filename, extracted_content)
                 user_prompt += f"\n\nDocument:\n{extracted_content}"
-            return await self.chat(model, system_prompt, user_prompt, return_json)
+
+            result = await self.chat(model, system_prompt, user_prompt, return_json)
+
+            return result
         except Exception as file_error:
             logger.exception(file_error)
             raise HTTPException(status_code=500, detail=f"Failed to process files: {file_error}") from file_error

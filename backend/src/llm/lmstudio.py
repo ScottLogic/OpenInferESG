@@ -3,6 +3,7 @@ import logging
 import json
 import aiohttp
 import re
+import time
 from src.utils import Config
 from src.session.file_uploads import get_file_content_for_filename, set_file_content_for_filename
 from src.utils.file_utils import extract_text
@@ -20,14 +21,16 @@ class LMStudio(LLM):
     """
 
     async def chat(self, model, system_prompt: str, user_prompt: str, return_json=False) -> str:
-        logger.debug("Called LMStudio llm. Waiting on response with prompt {0}."
-                 .format(str([system_prompt, user_prompt])))
+        logger.debug(
+            "Called LMStudio llm. Waiting on response with prompt {0}.".format(str([system_prompt, user_prompt]))
+        )
 
         url = config.lmstudio_url
         if url is None:
             logger.error("LMSTUDIO_URL configuration is missing")
-            raise ValueError("LMSTUDIO_URL is not configured. "
-                            "Please set this in your environment variables or .env file.")
+            raise ValueError(
+                "LMSTUDIO_URL is not configured. Please set this in your environment variables or .env file."
+            )
 
         # Make sure we have a clean URL without trailing slash
         if url.endswith("/"):
@@ -36,33 +39,31 @@ class LMStudio(LLM):
         # Construct the API endpoint
         url = f"{url}/v1/chat/completions"
 
-        headers = {
-            "Content-Type": "application/json"
-        }
+        headers = {"Content-Type": "application/json"}
         # If JSON is requested, modify the system prompt to ensure valid JSON response
         if return_json:
-            system_prompt = (system_prompt +
-                "\nIMPORTANT: You must respond with valid JSON only. Format your entire response as a "
-                "proper JSON object.")
+            system_prompt = (
+                system_prompt + "\nIMPORTANT: You must respond with valid JSON only. Format your entire response as a "
+                "proper JSON object."
+            )
 
         payload = {
             "model": model or config.lmstudio_model or "local-model",
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
+            "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
             "temperature": 0,
-            "max_tokens": config.lmstudio_max_tokens  # Get token limit from config
+            "max_tokens": config.lmstudio_max_tokens,  # Get token limit from config
         }
 
         # Log the complete payload for debugging
         logger.debug(f"LM Studio API request payload: {json.dumps(payload, indent=2)}")
         logger.info(f"Sending direct HTTP request to LM Studio at {url}")
 
+        start_time = time.time()
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(url, json=payload, headers=headers) as response:
                     response_text = await response.text()
+                    duration = time.time() - start_time
                     logger.debug(f"LM Studio API raw response: {response_text}")
 
                     if response.status != 200:
@@ -96,7 +97,33 @@ class LMStudio(LLM):
                     if not content:
                         logger.error("No content in message")
                         return "The LLM server returned an empty response."
+
+                    # Log usage data if available
+                    token_info = {}
+                    if "usage" in result:
+                        token_info = {
+                            "prompt_tokens": result["usage"].get("prompt_tokens", "N/A"),
+                            "completion_tokens": result["usage"].get("completion_tokens", "N/A"),
+                            "total_tokens": result["usage"].get("total_tokens", "N/A"),
+                        }
+                    else:
+                        logger.warning("No usage data in LM Studio response")
+                        token_info = {
+                            "prompt_tokens": "N/A",
+                            "completion_tokens": "N/A",
+                            "total_tokens": "N/A",
+                        }
+
+                        # Log to CSV
+                    self.record_usage(
+                        model="local_model",
+                        provider="lmstudio",
+                        token_usage=token_info,
+                        duration=duration,
+                    )
+
                     logger.info(f"Successfully got response from LM Studio: {content[:100]}...")
+                    logger.debug(f"Duration: {duration:.2f}s, Token usage: {token_info}")
 
                     # Return either raw content or validated JSON
                     return self._process_content(content, return_json) if return_json else content
@@ -120,7 +147,7 @@ class LMStudio(LLM):
         cleaned_content = content
 
         # Check for markdown code block format: ```json ... ```
-        code_block_pattern = r'```(?:json)?\s*([\s\S]*?)\s*```'
+        code_block_pattern = r"```(?:json)?\s*([\s\S]*?)\s*```"
         code_block_match = re.search(code_block_pattern, content)
         if code_block_match:
             # Extract just the JSON content without the code block markers
@@ -137,7 +164,7 @@ class LMStudio(LLM):
             # Try one more approach - sometimes there might be extra text before or after
             try:
                 # Look for patterns that might be JSON objects
-                json_pattern = r'(\{[\s\S]*\})'
+                json_pattern = r"(\{[\s\S]*\})"
                 json_match = re.search(json_pattern, cleaned_content)
                 if json_match:
                     potential_json = json_match.group(1)
@@ -172,8 +199,9 @@ class LMStudio(LLM):
             user_prompt += combined_content
 
             logger.info(f"Sending request with {len(files)} files attached to the prompt")
+            result = await self.chat(model, system_prompt, user_prompt, return_json)
 
-            return await self.chat(model, system_prompt, user_prompt, return_json)
+            return result
         except Exception as file_error:
             logger.exception(file_error)
             raise HTTPException(status_code=500, detail=f"Failed to process files: {file_error}") from file_error

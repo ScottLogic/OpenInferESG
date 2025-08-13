@@ -8,7 +8,7 @@ from src.session.llm_file_upload import (
     add_llm_file_upload,
     get_all_files,
     get_llm_file_upload_id,
-    reset_llm_file_uploads
+    reset_llm_file_uploads,
 )
 from openai import NOT_GIVEN, AsyncOpenAI, OpenAIError
 from openai.types.beta.threads import Text, TextContentBlock
@@ -33,6 +33,7 @@ class OpenAI(LLM):
         )
         try:
             client = AsyncOpenAI(api_key=config.openai_key)
+            start_time = time.time()
             response = await client.chat.completions.create(
                 model=model,
                 messages=[
@@ -42,9 +43,29 @@ class OpenAI(LLM):
                 temperature=0,
                 response_format={"type": "json_object"} if return_json else NOT_GIVEN,
             )
+            duration = time.time() - start_time
             content = response.choices[0].message.content
+
+            # Prepare token usage data for logging
+            if hasattr(response, "usage") and response.usage is not None:
+                token_info = {
+                    "prompt_tokens": response.usage.prompt_tokens,
+                    "completion_tokens": response.usage.completion_tokens,
+                    "total_tokens": response.usage.total_tokens,
+                }
+            else:
+                logger.warning("No usage data in OpenAI response")
+                token_info = {
+                    "prompt_tokens": "N/A",
+                    "completion_tokens": "N/A",
+                    "total_tokens": "N/A",
+                }
+
+            self.record_usage(model=model, provider="openai", token_usage=token_info, duration=duration)
+
             logger.info(f"OpenAI response: Finish reason: {response.choices[0].finish_reason}, Content: {content}")
-            logger.debug(f"Token data: {response.usage}")
+            logger.info(f"Response Usage: {response.usage}")
+            logger.debug(f"Token data: {response.usage}, Duration: {duration:.2f}s")
 
             if not content:
                 logger.error("Call to Open API failed: message content is None")
@@ -59,6 +80,8 @@ class OpenAI(LLM):
         self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json=False
     ) -> str:
         client = AsyncOpenAI(api_key=config.openai_key)
+        start_time = time.time()
+
         file_ids = await OpenAILLMFileUploadManager().upload_files(files)
 
         file_assistant = await client.beta.assistants.create(
@@ -96,7 +119,29 @@ class OpenAI(LLM):
 
         await client.beta.threads.delete(thread.id)
 
-        logger.info(f"OpenAI response: {message}")
+        duration = time.time() - start_time
+
+
+        if hasattr(run, "usage") and run.usage is not None:
+            token_info = {
+                "prompt_tokens": run.usage.prompt_tokens,
+                "completion_tokens": run.usage.completion_tokens,
+                "total_tokens": run.usage.total_tokens,
+            }
+        else:
+            logger.warning("No usage data in OpenAI File response")
+            token_info = {
+                "prompt_tokens": "N/A",
+                "completion_tokens": "N/A",
+                "total_tokens": "N/A",
+            }
+
+
+            # Log to CSV file using base class method
+        self.record_usage(model=model, provider="openai-file", token_usage=token_info, duration=duration)
+
+        logger.info(f"OpenAI file-based response: Message length: {len(message) if message else 0}")
+        logger.debug(f"Token usage: {token_info}, Duration: {duration:.2f}s")
         return message
 
 
@@ -139,4 +184,3 @@ class OpenAILLMFileUploadManager(LLMFileUploadManager):
             logger.info("Open AI: Files deleted")
         except OpenAIError:
             logger.info("OpenAI not configured")
-

@@ -1,10 +1,12 @@
 from src.agents import ChatAgent, chat_agent, tool, Parameter
 from src.agents.tool import ToolActionSuccess, ToolActionFailure, ToolAnswerType, CommonParameters
+from src.utils.usage_recorder import ConsoleUsageRecorder
 from tests.llm.mock_llm import MockLLM
+
 
 description = "A test tool"
 param_description = "A string"
-MockLLM()  # initialise MockLLM so future calls to get_llm will return this object
+MockLLM(ConsoleUsageRecorder())  # initialise MockLLM so future calls to get_llm will return this object
 
 mock_tool_a_name = "Mock Parameterised Tool A"
 mock_tool_b_name = "Mock Parameterised Tool B"

@@ -1,8 +1,11 @@
 from abc import ABC, ABCMeta, abstractmethod
-from os import PathLike
-from typing import Any, Coroutine
-from .count_calls import count_calls
 from dataclasses import dataclass
+from os import PathLike
+from typing import Any, Coroutine, Dict, Optional, Union
+
+from src.utils.usage_recorder import UsageRecorder, CSVUsageRecorder
+
+from .count_calls import count_calls
 
 
 count_calls_of_functions = ["chat", "chat_with_file"]
@@ -20,7 +23,7 @@ class LLMMeta(ABCMeta):
         if not hasattr(cls, "instances"):
             cls.instances = {}
 
-        cls.instances[name.lower()] = cls()
+        cls.instances[name.lower()] = cls(CSVUsageRecorder())
 
     def __new__(cls, name, bases, attrs):
         for function in count_calls_of_functions:
@@ -31,9 +34,30 @@ class LLMMeta(ABCMeta):
 
 
 class LLM(ABC, metaclass=LLMMeta):
+    def __init__(self, usage_recorder: UsageRecorder):
+        self.usage_recorder = usage_recorder
+
     @classmethod
     def get_instances(cls):
         return cls.instances
+
+    def record_usage(
+        self,
+        model: str,
+        provider: str,
+        token_usage: Optional[Union[Dict, str]],
+        duration: float = 0.0
+    ) -> None:
+        """
+        Record usage information
+
+        Args:
+            model: The model name used for the request
+            provider: The provider name used for the request
+            token_usage: Dictionary containing token usage information
+            duration: Time taken for the request in seconds
+        """
+        self.usage_recorder.record_activity(model, provider, token_usage, duration)
 
     @abstractmethod
     def chat(

@@ -9,6 +9,8 @@ from openai.types.beta.threads.file_citation_annotation import FileCitation
 from src.llm import LLMFile
 from src.llm.openai import OpenAI
 
+from src.utils.usage_recorder import ConsoleUsageRecorder
+
 
 @dataclass
 class MockResponse:
@@ -71,7 +73,7 @@ async def test_chat_with_file_removes_citations(upload_files_method, mock_async_
     mock_instance.beta.threads.messages.list = AsyncMock(return_value=MockListResponse())
     mock_instance.beta.threads.delete = AsyncMock()
 
-    client = OpenAI()
+    client = OpenAI(ConsoleUsageRecorder())
     response = await client.chat_with_file(
         model="",
         user_prompt="",
