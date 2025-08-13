@@ -1,5 +1,4 @@
 import csv
-import datetime
 from io import StringIO
 
 from unittest.mock import mock_open
