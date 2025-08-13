@@ -31,7 +31,7 @@ async def generate_chart(
     )
 
     generate_chart_code_prompt = engine.load_prompt("generate-chart-code")
-    generated_code = await llm.chat(model, generate_chart_code_prompt, details_to_generate_chart_code)
+    generated_code = await llm.chat(model, generate_chart_code_prompt, details_to_generate_chart_code, agent="chart-generator")
     sanitised_script = sanitise_script(generated_code)
 
     try:

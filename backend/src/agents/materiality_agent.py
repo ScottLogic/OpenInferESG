@@ -31,6 +31,7 @@ async def select_material_files(user_question: str, llm: LLM, model) -> list[str
                 catalogue=catalogue
             ),
             user_prompt=user_question,
+            agent="materiality",
             return_json=True
         )
         return json.loads(files_json)["files"]

@@ -72,6 +72,7 @@ class ReportAgent(Agent):
             self.model,
             system_prompt=engine.load_prompt("create-report-conclusion"),
             user_prompt=f"The document is as follows\n{report}",
+            agent="report"
         )
 
         return f"{report}\n\n{report_conclusion}"
