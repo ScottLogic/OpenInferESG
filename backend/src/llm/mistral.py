@@ -53,7 +53,7 @@ class Mistral(LLM):
             }
 
         self.record_usage(
-            model=model, provider="mistral", token_usage=token_info, duration=duration, request_type="file_chat"
+            model=model, provider="mistral", token_usage=token_info, duration=duration
         )
         logger.debug(f"Token data: {response.usage}, Duration: {duration:.2f}s")
         logger.debug('{0} response : "{1}"'.format(model, content))

@@ -120,7 +120,6 @@ class LMStudio(LLM):
                         provider="lmstudio",
                         token_usage=token_info,
                         duration=duration,
-                        request_type="chat",
                     )
 
                     logger.info(f"Successfully got response from LM Studio: {content[:100]}...")

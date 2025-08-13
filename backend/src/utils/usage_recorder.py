@@ -18,7 +18,6 @@ CSV_HEADERS = [
     "completion_tokens",
     "total_tokens",
     "duration_seconds",
-    "request_type",
 ]
 
 # Ensure the logs directory exists
@@ -39,7 +38,6 @@ class UsageRecorder(ABC):
         provider: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
-        request_type: str = "chat",
     ):
         pass
 
@@ -55,9 +53,8 @@ class ConsoleUsageRecorder(UsageRecorder):
         provider: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
-        request_type: str = "chat",
     ):
-        logger.info({"model": model, "provider": provider, "token_usage": token_usage, "duration": duration, "request_type": request_type})
+        logger.info({"model": model, "provider": provider, "token_usage": token_usage, "duration": duration})
 
 
 class CSVUsageRecorder(UsageRecorder):
@@ -75,16 +72,15 @@ class CSVUsageRecorder(UsageRecorder):
         provider: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
-        request_type: str = "chat",
     ) -> None:
         """
         Log LLM usage information to a CSV file.
 
         Args:
             model: The model name used for the request
+            provider: The provider name used for the request
             token_usage: Dictionary containing token usage information
             duration: Time taken for the request in seconds
-            request_type: Type of request (chat, file-chat, etc.)
         """
         timestamp = datetime.datetime.now().isoformat()
 
@@ -118,7 +114,6 @@ class CSVUsageRecorder(UsageRecorder):
                     completion_tokens,
                     total_tokens,
                     f"{duration:.2f}",
-                    request_type,
                 ]
             )
 

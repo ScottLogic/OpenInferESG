@@ -61,7 +61,7 @@ class OpenAI(LLM):
                     "total_tokens": "N/A",
                 }
 
-            self.record_usage(model=model, provider="openai", token_usage=token_info, duration=duration, request_type="chat")
+            self.record_usage(model=model, provider="openai", token_usage=token_info, duration=duration)
 
             logger.info(f"OpenAI response: Finish reason: {response.choices[0].finish_reason}, Content: {content}")
             logger.info(f"Response Usage: {response.usage}")
@@ -138,7 +138,7 @@ class OpenAI(LLM):
 
 
             # Log to CSV file using base class method
-        self.record_usage(model=model, provider="openai-file", token_usage=token_info, duration=duration, request_type="file_chat")
+        self.record_usage(model=model, provider="openai-file", token_usage=token_info, duration=duration)
 
         logger.info(f"OpenAI file-based response: Message length: {len(message) if message else 0}")
         logger.debug(f"Token usage: {token_info}, Duration: {duration:.2f}s")
