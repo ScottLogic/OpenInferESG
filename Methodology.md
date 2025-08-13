@@ -1,6 +1,6 @@
 # Methodology: Calculating Per-Query Energy for LLM Inference
 
-This methodology describes the step-by-step process from *How Hungry is AI?* for estimating the **per-query energy consumption** of an LLM in a data center. It includes the core equations, variable definitions, the utilization model, cloud hardware specs, and a worked example using GPT-4o.
+This methodology is based on the research paper by Jegham et al. (2025) *"How Hungry is AI? A Systematic Methodology for Empirical Energy and Water Consumption Analysis of Large Language Models"* [1] which presents a framework for estimating the energy consumption of Large Language Models (LLMs) during inference in data center environments. The approach provides a systematic way to calculate per-query energy usage, taking into account various hardware and deployment factors. Section 0 provides current hardware specifications for major cloud LLM deployments, which can be used as reference values in the calculations.
 
 > To view this as a markdown preview in VSCode press `Ctrl+Shift+V`
 
@@ -16,7 +16,7 @@ This methodology describes the step-by-step process from *How Hungry is AI?* for
 
 ## Introduction
 
-This methodology is based on the research paper *"How Hungry is AI?"* which presents a framework for estimating the energy consumption of Large Language Models (LLMs) during inference in data center environments. The approach provides a systematic way to calculate per-query energy usage, taking into account various hardware and deployment factors. Section 0 provides current hardware specifications for major cloud LLM deployments, which can be used as reference values in the calculations.
+This methodology is based on the research paper by Jegham et al. (2025) *"How Hungry is AI? A Systematic Methodology for Empirical Energy and Water Consumption Analysis of Large Language Models"* [1] which presents a framework for estimating the energy consumption of Large Language Models (LLMs) during inference in data center environments. The approach provides a systematic way to calculate per-query energy usage, taking into account various hardware and deployment factors. Section 0 provides current hardware specifications for major cloud LLM deployments, which can be used as reference values in the calculations.
 
 ## 0. Cloud Hardware Specifications for OpenAI Models
 
@@ -195,8 +195,6 @@ When implementing this methodology, consider:
 
 ## 6. References
 
-1. *"How Hungry is AI?"* - Original research paper
-2. Azure data center specifications for PUE values
-3. NVIDIA DGX H100/H200 technical specifications
+1. Jegham, N., Abdelatti, M., Elmoubarki, L., Hendawi, A. "How Hungry is AI? A Systematic Methodology for Empirical Energy and Water Consumption Analysis of Large Language Models." arXiv:2505.09598 [cs.CY]. https://arxiv.org/abs/2505.09598
 
 ---
