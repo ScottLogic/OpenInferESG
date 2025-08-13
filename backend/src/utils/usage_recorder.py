@@ -57,7 +57,7 @@ class ConsoleUsageRecorder(UsageRecorder):
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
     ):
-        logger.info({"model": model, "provider": provider, "token_usage": token_usage, "duration": duration})
+        logger.info({"model": model, "provider": provider, "agent": agent, "token_usage": token_usage, "duration": duration})
 
 
 class CSVUsageRecorder(UsageRecorder):
