@@ -99,7 +99,7 @@ async def generate_cypher(
 async def get_semantic_layer_cache(llm, model):
     global cache
     if not cache:
-        graph_schema = await get_semantic_layer(llm, model)
+        graph_schema = await get_semantic_layer(llm, model, "datastore")
         cache = graph_schema
         return cache
     else:
