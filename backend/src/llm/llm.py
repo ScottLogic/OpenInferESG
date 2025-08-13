@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from os import PathLike
 from typing import Any, Coroutine, Dict, Optional, Union
 
-from src.utils.usage_recorder import UsageRecorder, ConsoleUsageRecorder
+from src.utils.usage_recorder import UsageRecorder, CSVUsageRecorder
 
 from .count_calls import count_calls
 
@@ -25,7 +25,7 @@ class LLMMeta(ABCMeta):
         if not hasattr(cls, "instances"):
             cls.instances = {}
 
-        cls.instances[name.lower()] = cls()
+        cls.instances[name.lower()] = cls(CSVUsageRecorder())
 
     def __new__(cls, name, bases, attrs):
         for function in count_calls_of_functions:
@@ -36,8 +36,8 @@ class LLMMeta(ABCMeta):
 
 
 class LLM(ABC, metaclass=LLMMeta):
-    def __init__(self, usage_recorder: Optional[UsageRecorder] = None):
-        self.usage_recorder = usage_recorder or ConsoleUsageRecorder()
+    def __init__(self, usage_recorder: UsageRecorder):
+        self.usage_recorder = usage_recorder
 
     @classmethod
     def get_instances(cls):

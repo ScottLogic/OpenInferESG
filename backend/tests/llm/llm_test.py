@@ -1,8 +1,9 @@
 import pytest
 from src.llm.count_calls import Counter
+from src.utils.usage_recorder import ConsoleUsageRecorder
 from tests.llm.mock_llm import MockLLM
 
-model = MockLLM()
+model = MockLLM(ConsoleUsageRecorder())
 
 
 def test_chat_exists():
@@ -29,7 +30,7 @@ async def test_chat_increments_counter(mocker):
 async def test_chat_multi_model(mocker):
     counter = Counter()
     counter_mock = mocker.patch("src.llm.count_calls.counter", counter)
-    model_2 = MockLLM()
+    model_2 = MockLLM(ConsoleUsageRecorder())
 
     await model.chat("model", "system prompt", "user prompt")
     await model_2.chat("model", "system prompt", "user prompt")
