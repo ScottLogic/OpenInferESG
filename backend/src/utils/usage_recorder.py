@@ -13,7 +13,6 @@ DEFAULT_CSV_FILENAME = "llm_usage.csv"
 CSV_HEADERS = [
     "timestamp",
     "model",
-    "provider",
     "prompt_tokens",
     "completion_tokens",
     "total_tokens",
@@ -84,7 +83,6 @@ class CSVUsageRecorder(UsageRecorder):
             request_type: Type of request (chat, file-chat, etc.)
         """
         timestamp = datetime.datetime.now().isoformat()
-        provider = self.__class__.__name__.lower()
 
         # Extract token information with fallback for missing data
         if isinstance(token_usage, dict):
@@ -111,7 +109,6 @@ class CSVUsageRecorder(UsageRecorder):
                 [
                     timestamp,
                     model,
-                    provider,
                     prompt_tokens,
                     completion_tokens,
                     total_tokens,
@@ -120,4 +117,4 @@ class CSVUsageRecorder(UsageRecorder):
                 ]
             )
 
-        logger.debug(f"Logged {provider} usage data to {self.csv_file_path}")
+        logger.debug(f"Logged {model} usage data to {self.csv_file_path}")
