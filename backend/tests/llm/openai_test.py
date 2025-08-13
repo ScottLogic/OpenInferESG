@@ -76,8 +76,9 @@ async def test_chat_with_file_removes_citations(upload_files_method, mock_async_
     client = OpenAI(ConsoleUsageRecorder())
     response = await client.chat_with_file(
         model="",
-        user_prompt="",
         system_prompt="",
+        user_prompt="",
         files=[LLMFile("filename", Path("./backend/library/AstraZeneca-Sustainability-Report-2023.pdf"))],
+        agent="test-agent"
     )
     assert response == "Response with quote"

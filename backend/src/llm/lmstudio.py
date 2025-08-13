@@ -180,7 +180,7 @@ class LMStudio(LLM):
             return f"Error: The LLM returned invalid JSON format: {content[:100]}..."
 
     async def chat_with_file(
-        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json=False, agent: str = "lmstudio"
+        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], agent: str, return_json=False
     ) -> str:
         try:
             file_contents = []

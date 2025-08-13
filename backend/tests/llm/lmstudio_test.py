@@ -136,7 +136,7 @@ async def test_chat_with_file(lmstudio_instance):
 
     # Call the chat_with_file method directly
     response = await lmstudio_instance.chat_with_file(
-        "model", "system prompt", "user prompt", [mock_file]
+        "model", "system prompt", "user prompt", [mock_file], "test-agent"
     )
 
     # Our mock implementation returns a fixed response that includes the filename

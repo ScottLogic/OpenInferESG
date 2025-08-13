@@ -6,6 +6,6 @@ class MockLLM(LLM):
         return "mocked response"
 
     async def chat_with_file(
-        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json: bool = False, agent: str="mock-llm"
+        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], agent: str, return_json: bool = False
     ) -> str:
         return "mocked response"

@@ -69,7 +69,7 @@ class LLM(ABC, metaclass=LLMMeta):
 
     @abstractmethod
     def chat_with_file(
-        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json: bool = False, agent: str = "default"
+        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], agent: str, return_json: bool = False
     ) -> Coroutine:
         pass
 
