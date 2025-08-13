@@ -14,7 +14,7 @@ config = Config()
 class Mistral(LLM):
     client = MistralApi(api_key=config.mistral_key)
 
-    async def chat(self, model, system_prompt: str, user_prompt: str, return_json=False) -> str:
+    async def chat(self, model, system_prompt: str, user_prompt: str, return_json=False, agent: str = "mistral") -> str:
         logger.debug("Called llm. Waiting on response model with prompt {0}.".format(str([system_prompt, user_prompt])))
 
         start_time = time.time()
@@ -52,7 +52,7 @@ class Mistral(LLM):
                 "total_tokens": "N/A",
             }
 
-        self.record_usage(model=model, provider="mistral", token_usage=token_info, duration=duration)
+        self.record_usage(model=model, provider="mistral", agent=agent, token_usage=token_info, duration=duration)
         logger.debug(f"Token data: {response.usage}, Duration: {duration:.2f}s")
         logger.debug('{0} response : "{1}"'.format(model, content))
 
@@ -65,6 +65,7 @@ class Mistral(LLM):
         user_prompt: str,
         files: list[LLMFile],
         return_json=False,
+        agent: str = "mistral"
     ) -> str:
         try:
             for file in files:
@@ -74,7 +75,7 @@ class Mistral(LLM):
                     set_file_content_for_filename(file.filename, extracted_content)
                 user_prompt += f"\n\nDocument:\n{extracted_content}"
 
-            result = await self.chat(model, system_prompt, user_prompt, return_json)
+            result = await self.chat(model, system_prompt, user_prompt, return_json, agent)
 
             return result
         except Exception as file_error:

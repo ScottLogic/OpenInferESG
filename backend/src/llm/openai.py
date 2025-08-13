@@ -25,7 +25,7 @@ def remove_citations(message: Text):
 
 
 class OpenAI(LLM):
-    async def chat(self, model, system_prompt: str, user_prompt: str, return_json=False) -> str:
+    async def chat(self, model, system_prompt: str, user_prompt: str, return_json=False, agent: str="openai") -> str:
         logger.debug(
             "##### Called open ai chat ... llm. Waiting on response model with prompt {0}.".format(
                 str([system_prompt, user_prompt])
@@ -61,7 +61,7 @@ class OpenAI(LLM):
                     "total_tokens": "N/A",
                 }
 
-            self.record_usage(model=model, provider="openai", token_usage=token_info, duration=duration)
+            self.record_usage(model=model, provider="openai", agent=agent, token_usage=token_info, duration=duration)
 
             logger.info(f"OpenAI response: Finish reason: {response.choices[0].finish_reason}, Content: {content}")
             logger.info(f"Response Usage: {response.usage}")
@@ -77,7 +77,7 @@ class OpenAI(LLM):
             return "An error occurred while processing the request."
 
     async def chat_with_file(
-        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json=False
+        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json=False,  agent: str="openai"
     ) -> str:
         client = AsyncOpenAI(api_key=config.openai_key)
         start_time = time.time()
@@ -138,7 +138,7 @@ class OpenAI(LLM):
 
 
             # Log to CSV file using base class method
-        self.record_usage(model=model, provider="openai-file", token_usage=token_info, duration=duration)
+        self.record_usage(model=model, provider="openai-file", agent=agent, token_usage=token_info, duration=duration)
 
         logger.info(f"OpenAI file-based response: Message length: {len(message) if message else 0}")
         logger.debug(f"Token usage: {token_info}, Duration: {duration:.2f}s")

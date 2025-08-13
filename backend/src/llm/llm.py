@@ -45,7 +45,7 @@ class LLM(ABC, metaclass=LLMMeta):
         self,
         model: str,
         provider: str,
-        agent: str = "default",
+        agent: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0
     ) -> None:
@@ -63,13 +63,13 @@ class LLM(ABC, metaclass=LLMMeta):
 
     @abstractmethod
     def chat(
-        self, model: str, system_prompt: str, user_prompt: str, return_json: bool = False
+        self, model: str, system_prompt: str, user_prompt: str, return_json: bool = False, agent: str = "default"
     ) -> Coroutine[Any, Any, str]:
         pass
 
     @abstractmethod
     def chat_with_file(
-        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json: bool = False
+        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json: bool = False, agent: str = "default"
     ) -> Coroutine:
         pass
 
