@@ -21,14 +21,16 @@ class LMStudio(LLM):
     """
 
     async def chat(self, model, system_prompt: str, user_prompt: str, return_json=False) -> str:
-        logger.debug("Called LMStudio llm. Waiting on response with prompt {0}."
-                 .format(str([system_prompt, user_prompt])))
+        logger.debug(
+            "Called LMStudio llm. Waiting on response with prompt {0}.".format(str([system_prompt, user_prompt]))
+        )
 
         url = config.lmstudio_url
         if url is None:
             logger.error("LMSTUDIO_URL configuration is missing")
-            raise ValueError("LMSTUDIO_URL is not configured. "
-                            "Please set this in your environment variables or .env file.")
+            raise ValueError(
+                "LMSTUDIO_URL is not configured. Please set this in your environment variables or .env file."
+            )
 
         # Make sure we have a clean URL without trailing slash
         if url.endswith("/"):
@@ -37,23 +39,19 @@ class LMStudio(LLM):
         # Construct the API endpoint
         url = f"{url}/v1/chat/completions"
 
-        headers = {
-            "Content-Type": "application/json"
-        }
+        headers = {"Content-Type": "application/json"}
         # If JSON is requested, modify the system prompt to ensure valid JSON response
         if return_json:
-            system_prompt = (system_prompt +
-                "\nIMPORTANT: You must respond with valid JSON only. Format your entire response as a "
-                "proper JSON object.")
+            system_prompt = (
+                system_prompt + "\nIMPORTANT: You must respond with valid JSON only. Format your entire response as a "
+                "proper JSON object."
+            )
 
         payload = {
             "model": model or config.lmstudio_model or "local-model",
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ],
+            "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
             "temperature": 0,
-            "max_tokens": config.lmstudio_max_tokens  # Get token limit from config
+            "max_tokens": config.lmstudio_max_tokens,  # Get token limit from config
         }
 
         # Log the complete payload for debugging
@@ -99,24 +97,24 @@ class LMStudio(LLM):
                     if not content:
                         logger.error("No content in message")
                         return "The LLM server returned an empty response."
-                    
+
                     # Log usage data if available
                     token_info = {}
                     if "usage" in result:
                         token_info = {
                             "prompt_tokens": result["usage"].get("prompt_tokens", "N/A"),
                             "completion_tokens": result["usage"].get("completion_tokens", "N/A"),
-                            "total_tokens": result["usage"].get("total_tokens", "N/A")
+                            "total_tokens": result["usage"].get("total_tokens", "N/A"),
                         }
-                        
+
                         # Log to CSV
                         self.log_usage_to_csv(
                             model=model or config.lmstudio_model or "local-model",
                             token_usage=token_info,
                             duration=duration,
-                            request_type="chat"
+                            request_type="chat",
                         )
-                    
+
                     logger.info(f"Successfully got response from LM Studio: {content[:100]}...")
                     logger.debug(f"Duration: {duration:.2f}s, Token usage: {token_info}")
 
@@ -142,7 +140,7 @@ class LMStudio(LLM):
         cleaned_content = content
 
         # Check for markdown code block format: ```json ... ```
-        code_block_pattern = r'```(?:json)?\s*([\s\S]*?)\s*```'
+        code_block_pattern = r"```(?:json)?\s*([\s\S]*?)\s*```"
         code_block_match = re.search(code_block_pattern, content)
         if code_block_match:
             # Extract just the JSON content without the code block markers
@@ -159,7 +157,7 @@ class LMStudio(LLM):
             # Try one more approach - sometimes there might be extra text before or after
             try:
                 # Look for patterns that might be JSON objects
-                json_pattern = r'(\{[\s\S]*\})'
+                json_pattern = r"(\{[\s\S]*\})"
                 json_match = re.search(json_pattern, cleaned_content)
                 if json_match:
                     potential_json = json_match.group(1)
@@ -178,7 +176,7 @@ class LMStudio(LLM):
     ) -> str:
         try:
             start_time = time.time()
-            
+
             file_contents = []
             for file in files:
                 extracted_content = get_file_content_for_filename(file.filename)
@@ -198,16 +196,16 @@ class LMStudio(LLM):
             logger.info(f"Sending request with {len(files)} files attached to the prompt")
 
             result = await self.chat(model, system_prompt, user_prompt, return_json)
-            
+
             duration = time.time() - start_time
             # Log the full file chat duration (separate from the chat API call itself)
             self.log_usage_to_csv(
                 model=model or config.lmstudio_model or "local-model",
                 token_usage="See chat logs",  # Token usage already logged in the chat method
                 duration=duration,
-                request_type="file_chat"
+                request_type="file_chat",
             )
-            
+
             return result
         except Exception as file_error:
             logger.exception(file_error)

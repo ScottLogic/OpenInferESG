@@ -8,7 +8,7 @@ from src.session.llm_file_upload import (
     add_llm_file_upload,
     get_all_files,
     get_llm_file_upload_id,
-    reset_llm_file_uploads
+    reset_llm_file_uploads,
 )
 from openai import NOT_GIVEN, AsyncOpenAI, OpenAIError
 from openai.types.beta.threads import Text, TextContentBlock
@@ -45,28 +45,20 @@ class OpenAI(LLM):
             )
             duration = time.time() - start_time
             content = response.choices[0].message.content
-            
+
             # Prepare token usage data for logging
             token_info = "N/A"
             if response.usage:
                 token_info = {
                     "prompt_tokens": response.usage.prompt_tokens,
                     "completion_tokens": response.usage.completion_tokens,
-                    "total_tokens": response.usage.total_tokens
+                    "total_tokens": response.usage.total_tokens,
                 }
-                
+
                 # Log to CSV file using base class method
-                self.log_usage_to_csv(
-                    model=model,
-                    token_usage=token_info,
-                    duration=duration,
-                    request_type="chat"
-                )
-            
-            logger.info(
-                f"OpenAI response: Finish reason: {response.choices[0].finish_reason}, "
-                f"Content: {content}"
-            )
+                self.log_usage_to_csv(model=model, token_usage=token_info, duration=duration, request_type="chat")
+
+            logger.info(f"OpenAI response: Finish reason: {response.choices[0].finish_reason}, Content: {content}")
             logger.debug(f"Token data: {response.usage}, Duration: {duration:.2f}s")
 
             if not content:
@@ -83,7 +75,7 @@ class OpenAI(LLM):
     ) -> str:
         client = AsyncOpenAI(api_key=config.openai_key)
         start_time = time.time()
-        
+
         file_ids = await OpenAILLMFileUploadManager().upload_files(files)
 
         file_assistant = await client.beta.assistants.create(
@@ -120,25 +112,20 @@ class OpenAI(LLM):
             message = messages.data[0].content[0].to_json()
 
         await client.beta.threads.delete(thread.id)
-        
+
         duration = time.time() - start_time
-        
+
         # For Assistants API, token usage is available in the run.usage
         usage_info = {}
         if hasattr(run, "usage") and run.usage:
             usage_info = {
                 "prompt_tokens": getattr(run.usage, "prompt_tokens", "N/A"),
                 "completion_tokens": getattr(run.usage, "completion_tokens", "N/A"),
-                "total_tokens": getattr(run.usage, "total_tokens", "N/A")
+                "total_tokens": getattr(run.usage, "total_tokens", "N/A"),
             }
-            
+
             # Log to CSV file using base class method
-            self.log_usage_to_csv(
-                model=model,
-                token_usage=usage_info,
-                duration=duration,
-                request_type="file_chat"
-            )
+            self.log_usage_to_csv(model=model, token_usage=usage_info, duration=duration, request_type="file_chat")
 
         logger.info(f"OpenAI file-based response: Message length: {len(message) if message else 0}")
         logger.debug(f"Token usage: {usage_info}, Duration: {duration:.2f}s")
@@ -184,4 +171,3 @@ class OpenAILLMFileUploadManager(LLMFileUploadManager):
             logger.info("Open AI: Files deleted")
         except OpenAIError:
             logger.info("OpenAI not configured")
-
