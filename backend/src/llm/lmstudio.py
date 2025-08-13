@@ -106,14 +106,20 @@ class LMStudio(LLM):
                             "completion_tokens": result["usage"].get("completion_tokens", "N/A"),
                             "total_tokens": result["usage"].get("total_tokens", "N/A"),
                         }
+                    else:
+                        token_info = {
+                            "prompt_tokens": "N/A",
+                            "completion_tokens": "N/A",
+                            "total_tokens": "N/A",
+                        }
 
                         # Log to CSV
-                        self.record_usage(
-                            model=model or config.lmstudio_model or "local-model",
-                            token_usage=token_info,
-                            duration=duration,
-                            request_type="chat",
-                        )
+                    self.record_usage(
+                        model="local_model",
+                        token_usage=token_info,
+                        duration=duration,
+                        request_type="chat",
+                    )
 
                     logger.info(f"Successfully got response from LM Studio: {content[:100]}...")
                     logger.debug(f"Duration: {duration:.2f}s, Token usage: {token_info}")
@@ -194,17 +200,7 @@ class LMStudio(LLM):
             user_prompt += combined_content
 
             logger.info(f"Sending request with {len(files)} files attached to the prompt")
-
             result = await self.chat(model, system_prompt, user_prompt, return_json)
-
-            duration = time.time() - start_time
-            # Log the full file chat duration (separate from the chat API call itself)
-            self.record_usage(
-                model=model,
-                token_usage="See chat logs",  # Token usage already logged in the chat method
-                duration=duration,
-                request_type="file_chat",
-            )
 
             return result
         except Exception as file_error:
