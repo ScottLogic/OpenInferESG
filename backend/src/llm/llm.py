@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from os import PathLike
 from typing import Any, Coroutine, Dict, Optional, Union
 
-from src.utils.usage_recorder import UsageRecorder, LogUsageRecorder
+from src.utils.usage_recorder import UsageRecorder, ConsoleUsageRecorder
 
 from .count_calls import count_calls
 
@@ -37,7 +37,7 @@ class LLMMeta(ABCMeta):
 
 class LLM(ABC, metaclass=LLMMeta):
     def __init__(self, usage_recorder: Optional[UsageRecorder] = None):
-        self.usage_recorder = usage_recorder or LogUsageRecorder()
+        self.usage_recorder = usage_recorder or ConsoleUsageRecorder()
 
     @classmethod
     def get_instances(cls):

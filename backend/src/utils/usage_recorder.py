@@ -3,6 +3,7 @@ import logging
 import csv
 import datetime
 from pathlib import Path
+import os
 
 from typing import Optional, Dict, Union
 from src.utils import Config
@@ -42,7 +43,11 @@ class UsageRecorder(ABC):
         pass
 
 
-class LogUsageRecorder(UsageRecorder):
+class ConsoleUsageRecorder(UsageRecorder):
+    
+    def __init__(self):
+        logger.info(f"Usage will be logged to the console")
+    
     def record_activity(
         self,
         model: str,
@@ -54,6 +59,14 @@ class LogUsageRecorder(UsageRecorder):
 
 
 class CSVUsageRecorder(UsageRecorder):
+    
+    def __init__(self):
+                # Get the configured CSV filename, or use default if not set
+        csv_filename = config.llm_usage_log_filename or DEFAULT_CSV_FILENAME
+        self.csv_file_path = CSV_DIR / csv_filename
+        
+        logger.info(f"Usage logs will be saved to the following path: {self.csv_file_path}")
+    
     def record_activity(
         self,
         model: str,
@@ -73,7 +86,7 @@ class CSVUsageRecorder(UsageRecorder):
         timestamp = datetime.datetime.now().isoformat()
         provider = self.__class__.__name__.lower()
 
-        # Extract token information with fallbacks for missing data
+        # Extract token information with fallback for missing data
         if isinstance(token_usage, dict):
             prompt_tokens = token_usage.get("prompt_tokens", "N/A")
             completion_tokens = token_usage.get("completion_tokens", "N/A")
@@ -83,14 +96,10 @@ class CSVUsageRecorder(UsageRecorder):
             completion_tokens = "N/A"
             total_tokens = "N/A"
 
-        # Get the configured CSV filename, or use default if not set
-        csv_filename = config.llm_usage_log_filename or DEFAULT_CSV_FILENAME
-        csv_file_path = CSV_DIR / csv_filename
-
         # Create the file with headers if it doesn't exist
-        file_exists = os.path.isfile(csv_file_path)
+        file_exists = os.path.isfile(self.csv_file_path)
 
-        with open(csv_file_path, mode="a", newline="") as file:
+        with open(self.csv_file_path, mode="a", newline="") as file:
             writer = csv.writer(file)
 
             # Write headers if file is new
@@ -111,4 +120,4 @@ class CSVUsageRecorder(UsageRecorder):
                 ]
             )
 
-        logger.debug(f"Logged {provider} usage data to {csv_file_path}")
+        logger.debug(f"Logged {provider} usage data to {self.csv_file_path}")
