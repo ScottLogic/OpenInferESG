@@ -13,20 +13,22 @@
 
 ## Introduction
 
-This methodology is based on the research paper by Jegham et al. (2025) _"How Hungry is AI? A Systematic Methodology for Empirical Energy and Water Consumption Analysis of Large Language Models"_ [1] which presents a framework for estimating the energy consumption of Large Language Models (LLMs) during inference in data center environments. The approach provides a systematic way to calculate per-query energy usage, taking into account various hardware and deployment factors. Section 0 provides current hardware specifications for major cloud LLM deployments, which can be used as reference values in the calculations.
+This methodology is based on the research paper by Jegham et al. (2025) _"How Hungry is AI? A Systematic Methodology for Empirical Energy and Water Consumption Analysis of Large Language Models"_ [1] which presents a framework for estimating the energy consumption of Large Language Models (LLMs) during inference in data center environments. The approach provides a systematic way to calculate per-query energy usage, taking into account various hardware and deployment factors. [Section 1](#hardware-specification) provides current hardware specifications for major cloud LLM deployments, which can be used as reference values in the calculations.
 
 ## 1. Hardware Specifications
 
 This section provides reference values for hardware configurations used in major cloud LLM deployments. These specifications can be used as input parameters for the energy calculations detailed in the following sections.
 
-### 0.1 Deployment Specifications
+### 1.1 Deployment Specifications
 
 **Table 1 – Deployment and Infrastructure Specifications (OpenAI Models)**
 
-| Models                                                                                                                   | Launch Dates        | Host            | Hardware      | Critical Power (kW) | PUE  |
-| ------------------------------------------------------------------------------------------------------------------------ | ------------------- | --------------- | ------------- | ------------------- | ---- |
-| GPT-4.1, GPT-4.1 mini, GPT-4.1 nano, o4-mini (high), GPT-4.5, o3, o3-mini (high), o3-mini, o1, o1-mini, GPT-4o (Mar ’25) | Apr 2025 – May 2024 | Microsoft Azure | DGX H200/H100 | 10.20               | 1.12 |
-| GPT-4o mini, GPT-4 Turbo, GPT-4                                                                                          | Jul 2024 – Mar 2023 | Microsoft Azure | DGX A100\*    | 6.50                | 1.12 |
+| Models                                                                                                                   | Launch Dates        | Host            | Hardware          | Critical Power (kW) | PUE      |
+| ------------------------------------------------------------------------------------------------------------------------ | ------------------- | --------------- | ----------------- | ------------------- | -------- |
+| GPT-4.1, GPT-4.1 mini, GPT-4.1 nano, o4-mini (high), GPT-4.5, o3, o3-mini (high), o3-mini, o1, o1-mini, GPT-4o (Mar ’25) | Apr 2025 – May 2024 | Microsoft Azure | DGX H200/H100 [2] | 10.20 [3]           | 1.12 [4] |
+| GPT-4o mini, GPT-4 Turbo, GPT-4                                                                                          | Jul 2024 – Mar 2023 | Microsoft Azure | DGX A100\*          | 6.50 [5]            | 1.12     |
+
+*DGX A100 was estimated for GPT-4o mini, GPT-4 Turbo, and GPT-4. Justification and estimation details are provided in Section 4.3.1. of _"How Hungry is AI?"_
 
 ## 2. Core Concept
 
@@ -34,7 +36,7 @@ The methodology estimates energy consumption per query through three key steps:
 
 1. Calculate the inference time for the request (in hours)
 2. Multiply by the **effective system power** (combining GPU and non-GPU components)
-3. Scale by the data center's Power Usage Effectiveness (PUE)
+3. Multiply by the data center's Power Usage Effectiveness (PUE)
 
 ## 3. Core Equations and Variables
 
@@ -184,8 +186,19 @@ Matches the ≈ **1.788 Wh** per-query in the paper for long GPT-4o prompts.
 
 1. Jegham, N., Abdelatti, M., Elmoubarki, L., Hendawi, A. "How Hungry is AI? A Systematic Methodology for Empirical Energy and Water Consumption Analysis of Large Language Models." arXiv:2505.09598 [cs.CY]. https://arxiv.org/abs/2505.09598
 
-2. Noelle Walsh. How microsoft measures datacenter water and energy use to improve azure
-cloud sustainability. https://azure.microsoft.com/en-us/blog/how-microsoft-measures-datacenter-water-and-energy-use-to-improve-azure-cloud-sustainability/,
-April 2022. Microsoft Azure Blog.
+2. NVIDIA. NVIDIA Hopper GPUs Expand Reach as Demand for AI Grows.
+   https://nvidianews.nvidia.com/news/nvidia-hopper-gpus-expand-reach-as-demand-for-ai-grows, March 2023. Accessed: 2025-04-2
+
+3. Imran Latif, Alex C. Newkirk, Matthew R. Carbone, Arslan Munir, Yuewei Lin, Jonathan
+   Koomey, Xi Yu, and Zhihua Dong. Single-node power demand during ai training: Measurements
+   on an 8-gpu nvidia h100 system. IEEE Access, 13:61740–61747, 2025. doi: 10.1109/ACCESS.
+   2025.3554728.
+
+4. Noelle Walsh. How microsoft measures datacenter water and energy use to improve azure
+   cloud sustainability. https://azure.microsoft.com/en-us/blog/how-microsoft-measures-datacenter-water-and-energy-use-to-improve-azure-cloud-sustainability/,
+   April 2022. Microsoft Azure Blog.
+
+5. NVIDIA Corporation. Nvidia dgx a100: The universal system for ai infrastructure. https://images.nvidia.com/aem-dam/Solutions/Data-Center/nvidia-dgx-a100-datasheet.pdf, 2020. Datasheet detailing specifications and features of the NVIDIA
+   DGX A100 system.
 
 ---
