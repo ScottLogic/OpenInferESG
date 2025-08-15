@@ -19,6 +19,8 @@ if not open_api_key:
     raise RuntimeError("OPENAI_KEY environment variable not found. Please set it in your environment or .env file.")
 os.environ["OPENAI_API_KEY"] = open_api_key
 
+client = AsyncOpenAI(api_key=open_api_key)
+
 filepath = r"C:\Users\afonseca\Downloads\report.md.txt"
 
 #Loads the document from a file
