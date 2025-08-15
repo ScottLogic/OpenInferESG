@@ -5,7 +5,6 @@ from openai import AsyncOpenAI
 from ragas import evaluate
 from ragas.metrics import faithfulness, answer_relevancy
 from ragas import EvaluationDataset, SingleTurnSample
-from PyPDF2 import PdfReader  # For PDF parsing
 import PyPDF2
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
