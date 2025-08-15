@@ -32,11 +32,12 @@ class IntentAgent(Agent):
             engine.load_prompt(
                 "intent-system",
                 chat_history=session_chat if session_chat else "There is no chat history",
-                report_prompt=report_prompt
+                report_prompt=report_prompt,
             ),
             user_prompt=engine.load_prompt(
                 "intent",
                 question=utterance
             ),
+            agent="intent",
             return_json=True
         )

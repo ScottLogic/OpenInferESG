@@ -7,7 +7,7 @@ class MockLMStudio:
     Mock implementation of LMStudio for testing
     """
 
-    async def chat(self, model, system_prompt, user_prompt, return_json=False):
+    async def chat(self, model, system_prompt, user_prompt, agent="mock-lmstudio", return_json=False):
         """Mock implementation of chat"""
         if return_json:
             return '{"result": "success"}'
@@ -40,7 +40,7 @@ class MockLMStudio:
 
         return content
 
-    async def chat_with_file(self, model, system_prompt, user_prompt, files, return_json=False):
+    async def chat_with_file(self, model, system_prompt, user_prompt, files, agent, return_json=False):
         """Mock implementation of chat_with_file"""
         file_names = [f.filename for f in files]
         return f"Mock response with files: {', '.join(file_names)}"

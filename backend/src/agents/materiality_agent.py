@@ -31,6 +31,7 @@ async def select_material_files(user_question: str, llm: LLM, model) -> list[str
                 catalogue=catalogue
             ),
             user_prompt=user_question,
+            agent="materiality",
             return_json=True
         )
         return json.loads(files_json)["files"]
@@ -57,7 +58,8 @@ async def answer_materiality_question(
             model,
             system_prompt=engine.load_prompt("answer-materiality-question"),
             user_prompt=user_question,
-            files=create_llm_files(materiality_files)
+            files=create_llm_files(materiality_files),
+            agent="materiality"
         )
     else:
         return ToolActionFailure(
@@ -84,6 +86,7 @@ class MaterialityAgent(BaseChatAgent):
             system_prompt=engine.load_prompt("list-material-topics-system-prompt"),
             user_prompt=f"What topics are material for {company_name}?",
             files=create_llm_files(materiality_files),
-            return_json=True,
+            agent="materiality",
+            return_json=True
         )
         return json.loads(materiality_topics)["material_topics"]
