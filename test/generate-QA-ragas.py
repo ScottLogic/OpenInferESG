@@ -105,7 +105,7 @@ Context:
 #Generate 20 Q&A pairs
 async def main():
     context = load_document(filepath)
-    qa_pairs = await generate_qa_pairs(context, num_pairs= 20)
+    qa_pairs = await generate_qa_pairs(context, num_pairs=20)
 
     if not qa_pairs:
         print("No valid QA pairs generated.")
