@@ -102,7 +102,7 @@ Context:
         print("Raw response:", content)
         return []
 
-#Genarate 20 Q&A pairs
+#Generate 20 Q&A pairs
 async def main():
     context = load_document(filepath)
     qa_pairs = await generate_qa_pairs(context, num_pairs= 20)
