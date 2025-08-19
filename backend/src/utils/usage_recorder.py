@@ -14,6 +14,7 @@ CSV_HEADERS = [
     "timestamp",
     "model",
     "provider",
+    "agent",
     "prompt_tokens",
     "completion_tokens",
     "total_tokens",
@@ -36,6 +37,7 @@ class UsageRecorder(ABC):
         self,
         model: str,
         provider: str,
+        agent: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
     ):
@@ -43,7 +45,6 @@ class UsageRecorder(ABC):
 
 
 class ConsoleUsageRecorder(UsageRecorder):
-
     def __init__(self):
         logger.info("Usage will be logged to the console")
 
@@ -51,14 +52,16 @@ class ConsoleUsageRecorder(UsageRecorder):
         self,
         model: str,
         provider: str,
+        agent: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
     ):
-        logger.info({"model": model, "provider": provider, "token_usage": token_usage, "duration": duration})
+        logger.info(
+            {"model": model, "provider": provider, "agent": agent, "token_usage": token_usage, "duration": duration}
+        )
 
 
 class CSVUsageRecorder(UsageRecorder):
-
     def __init__(self):
         # Get the configured CSV filename, or use default if not set
         csv_filename = config.llm_usage_log_filename or DEFAULT_CSV_FILENAME
@@ -70,6 +73,7 @@ class CSVUsageRecorder(UsageRecorder):
         self,
         model: str,
         provider: str,
+        agent: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
     ) -> None:
@@ -79,6 +83,7 @@ class CSVUsageRecorder(UsageRecorder):
         Args:
             model: The model name used for the request
             provider: The provider name used for the request
+            agent: The name of the agent making the request
             token_usage: Dictionary containing token usage information
             duration: Time taken for the request in seconds
         """
@@ -110,6 +115,7 @@ class CSVUsageRecorder(UsageRecorder):
                     timestamp,
                     model,
                     provider,
+                    agent,
                     prompt_tokens,
                     completion_tokens,
                     total_tokens,

@@ -46,6 +46,7 @@ async def read_file(user_question, filename: str, llm, model) -> ToolActionSucce
         system_prompt=engine.load_prompt("extract-text-from-file-system-prompt"),
         user_prompt=user_question,
         files=[LLMFile(file["filename"], bytes())],
+        agent="file_agent",
         return_json=True
     )
 

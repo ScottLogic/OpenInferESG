@@ -27,6 +27,7 @@ async def generate_suggestions() -> List[str]:
             "generate-message-suggestions", chat_history=chat_history, report_content=report_content
         ),
         user_prompt="Give me 5 suggestions.",
+        agent="suggestions",
         return_json=True
     )
     try:
