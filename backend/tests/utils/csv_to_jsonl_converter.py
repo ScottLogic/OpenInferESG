@@ -12,7 +12,7 @@ def convert_csv_to_jsonl():
     parent_dir = os.path.dirname(script_dir)
     input_csv_path = os.path.join(parent_dir, 'files', 'question_and_groundtruth_dataset.csv')
     output_jsonl_path = os.path.join(parent_dir, 'files', 'ragas_evaluation_dataset.jsonl')
-    
+
     # Create the JSONL file
     with open(input_csv_path, 'r', encoding='utf-8-sig') as csv_file, \
          open(output_jsonl_path, 'w', encoding='utf-8') as jsonl_file:
