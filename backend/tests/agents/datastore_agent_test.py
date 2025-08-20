@@ -46,6 +46,7 @@ async def test_generate_query_success(mock_load_prompt, mock_publish_log_info,
         model,
         "generate cypher query prompt",
         "details to create cypher query prompt",
+        agent="datastore",
         return_json=True
     )
     mock_execute_query.assert_called_once_with("MATCH (n) RETURN n")
@@ -90,6 +91,7 @@ async def test_generate_query_failure(mock_load_prompt, mock_publish_log_info,
         model,
         "generate cypher query prompt",
         "details to create cypher query prompt",
+        agent="datastore",
         return_json=True
     )
     mock_publish_log_info.assert_not_called()

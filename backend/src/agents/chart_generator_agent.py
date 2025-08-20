@@ -17,10 +17,7 @@ engine = PromptEngine()
 
 
 async def generate_chart(
-    question_intent,
-    data_provided,
-    question_params,
-    llm: LLM, model
+    question_intent, data_provided, question_params, llm: LLM, model
 ) -> ToolActionSuccess | ToolActionFailure:
     details_to_generate_chart_code = engine.load_prompt(
         "details-to-generate-chart-code",
@@ -31,7 +28,9 @@ async def generate_chart(
     )
 
     generate_chart_code_prompt = engine.load_prompt("generate-chart-code")
-    generated_code = await llm.chat(model, generate_chart_code_prompt, details_to_generate_chart_code)
+    generated_code = await llm.chat(
+        model, generate_chart_code_prompt, details_to_generate_chart_code, agent="chart-generator"
+    )
     sanitised_script = sanitise_script(generated_code)
 
     try:
@@ -81,16 +80,12 @@ def sanitise_script(script: str) -> str:
         "question_params": Parameter(
             type="string",
             description="The specific parameters required for the question to be answered with the question_intent, "
-                        "extracted from data_provided",
+            "extracted from data_provided",
         ),
     },
 )
 async def generate_code_chart(
-    question_intent,
-    data_provided,
-    question_params,
-    llm: LLM,
-    model
+    question_intent, data_provided, question_params, llm: LLM, model
 ) -> ToolActionSuccess | ToolActionFailure:
     return await generate_chart(question_intent, data_provided, question_params, llm, model)
 

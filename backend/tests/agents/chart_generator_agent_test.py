@@ -53,7 +53,8 @@ plt.plot([1, 2, 3], [4, 5, 6])
         llm.chat.assert_called_once_with(
             model,
             "generate chart code prompt",
-            "details to create chart code prompt"
+            "details to create chart code prompt",
+            agent="chart-generator"
         )
         mock_sanitise_script.assert_called_once_with("generated code")
 
@@ -90,7 +91,8 @@ import matplotlib.pyplot as plt
         llm.chat.assert_called_once_with(
             model,
             "generate chart code prompt",
-            "details to create chart code prompt"
+            "details to create chart code prompt",
+            agent="chart-generator"
         )
 
         mock_sanitise_script.assert_called_once_with("generated code")

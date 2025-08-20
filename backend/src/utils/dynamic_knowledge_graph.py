@@ -21,6 +21,7 @@ async def generate_dynamic_knowledge_graph(csv_data: list[list[str]]) -> dict[st
         llm_model,  # type: ignore[reportArgumentType]
         system_prompt=engine.load_prompt("generate-knowledge-graph-model"),
         user_prompt=str(reduced_data_set),
+        agent="knowledge-graph",
         return_json=True
     )
 
@@ -34,6 +35,7 @@ async def generate_dynamic_knowledge_graph(csv_data: list[list[str]]) -> dict[st
             input_data=reduced_data_set,
             data_model=data_model
         ),
+        agent="knowledge-graph",
         return_json=True
     )
 
