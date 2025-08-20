@@ -20,7 +20,13 @@ os.environ["OPENAI_API_KEY"] = open_api_key
 
 client = AsyncOpenAI(api_key=open_api_key)
 
-filepath = r"C:\Users\afonseca\Downloads\report.md.txt"
+# Get document path from command line argument or environment variable
+if len(sys.argv) > 1:
+    filepath = sys.argv[1]
+elif os.getenv("DOCUMENT_PATH"):
+    filepath = os.getenv("DOCUMENT_PATH")
+else:
+    raise RuntimeError("Document path not specified. Please provide the path as a command line argument or set the DOCUMENT_PATH environment variable.")
 
 #Loads the document from a file
 def load_document(path):
