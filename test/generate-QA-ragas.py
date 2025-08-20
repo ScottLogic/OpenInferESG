@@ -60,38 +60,22 @@ def remove_duplicate_questions(qa_pairs, threshold=0.9):
     return cleaned_qa_pairs
 
 # Generate Q&A pairs from full context
+
+def load_prompt(path):
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
+
+PROMPT_PATH = os.path.join(os.path.dirname(__file__), "../prompts/generate_qa_prompt.txt")
+
+# Generate Q&A pairs from full context
 async def generate_qa_pairs(context, num_pairs=20):
-    prompt = f"""
-Given the following document context, generate {num_pairs} unique question and answer pairs.
-
-Rules:
-- Question: [question from document content] 
-- Answer: [exact answer from document or "I'm sorry, I cannot answer the question"]
-- Understand the context and generate content accordingly.
-- Ensure questions are drawn from different sections of the document.
-- Keep questions at a reasonable length.
-- Include both simple and complex questions that require reasoning.
-- Do not hallucinate or make things up.
-- If the question cannot be answered using the content, return: "I'm sorry, I cannot answer the question".
-- Do not duplicate questions or answers.
-
-Return ONLY in JSON format as a list of objects:
-[
-  {{"question": "...", "answer": "..."}},
-  ...
-]
-
-Context:
-\"\"\"
-{context}
-\"\"\"
-"""
+    prompt_template = load_prompt(PROMPT_PATH)
+    prompt = prompt_template.format(context=context, num_pairs=num_pairs)
     response = await client.chat.completions.create(
         model="gpt-4",
         messages=[{"role": "user", "content": prompt}],
-        temperature=0.7,
+        temperature=0,
     )
-
     content = response.choices[0].message.content
     try:
         import json
