@@ -86,6 +86,7 @@ async def summarise_content(search_query, contents, llm, model) -> str | None:
         model,
         engine.load_prompt("web_page_scrape_summary_system_prompt", question=search_query, content=contents),
         "",
+        agent="web-scraper",
         return_json=True
     ))
     if "relevant" in response and response["relevant"].lower() == "true" and "summary" in response:
