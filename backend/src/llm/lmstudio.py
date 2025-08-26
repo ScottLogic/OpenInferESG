@@ -46,9 +46,11 @@ class LMStudio(LLM):
                 system_prompt + "\nIMPORTANT: You must respond with valid JSON only. Format your entire response as a "
                 "proper JSON object."
             )
+        
+        lmstudio_model = model or config.lmstudio_model or "local-model"
 
         payload = {
-            "model": model or config.lmstudio_model or "local-model",
+            "model": lmstudio_model,
             "messages": [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}],
             "temperature": 0,
             "max_tokens": config.lmstudio_max_tokens,  # Get token limit from config
@@ -116,7 +118,7 @@ class LMStudio(LLM):
 
                         # Log to CSV
                     self.record_usage(
-                        model="local_model",
+                        model=lmstudio_model,
                         provider="lmstudio",
                         agent=agent,
                         token_usage=token_info,
