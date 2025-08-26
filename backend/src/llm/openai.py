@@ -2,6 +2,7 @@ import asyncio
 import logging
 import time
 
+from src.utils.power_usage import calculate_power_usage
 from src.utils import Config
 from src.llm.llm import LLM, LLMFile, LLMFileUploadManager
 from src.session.llm_file_upload import (
@@ -61,11 +62,14 @@ class OpenAI(LLM):
                     "total_tokens": "N/A",
                 }
 
-            self.record_usage(model=model, provider="openai", agent=agent, token_usage=token_info, duration=duration)
+            power_usage = calculate_power_usage(duration, model)
+
+            self.record_usage(model=model, provider="openai", agent=agent, token_usage=token_info, duration=duration, power_usage=power_usage)
 
             logger.info(f"OpenAI response: Finish reason: {response.choices[0].finish_reason}, Content: {content}")
             logger.info(f"Response Usage: {response.usage}")
             logger.debug(f"Token data: {response.usage}, Duration: {duration:.2f}s")
+            logger.debug(f"OpenAI power usage: {power_usage:.2f} Wh")
 
             if not content:
                 logger.error("Call to Open API failed: message content is None")

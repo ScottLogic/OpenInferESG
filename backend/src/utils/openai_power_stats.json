@@ -1,0 +1,22 @@
+{
+    "gpt-4o": {
+        "gpu_power": 10.20,
+        "non_gpu_power": 1.6,
+        "pue": 1.12,
+        "assigned_gpus": 8,
+        "gpus_per_node": 8,
+        "batch_size": 8,
+        "non_gpu_draw": 0.5,
+        "gpu_draw": 0.45
+    },
+    "gpt-4o-mini": {
+        "gpu_power": 6.5,
+        "non_gpu_power": 1.6,
+        "pue": 1.12,
+        "assigned_gpus": 4,
+        "gpus_per_node": 8,
+        "batch_size": 8,
+        "non_gpu_draw": 0.5,
+        "gpu_draw": 1 
+    }
+}
