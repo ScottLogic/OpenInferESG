@@ -11,7 +11,7 @@
     },
     "gpt-4o-mini": {
         "gpu_power": 6.5,
-        "non_gpu_power": 1.6,
+        "non_gpu_power": 0.975,
         "pue": 1.12,
         "assigned_gpus": 4,
         "gpus_per_node": 8,
