@@ -60,7 +60,14 @@ class ConsoleUsageRecorder(UsageRecorder):
         power_usage: Optional[float] = None,
     ):
         logger.info(
-            {"model": model, "provider": provider, "agent": agent, "token_usage": token_usage, "duration": duration, "power_usage": power_usage}
+            {
+                "model": model,
+                "provider": provider,
+                "agent": agent,
+                "token_usage": token_usage,
+                "duration": duration,
+                "power_usage": power_usage
+            }
         )
 
 

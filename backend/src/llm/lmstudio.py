@@ -46,7 +46,7 @@ class LMStudio(LLM):
                 system_prompt + "\nIMPORTANT: You must respond with valid JSON only. Format your entire response as a "
                 "proper JSON object."
             )
-        
+
         lmstudio_model = model or config.lmstudio_model or "local-model"
 
         payload = {

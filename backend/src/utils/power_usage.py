@@ -3,6 +3,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# JSON_FILE_NAME = "./openai_model_specs.json"
 JSON_FILE_NAME = "/backend/src/utils/openai_model_specs.json"
 
 openai_power_stats = json.load(open(JSON_FILE_NAME))

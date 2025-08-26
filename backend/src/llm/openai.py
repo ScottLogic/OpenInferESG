@@ -64,7 +64,14 @@ class OpenAI(LLM):
 
             power_usage = calculate_power_usage(duration, model)
 
-            self.record_usage(model=model, provider="openai", agent=agent, token_usage=token_info, duration=duration, power_usage=power_usage)
+            self.record_usage(
+                model=model,
+                provider="openai",
+                agent=agent,
+                token_usage=token_info,
+                duration=duration,
+                power_usage=power_usage
+            )
 
             logger.info(f"OpenAI response: Finish reason: {response.choices[0].finish_reason}, Content: {content}")
             logger.info(f"Response Usage: {response.usage}")
