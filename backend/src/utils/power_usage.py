@@ -1,14 +1,15 @@
 import json
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
-# JSON_FILE_NAME = "./openai_model_specs.json"
-JSON_FILE_NAME = "/backend/src/utils/openai_model_specs.json"
-
-openai_power_stats = json.load(open(JSON_FILE_NAME))
+JSON_FILE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "openai_model_specs.json"))
+openai_power_stats = None
+model_power_dict = None
 
 def calculate_model_power(model: str) -> float | None:
+    openai_power_stats = json.load(open(JSON_FILE_PATH))
     model_stats = openai_power_stats[model]
     if model_stats is None:
         return None
@@ -28,11 +29,12 @@ def calculate_model_power(model: str) -> float | None:
 
     return effective_power
 
-
-model_power_dict = dict(map(lambda key: (key, calculate_model_power(key)), openai_power_stats.keys()))
-
-
 def calculate_power_usage(duration_seconds: float, model: str) -> float | None:
+    global model_power_dict
+    if model_power_dict is None:
+        openai_power_stats = json.load(open(JSON_FILE_PATH))
+        model_power_dict = dict(map(lambda key: (key, calculate_model_power(key)), openai_power_stats.keys()))
+
     model_power = model_power_dict.get(model)
     if model_power is None:
         logger.warning(f"Power details not found for model: {model}")
