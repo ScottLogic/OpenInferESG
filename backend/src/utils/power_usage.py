@@ -8,9 +8,8 @@ JSON_FILE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "openai
 openai_power_stats = None
 model_power_dict = None
 
-def calculate_model_power(model: str) -> float | None:
-    openai_power_stats = json.load(open(JSON_FILE_PATH))
-    model_stats = openai_power_stats[model]
+def calculate_model_power(model: str, openai_power_stats: dict[str, dict]) -> float | None:
+    model_stats = openai_power_stats.get(model)
     if model_stats is None:
         return None
 
@@ -33,7 +32,7 @@ def calculate_power_usage(duration_seconds: float, model: str) -> float | None:
     global model_power_dict
     if model_power_dict is None:
         openai_power_stats = json.load(open(JSON_FILE_PATH))
-        model_power_dict = dict(map(lambda key: (key, calculate_model_power(key)), openai_power_stats.keys()))
+        model_power_dict = dict(map(lambda key: (key, calculate_model_power(key, openai_power_stats)), openai_power_stats.keys()))
 
     model_power = model_power_dict.get(model)
     if model_power is None:
