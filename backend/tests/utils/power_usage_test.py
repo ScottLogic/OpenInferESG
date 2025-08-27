@@ -52,4 +52,3 @@ def test_calculate_power_usage_uses_cached_model_power_dict(monkeypatch, mock_op
     power_usage.model_power_dict = {"test-model": 0.0153}
     result = power_usage.calculate_power_usage(3600, "test-model")
     assert pytest.approx(result, 0.01) == 15.3
-    
