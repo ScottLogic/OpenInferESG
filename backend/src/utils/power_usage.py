@@ -5,6 +5,9 @@ import os
 logger = logging.getLogger(__name__)
 
 JSON_FILE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "openai_model_specs.json"))
+if not os.path.exists(JSON_FILE_PATH):
+    logger.warning("Unable to look up power usage statistics... continuing")
+
 openai_power_stats = None
 model_power_dict = None
 
@@ -31,7 +34,11 @@ def calculate_model_power(model: str, openai_power_stats: dict[str, dict]) -> fl
 def calculate_power_usage(duration_seconds: float, model: str) -> float | None:
     global model_power_dict
     if model_power_dict is None:
-        openai_power_stats = json.load(open(JSON_FILE_PATH))
+        try:
+            openai_power_stats = json.load(open(JSON_FILE_PATH))
+        except Exception as e:
+            logger.error(f"Error loading open ai model file: {e}")
+            return None
         model_power_dict = dict(
             map(lambda key: (key, calculate_model_power(key, openai_power_stats)), openai_power_stats.keys())
         )
