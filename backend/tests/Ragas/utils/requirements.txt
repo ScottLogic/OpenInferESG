@@ -1,0 +1,11 @@
+# RAGAS with newer versions that are compatible with each other
+ragas==0.3.0  # Match the version in backend/requirements.txt
+langchain==0.3.27 # Match the version in backend/requirements.txt
+langchain-openai==0.3.28 # Match the version in backend/requirements.txt
+openai==1.99.1 # Match the version in backend/requirements.txt
+
+# Supporting packages
+requests>=2.31.0
+python-dotenv>=1.0.0
+pandas>=2.0.0
+nest_asyncio>=1.5.6
