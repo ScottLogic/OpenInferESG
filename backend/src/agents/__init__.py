@@ -40,7 +40,7 @@ def get_materiality_agent() -> MaterialityAgent:
 
 
 def get_generalist_agent() -> GeneralistAgent:
-    return GeneralistAgent(config.intent_agent_llm, config.intent_agent_model)
+    return GeneralistAgent(config.generalist_agent_llm, config.generalist_agent_model)
 
 
 def get_chat_agents() -> List[ChatAgent]:

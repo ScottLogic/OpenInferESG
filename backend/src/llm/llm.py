@@ -45,8 +45,10 @@ class LLM(ABC, metaclass=LLMMeta):
         self,
         model: str,
         provider: str,
-        token_usage: Optional[Union[Dict, str]],
-        duration: float = 0.0
+        agent: str,
+        token_usage: Optional[Union[Dict, str]] = None,
+        duration: float = 0.0,
+        power_usage: Optional[float] = None,
     ) -> None:
         """
         Record usage information
@@ -54,20 +56,28 @@ class LLM(ABC, metaclass=LLMMeta):
         Args:
             model: The model name used for the request
             provider: The provider name used for the request
+            agent: The name of the agent making the call
             token_usage: Dictionary containing token usage information
             duration: Time taken for the request in seconds
+            power_usage: Power usage of the request in watt-hours
         """
-        self.usage_recorder.record_activity(model, provider, token_usage, duration)
+        self.usage_recorder.record_activity(model, provider, agent, token_usage, duration, power_usage)
 
     @abstractmethod
     def chat(
-        self, model: str, system_prompt: str, user_prompt: str, return_json: bool = False
+        self, model: str, system_prompt: str, user_prompt: str, agent: str, return_json: bool = False
     ) -> Coroutine[Any, Any, str]:
         pass
 
     @abstractmethod
     def chat_with_file(
-        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json: bool = False
+        self,
+        model: str,
+        system_prompt: str,
+        user_prompt: str,
+        files: list[LLMFile],
+        agent: str,
+        return_json: bool = False,
     ) -> Coroutine:
         pass
 

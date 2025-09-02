@@ -30,6 +30,7 @@ class Config(object):
         self.router_llm = None
         self.suggestions_llm = None
         self.dynamic_knowledge_graph_llm = None
+        self.generalist_agent_llm = None
         self.validator_agent_model = None
         self.intent_agent_model = None
         self.answer_agent_model = None
@@ -43,6 +44,7 @@ class Config(object):
         self.redis_host = default_redis_host
         self.suggestions_model = None
         self.dynamic_knowledge_graph_model = None
+        self.generalist_agent_model = None
         self.allowed_chat_agents = None
         self.llm_usage_log_filename = "llm_usage.csv"
         self.load_env()
@@ -77,6 +79,7 @@ class Config(object):
             self.router_llm = os.getenv("ROUTER_LLM")
             self.suggestions_llm = os.getenv("SUGGESTIONS_LLM")
             self.dynamic_knowledge_graph_llm = os.getenv("DYNAMIC_KNOWLEDGE_GRAPH_LLM")
+            self.generalist_agent_llm = os.getenv("GENERALIST_AGENT_LLM")
             self.file_agent_llm = os.getenv("FILE_AGENT_LLM")
             self.answer_agent_model = os.getenv("ANSWER_AGENT_MODEL")
             self.intent_agent_model = os.getenv("INTENT_AGENT_MODEL")
@@ -90,6 +93,7 @@ class Config(object):
             self.redis_host = os.getenv("REDIS_HOST", default_redis_host)
             self.suggestions_model = os.getenv("SUGGESTIONS_MODEL")
             self.dynamic_knowledge_graph_model = os.getenv("DYNAMIC_KNOWLEDGE_GRAPH_MODEL")
+            self.generalist_agent_model = os.getenv("GENERALIST_AGENT_MODEL")
             self.file_agent_model = os.getenv("FILE_AGENT_MODEL")
             self.llm_usage_log_filename = os.getenv("LLM_USAGE_LOG_FILENAME", "llm_usage.csv")
             self.allowed_chat_agents = (

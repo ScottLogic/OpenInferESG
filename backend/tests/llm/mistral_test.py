@@ -33,7 +33,7 @@ async def test_chat_content_string_returns_string(mocker):
     mistral.client = mocker.AsyncMock(return_value=mock_client)
     mistral.client.chat.complete_async.return_value = create_mock_chat_response(content_response)
 
-    response = await mistral.chat(mock_model, system_prompt, user_prompt)
+    response = await mistral.chat(mock_model, system_prompt, user_prompt, "test-agent")
 
     assert response == content_response
 
@@ -42,7 +42,7 @@ async def test_chat_content_string_returns_string(mocker):
 async def test_chat_calls_client_chat(mocker):
     mistral.client = mocker.AsyncMock(return_value=mock_client)
 
-    await mistral.chat(mock_model, system_prompt, user_prompt)
+    await mistral.chat(mock_model, system_prompt, user_prompt, "test-agent")
 
     expected_messages = [
         SystemMessage(content=system_prompt),
@@ -58,7 +58,7 @@ async def test_chat_response_none_logs_error(mocker, caplog):
     mistral.client = mocker.AsyncMock(return_value=mock_client)
     mistral.client.chat.complete_async.return_value = None
 
-    response = await mistral.chat(mock_model, system_prompt, user_prompt)
+    response = await mistral.chat(mock_model, system_prompt, user_prompt, "test-agent")
 
     assert response == "An error occurred while processing the request."
     assert (
@@ -75,7 +75,7 @@ async def test_chat_response_choices_none_logs_error(mocker, caplog):
     chat_response.choices = []
     mistral.client.chat.complete_async.return_value = chat_response
 
-    response = await mistral.chat(mock_model, system_prompt, user_prompt)
+    response = await mistral.chat(mock_model, system_prompt, user_prompt, "test-agent")
 
     assert response == "An error occurred while processing the request."
     assert (
@@ -92,7 +92,7 @@ async def test_chat_response_choices_empty_logs_error(mocker, caplog):
     chat_response.choices = []
     mistral.client.chat.complete_async.return_value = chat_response
 
-    response = await mistral.chat(mock_model, system_prompt, user_prompt)
+    response = await mistral.chat(mock_model, system_prompt, user_prompt, "test-agent")
 
     assert response == "An error occurred while processing the request."
     assert (
@@ -110,7 +110,7 @@ async def test_chat_response_choices_message_content_none_logs_error(mocker, cap
     chat_response.choices[0].message.content = None
     mistral.client.chat.complete_async.return_value = chat_response
 
-    response = await mistral.chat(mock_model, system_prompt, user_prompt)
+    response = await mistral.chat(mock_model, system_prompt, user_prompt, "test-agent")
 
     assert response == "An error occurred while processing the request."
     assert (
@@ -128,7 +128,7 @@ async def test_chat_response_choices_message_content_unset_logs_error(mocker, ca
     chat_response.choices[0].message.content = UNSET
     mistral.client.chat.complete_async.return_value = chat_response
 
-    response = await mistral.chat(mock_model, system_prompt, user_prompt)
+    response = await mistral.chat(mock_model, system_prompt, user_prompt, "test-agent")
 
     assert response == "An error occurred while processing the request."
     assert (

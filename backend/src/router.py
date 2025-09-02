@@ -56,6 +56,7 @@ async def select_tool_for_question(
             agent_failure_message=create_agent_failure_message(chat_agent_failures, excluded_agents),
             question=task
         ),
+        agent="router",
         return_json=True
     )
 

@@ -14,4 +14,5 @@ class AnswerAgent(Agent):
             self.model,
             engine.load_prompt("create-answer-system-prompt"),
             engine.load_prompt("create-answer-user-prompt", question=utterance, final_scratchpad=final_scratchpad),
+            agent="answer"
         )

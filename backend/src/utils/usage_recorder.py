@@ -14,10 +14,12 @@ CSV_HEADERS = [
     "timestamp",
     "model",
     "provider",
+    "agent",
     "prompt_tokens",
     "completion_tokens",
     "total_tokens",
     "duration_seconds",
+    "power_usage_wh",
 ]
 
 # Ensure the logs directory exists
@@ -36,14 +38,15 @@ class UsageRecorder(ABC):
         self,
         model: str,
         provider: str,
+        agent: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
+        power_usage: Optional[float] = None,
     ):
         pass
 
 
 class ConsoleUsageRecorder(UsageRecorder):
-
     def __init__(self):
         logger.info("Usage will be logged to the console")
 
@@ -51,14 +54,24 @@ class ConsoleUsageRecorder(UsageRecorder):
         self,
         model: str,
         provider: str,
+        agent: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
+        power_usage: Optional[float] = None,
     ):
-        logger.info({"model": model, "provider": provider, "token_usage": token_usage, "duration": duration})
+        logger.info(
+            {
+                "model": model,
+                "provider": provider,
+                "agent": agent,
+                "token_usage": token_usage,
+                "duration": duration,
+                "power_usage": power_usage
+            }
+        )
 
 
 class CSVUsageRecorder(UsageRecorder):
-
     def __init__(self):
         # Get the configured CSV filename, or use default if not set
         csv_filename = config.llm_usage_log_filename or DEFAULT_CSV_FILENAME
@@ -70,8 +83,10 @@ class CSVUsageRecorder(UsageRecorder):
         self,
         model: str,
         provider: str,
+        agent: str,
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
+        power_usage: Optional[float] = None,
     ) -> None:
         """
         Log LLM usage information to a CSV file.
@@ -79,10 +94,13 @@ class CSVUsageRecorder(UsageRecorder):
         Args:
             model: The model name used for the request
             provider: The provider name used for the request
+            agent: The name of the agent making the request
             token_usage: Dictionary containing token usage information
             duration: Time taken for the request in seconds
+            power_usage: Power usage of the request in watt-hours
         """
         timestamp = datetime.datetime.now().isoformat()
+        power_usage_wh = f"{power_usage:.4f}" if power_usage is not None else "N/A"
 
         # Extract token information with fallback for missing data
         if isinstance(token_usage, dict):
@@ -110,10 +128,12 @@ class CSVUsageRecorder(UsageRecorder):
                     timestamp,
                     model,
                     provider,
+                    agent,
                     prompt_tokens,
                     completion_tokens,
                     total_tokens,
                     f"{duration:.2f}",
+                    power_usage_wh,
                 ]
             )
 

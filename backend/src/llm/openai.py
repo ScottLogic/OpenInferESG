@@ -2,6 +2,7 @@ import asyncio
 import logging
 import time
 
+from src.utils.power_usage import calculate_power_usage
 from src.utils import Config
 from src.llm.llm import LLM, LLMFile, LLMFileUploadManager
 from src.session.llm_file_upload import (
@@ -25,7 +26,7 @@ def remove_citations(message: Text):
 
 
 class OpenAI(LLM):
-    async def chat(self, model, system_prompt: str, user_prompt: str, return_json=False) -> str:
+    async def chat(self, model, system_prompt: str, user_prompt: str, agent: str, return_json=False) -> str:
         logger.debug(
             "##### Called open ai chat ... llm. Waiting on response model with prompt {0}.".format(
                 str([system_prompt, user_prompt])
@@ -61,11 +62,21 @@ class OpenAI(LLM):
                     "total_tokens": "N/A",
                 }
 
-            self.record_usage(model=model, provider="openai", token_usage=token_info, duration=duration)
+            power_usage = calculate_power_usage(duration, model)
+
+            self.record_usage(
+                model=model,
+                provider="openai",
+                agent=agent,
+                token_usage=token_info,
+                duration=duration,
+                power_usage=power_usage
+            )
 
             logger.info(f"OpenAI response: Finish reason: {response.choices[0].finish_reason}, Content: {content}")
             logger.info(f"Response Usage: {response.usage}")
             logger.debug(f"Token data: {response.usage}, Duration: {duration:.2f}s")
+            logger.debug(f"OpenAI power usage: {power_usage:.2f} Wh")
 
             if not content:
                 logger.error("Call to Open API failed: message content is None")
@@ -77,7 +88,7 @@ class OpenAI(LLM):
             return "An error occurred while processing the request."
 
     async def chat_with_file(
-        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], return_json=False
+        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], agent: str, return_json=False
     ) -> str:
         client = AsyncOpenAI(api_key=config.openai_key)
         start_time = time.time()
@@ -138,7 +149,7 @@ class OpenAI(LLM):
 
 
             # Log to CSV file using base class method
-        self.record_usage(model=model, provider="openai-file", token_usage=token_info, duration=duration)
+        self.record_usage(model=model, provider="openai-file", agent=agent, token_usage=token_info, duration=duration)
 
         logger.info(f"OpenAI file-based response: Message length: {len(message) if message else 0}")
         logger.debug(f"Token usage: {token_info}, Duration: {duration:.2f}s")
