@@ -135,7 +135,9 @@ class OpenInferESGClient:
         print("Timed out waiting for report generation")
         return False
 
-    def get_answer(self, question: str, timeout: int = 120, retries: int = 3) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
+    def get_answer(
+        self, question: str, timeout: int = 120, retries: int = 3
+    ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
         """
         Get an answer from the OpenInferESG API
 

@@ -4,11 +4,8 @@ Main pipeline for running Ragas evaluations with OpenInferESG.
 import os
 import sys
 import time
-import json
-from typing import List, Dict, Any, Optional
-from pathlib import Path
+from typing import List, Dict, Optional
 import importlib.util
-import importlib
 
 from modules.api_client import OpenInferESGClient
 from modules.data_utils import (
@@ -60,7 +57,10 @@ def collect_api_responses(
         end_idx = min(start_idx + batch_size, len(records))
         batch_records = records[start_idx:end_idx]
 
-        print(f"\nProcessing batch {batch_num + 1}/{num_batches} (questions {start_idx + 1}-{end_idx} of {len(records)})...")
+        print(
+            f"\nProcessing batch {batch_num + 1}/{num_batches} "
+            f"(questions {start_idx + 1}-{end_idx} of {len(records)})..."
+        )
 
         # After each batch (except the first), take a longer break
         if batch_num > 0:

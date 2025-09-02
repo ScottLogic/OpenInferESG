@@ -4,7 +4,9 @@ Data processing utilities for Ragas evaluation pipeline.
 import json
 from typing import Dict, List, Any, Optional
 
-def create_simplified_record(question: str, api_response: Optional[Dict[str, Any]], record: Dict[str, Any]) -> Dict[str, Any]:
+def create_simplified_record(
+    question: str, api_response: Optional[Dict[str, Any]], record: Dict[str, Any]
+) -> Dict[str, Any]:
     """
     Create a simplified record with only the required fields
 
