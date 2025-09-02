@@ -5,7 +5,6 @@ import os
 import sys
 import time
 from typing import List, Dict, Optional
-import importlib.util
 
 from modules.api_client import OpenInferESGClient
 from modules.data_utils import (
