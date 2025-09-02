@@ -134,6 +134,7 @@ backend/tests/files/
 backend/tests/Ragas/files/*
 # Only include the specific CSV file we want to track
 !backend/tests/Ragas/files/question_and_groundtruth_dataset.csv
+!backend/tests/files/question_and_groundtruth_dataset.csv
 env/
 venv/
 ENV/
