@@ -139,7 +139,7 @@ All output files will be stored inside the Files folder within the Ragas folder:
 
 - `ragas_evaluation_dataset.jsonl`: Initial JSONL file with questions and references
 - `ragas_evaluation_with_responses.jsonl`: Enriched JSONL with API responses
-- `evaluation_results.csv`: Evaluation metrics for each question and average scores
+- `evaluation_results.csv`: Evaluation metrics for each question and average scores (will be generated after implementation of the next evaluation step of calling Ragas to generate metrics)
 
 ## Troubleshooting
 
