@@ -46,7 +46,7 @@ if __name__ == "__main__":
         print("  --check/-c      - Just check if the backend is running")
         print("\nExamples:")
         print("  python enhanced_run_evaluation_pipeline.py report.pdf 5")
-        print("  python enhanced_run_evaluation_pipeline.py report.pd")
+        print("  python enhanced_run_evaluation_pipeline.py report.pdf")
         print("  python enhanced_run_evaluation_pipeline.py --check")
         print("\nChecking if backend is available:")
         check_backend_status()
