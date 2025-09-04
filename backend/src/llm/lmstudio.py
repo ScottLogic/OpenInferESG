@@ -21,7 +21,15 @@ class LMStudio(LLM):
     This implementation uses aiohttp to directly call LM Studio's API endpoints.
     """
 
-    async def chat(self, model, system_prompt: str, user_prompt: str, agent: str, return_json=False, timeout: ClientTimeout | None = None) -> str:
+    async def chat(
+            self,
+            model,
+            system_prompt: str,
+            user_prompt: str,
+            agent: str,
+            return_json=False,
+            timeout: ClientTimeout | None = None
+    ) -> str:
         logger.debug(
             "Called LMStudio llm. Waiting on response with prompt {0}.".format(str([system_prompt, user_prompt]))
         )
@@ -183,7 +191,14 @@ class LMStudio(LLM):
             return f"Error: The LLM returned invalid JSON format: {content[:100]}..."
 
     async def chat_with_file(
-        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], agent: str, return_json=False, timeout: ClientTimeout | None = None
+        self,
+        model: str,
+        system_prompt: str,
+        user_prompt: str,
+        files: list[LLMFile],
+        agent: str,
+        return_json=False,
+        timeout: ClientTimeout | None = None
     ) -> str:
         try:
             file_contents = []

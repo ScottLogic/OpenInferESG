@@ -90,7 +90,7 @@ class ReportAgent(Agent):
             files=[file],
             agent="report",
             timeout=timeout
-        ) 
+        )
 
         categories = {}
 
@@ -110,7 +110,7 @@ class ReportAgent(Agent):
                     "report_heading": question["report_heading"],
                     "task": task
                 })
-        
+
         logger.info("Processing materiality section")
         materiality = await self.llm.chat_with_file(
             self.model,
@@ -144,7 +144,10 @@ class ReportAgent(Agent):
         return f"{report}\n\n{report_conclusion}"
 
     async def get_company_name(self, file: LLMFile, create_local_report: bool) -> str:
-        system_prompt_file = "find-company-name-from-file-system-prompt-name-only" if create_local_report else "find-company-name-from-file-system-prompt"
+        system_prompt_file = (
+            "find-company-name-from-file-system-prompt-name-only" if create_local_report
+            else "find-company-name-from-file-system-prompt"
+        )
         response = await self.llm.chat_with_file(
             self.model,
             system_prompt=engine.load_prompt(system_prompt_file),

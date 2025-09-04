@@ -88,7 +88,14 @@ class OpenAI(LLM):
             return "An error occurred while processing the request."
 
     async def chat_with_file(
-        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], agent: str, return_json=False, timeout=None
+        self,
+        model: str,
+        system_prompt: str,
+        user_prompt: str,
+        files: list[LLMFile],
+        agent: str,
+        return_json=False,
+        timeout=None
     ) -> str:
         client = AsyncOpenAI(api_key=config.openai_key)
         start_time = time.time()

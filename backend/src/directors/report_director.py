@@ -45,7 +45,10 @@ async def create_report_from_file(file_contents: bytes, filename: str, file_id: 
 
     topics = await get_materiality_agent().list_material_topics_for_company(company_name)
 
-    report = await report_agent.create_local_report(file, topics) if create_local_report else await report_agent.create_report(file, topics)
+    report = (
+        await report_agent.create_local_report(file, topics) if create_local_report
+        else await report_agent.create_report(file, topics)
+    )
 
     report_response = ReportResponse(
         filename=filename,

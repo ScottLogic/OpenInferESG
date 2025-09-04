@@ -13,5 +13,6 @@ class MockLLM(LLM):
         files: list[LLMFile],
         agent: str,
         return_json: bool = False,
+        timeout=None,
     ) -> str:
         return "mocked response"
