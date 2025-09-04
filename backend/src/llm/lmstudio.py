@@ -8,6 +8,7 @@ from src.utils import Config
 from src.session.file_uploads import get_file_content_for_filename, set_file_content_for_filename
 from src.utils.file_utils import extract_text
 from .llm import LLM, LLMFile
+from aiohttp import ClientTimeout
 
 logger = logging.getLogger(__name__)
 config = Config()
@@ -20,7 +21,7 @@ class LMStudio(LLM):
     This implementation uses aiohttp to directly call LM Studio's API endpoints.
     """
 
-    async def chat(self, model, system_prompt: str, user_prompt: str, agent: str, return_json=False) -> str:
+    async def chat(self, model, system_prompt: str, user_prompt: str, agent: str, return_json=False, timeout: ClientTimeout | None = None) -> str:
         logger.debug(
             "Called LMStudio llm. Waiting on response with prompt {0}.".format(str([system_prompt, user_prompt]))
         )
@@ -63,7 +64,7 @@ class LMStudio(LLM):
         start_time = time.time()
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.post(url, json=payload, headers=headers) as response:
+                async with session.post(url, json=payload, headers=headers, timeout=timeout) as response:
                     response_text = await response.text()
                     duration = time.time() - start_time
                     logger.debug(f"LM Studio API raw response: {response_text}")
@@ -182,7 +183,7 @@ class LMStudio(LLM):
             return f"Error: The LLM returned invalid JSON format: {content[:100]}..."
 
     async def chat_with_file(
-        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], agent: str, return_json=False
+        self, model: str, system_prompt: str, user_prompt: str, files: list[LLMFile], agent: str, return_json=False, timeout: ClientTimeout | None = None
     ) -> str:
         try:
             file_contents = []
@@ -202,7 +203,7 @@ class LMStudio(LLM):
             user_prompt += combined_content
 
             logger.info(f"Sending request with {len(files)} files attached to the prompt")
-            result = await self.chat(model, system_prompt, user_prompt, agent, return_json)
+            result = await self.chat(model, system_prompt, user_prompt, agent, return_json, timeout=timeout)
 
             return result
         except Exception as file_error:

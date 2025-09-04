@@ -3,6 +3,8 @@ from dataclasses import dataclass
 from os import PathLike
 from typing import Any, Coroutine, Dict, Optional, Union
 
+from aiohttp import ClientTimeout
+
 from src.utils.usage_recorder import UsageRecorder, CSVUsageRecorder
 
 from .count_calls import count_calls
@@ -78,6 +80,7 @@ class LLM(ABC, metaclass=LLMMeta):
         files: list[LLMFile],
         agent: str,
         return_json: bool = False,
+        timeout: ClientTimeout | None = None
     ) -> Coroutine:
         pass
 
