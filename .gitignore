@@ -127,8 +127,13 @@ celerybeat.pid
 # Environments
 .env
 .venv
-files
-# Exception for question dataset CSV file
+# Ignore files directories except for specific files
+files/
+backend/tests/files/
+# Exclude Ragas files but allow exceptions
+backend/tests/Ragas/files/*
+# Only include the specific CSV file we want to track
+!backend/tests/Ragas/files/question_and_groundtruth_dataset.csv
 !backend/tests/files/question_and_groundtruth_dataset.csv
 env/
 venv/

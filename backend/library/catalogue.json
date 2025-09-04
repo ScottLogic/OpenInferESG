@@ -1,5 +1,12 @@
 {
   "library": {
+    "SLIR": [
+      {
+        "name": "ScottLogicEnvironmentalImpactReport2024.pdf",
+        "sector-label": "Scott Logic",
+        "esg-labels": ["Environment", "Social", "Governance"]
+      }
+    ],
     "TFND": [
       {
         "name": "Additional-Sector-Guidance-Aquaculture.pdf",
