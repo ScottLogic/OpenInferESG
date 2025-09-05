@@ -16,6 +16,16 @@ from src.utils.usage_recorder import ConsoleUsageRecorder
 class MockResponse:
     id: str
 
+@dataclass
+class MockUsage:
+    input_tokens: int
+    output_tokens: int
+    total_tokens: int
+
+@dataclass
+class MockResponsesResponse:
+    output_text: str
+    usage: MockUsage
 
 @dataclass
 class MockFileResponse:
@@ -28,50 +38,24 @@ class MockMessage:
     content: list[TextContentBlock]
 
 
-class MockListResponse:
-    data = [
-        MockMessage(
-            content=[
-                TextContentBlock(
-                    text=Text(
-                        annotations=[
-                            FileCitationAnnotation(
-                                file_citation=FileCitation(file_id="123"),
-                                text="【7†source】",
-                                end_index=1,
-                                start_index=2,
-                                type="file_citation",
-                            ),
-                            FileCitationAnnotation(
-                                file_citation=FileCitation(file_id="123"),
-                                text="【1:9†source】",
-                                end_index=1,
-                                start_index=2,
-                                type="file_citation",
-                            ),
-                        ],
-                        value="Response with quote【7†source】【1:9†source】",
-                    ),
-                    type="text",
-                )
-            ]
-        )
-    ]
-
-
 @pytest.mark.asyncio
 @patch("src.llm.openai.AsyncOpenAI")
-@patch("src.llm.openai.OpenAILLMFileUploadManager.upload_files")
-async def test_chat_with_file_removes_citations(upload_files_method, mock_async_openai):
-    upload_files_method.return_value = AsyncMock(return_value=["file_id_1"])
+@patch("src.llm.openai.OpenAILLMFileUploadManager.add_files_to_vector_store", new_callable=AsyncMock)
+@patch("src.llm.openai.OpenAILLMFileUploadManager.upload_files", new_callable=AsyncMock)
+async def test_chat_with_file_removes_citations(upload_files_method, add_files_to_vector_store_method, mock_async_openai):
+    upload_files_method.return_value = AsyncMock(return_value=[MockResponse("file_id_1")])
+    add_files_to_vector_store_method.return_value = AsyncMock(return_value=MockResponse("vector_store_id_1"))
 
     mock_instance = mock_async_openai.return_value
 
-    mock_instance.beta.assistants.create = AsyncMock(return_value=MockResponse(id="assistant-id"))
-    mock_instance.beta.threads.create = AsyncMock(return_value=MockResponse(id="thread-id"))
-    mock_instance.beta.threads.runs.create_and_poll = AsyncMock(return_value=MockResponse(id="run-id"))
-    mock_instance.beta.threads.messages.list = AsyncMock(return_value=MockListResponse())
-    mock_instance.beta.threads.delete = AsyncMock()
+    mock_instance.responses.create = AsyncMock(return_value=MockResponsesResponse(
+        output_text="Response with quote",
+        usage=MockUsage(
+            input_tokens=10,
+            output_tokens=5,
+            total_tokens=15
+        )
+    ))
 
     client = OpenAI(ConsoleUsageRecorder())
     response = await client.chat_with_file(
