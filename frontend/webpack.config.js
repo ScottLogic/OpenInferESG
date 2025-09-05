@@ -70,4 +70,8 @@ const config = {
   ],
 };
 
+devServer: {
+  hot: true
+}
+
 export default config;
