@@ -15,16 +15,19 @@ from src.utils.usage_recorder import ConsoleUsageRecorder
 class MockResponse:
     id: str
 
+
 @dataclass
 class MockUsage:
     input_tokens: int
     output_tokens: int
     total_tokens: int
 
+
 @dataclass
 class MockResponsesResponse:
     output_text: str
     usage: MockUsage
+
 
 @dataclass
 class MockFileResponse:
@@ -41,20 +44,19 @@ class MockMessage:
 @patch("src.llm.openai.AsyncOpenAI")
 @patch("src.llm.openai.OpenAILLMFileUploadManager.add_files_to_vector_store", new_callable=AsyncMock)
 @patch("src.llm.openai.OpenAILLMFileUploadManager.upload_files", new_callable=AsyncMock)
-async def test_chat_with_file_removes_citations(upload_files_method, add_files_to_vector_store_method, mock_async_openai):
+async def test_chat_with_file_removes_citations(
+    upload_files_method, add_files_to_vector_store_method, mock_async_openai
+):
     upload_files_method.return_value = AsyncMock(return_value=[MockResponse("file_id_1")])
     add_files_to_vector_store_method.return_value = AsyncMock(return_value=MockResponse("vector_store_id_1"))
 
     mock_instance = mock_async_openai.return_value
 
-    mock_instance.responses.create = AsyncMock(return_value=MockResponsesResponse(
-        output_text="Response with quote",
-        usage=MockUsage(
-            input_tokens=10,
-            output_tokens=5,
-            total_tokens=15
+    mock_instance.responses.create = AsyncMock(
+        return_value=MockResponsesResponse(
+            output_text="Response with quote", usage=MockUsage(input_tokens=10, output_tokens=5, total_tokens=15)
         )
-    ))
+    )
 
     client = OpenAI(ConsoleUsageRecorder())
     response = await client.chat_with_file(
@@ -62,6 +64,6 @@ async def test_chat_with_file_removes_citations(upload_files_method, add_files_t
         system_prompt="",
         user_prompt="",
         files=[LLMFile("filename", Path("./backend/library/AstraZeneca-Sustainability-Report-2023.pdf"))],
-        agent="test-agent"
+        agent="test-agent",
     )
     assert response == "Response with quote"
