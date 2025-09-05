@@ -71,7 +71,7 @@ const config = {
 };
 
 devServer: {
-  hot: true
+  hot: true;
 }
 
 export default config;
