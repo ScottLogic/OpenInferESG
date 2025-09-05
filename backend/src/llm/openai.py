@@ -70,7 +70,7 @@ class OpenAI(LLM):
                 agent=agent,
                 token_usage=token_info,
                 duration=duration,
-                power_usage=power_usage
+                power_usage=power_usage,
             )
 
             logger.info(f"OpenAI response: Finish reason: {response.choices[0].finish_reason}, Content: {content}")
@@ -95,49 +95,31 @@ class OpenAI(LLM):
 
         file_ids = await OpenAILLMFileUploadManager().upload_files(files)
 
-        file_assistant = await client.beta.assistants.create(
-            name="ESG Analyst",
-            instructions=system_prompt,
-            model=model,
-            temperature=0,
-            tools=[{"type": "file_search"}],
-            response_format={"type": "json_object"} if return_json else NOT_GIVEN,
-        )
+        vector_store_id = await OpenAILLMFileUploadManager().add_files_to_vector_store(file_ids)
 
-        thread = await client.beta.threads.create(
-            messages=[
+        response = await client.responses.create(
+            model=model,
+            tools=[{"type": "file_search", "vector_store_ids": [vector_store_id]}],
+            input=[
+                {"role": "system", "content": system_prompt},
                 {
                     "role": "user",
                     "content": user_prompt,
-                    "attachments": [{"file_id": file_id, "tools": [{"type": "file_search"}]} for file_id in file_ids],
-                }
-            ]
-        )
-
-        run = await client.beta.threads.runs.create_and_poll(
-            thread_id=thread.id,
-            assistant_id=file_assistant.id,
+                },
+            ],
             temperature=0,
-            response_format={"type": "json_object"} if return_json else NOT_GIVEN,
+            text={"format": {"type": "json_object"}} if return_json else NOT_GIVEN,
         )
 
-        messages = await client.beta.threads.messages.list(thread_id=thread.id, run_id=run.id)
-
-        if isinstance(messages.data[0].content[0], TextContentBlock):
-            message = remove_citations(messages.data[0].content[0].text)
-        else:
-            message = messages.data[0].content[0].to_json()
-
-        await client.beta.threads.delete(thread.id)
+        message = response.output_text
 
         duration = time.time() - start_time
 
-
-        if hasattr(run, "usage") and run.usage is not None:
+        if hasattr(response, "usage") and response.usage is not None:
             token_info = {
-                "prompt_tokens": run.usage.prompt_tokens,
-                "completion_tokens": run.usage.completion_tokens,
-                "total_tokens": run.usage.total_tokens,
+                "prompt_tokens": response.usage.input_tokens,
+                "completion_tokens": response.usage.output_tokens,
+                "total_tokens": response.usage.total_tokens,
             }
         else:
             logger.warning("No usage data in OpenAI File response")
@@ -147,9 +129,16 @@ class OpenAI(LLM):
                 "total_tokens": "N/A",
             }
 
-
-            # Log to CSV file using base class method
-        self.record_usage(model=model, provider="openai-file", agent=agent, token_usage=token_info, duration=duration)
+        power_usage = calculate_power_usage(duration, model)
+        # Log to CSV file using base class method
+        self.record_usage(
+            model=model,
+            provider="openai-file",
+            agent=agent,
+            token_usage=token_info,
+            duration=duration,
+            power_usage=power_usage,
+        )
 
         logger.info(f"OpenAI file-based response: Message length: {len(message) if message else 0}")
         logger.debug(f"Token usage: {token_info}, Duration: {duration:.2f}s")
@@ -168,7 +157,7 @@ class OpenAILLMFileUploadManager(LLMFileUploadManager):
             if not file_id:
                 logger.info(f"Open AI: Preparing to upload '{file.filename}'")
                 file = (file.filename, file.file) if isinstance(file.file, bytes) else file.file
-                files_to_upload.append(client.files.create(file=file, purpose="assistants"))
+                files_to_upload.append(client.files.create(file=file, purpose="user_data"))
             else:
                 file_ids.append(file_id)
                 logger.info(f"Open AI: {file.filename} already uploaded to OpenAI with id '{file_id}'")
@@ -182,7 +171,26 @@ class OpenAILLMFileUploadManager(LLMFileUploadManager):
 
         if uploaded_files:
             logger.info(f"Open AI: Time to upload files {time.time() - start_time}")
+
         return file_ids
+
+    async def add_files_to_vector_store(self, file_ids: list[str]) -> str:
+        client = AsyncOpenAI(api_key=config.openai_key)
+
+        vector_store = await client.vector_stores.create(
+            name="knowledge_base",
+            expires_after={
+                "anchor": "last_active_at",
+                "days": 1,
+            },
+        )
+
+        await client.vector_stores.file_batches.create_and_poll(
+            vector_store_id=vector_store.id,
+            file_ids=file_ids,
+        )
+
+        return vector_store.id
 
     async def delete_all_files(self):
         try:
