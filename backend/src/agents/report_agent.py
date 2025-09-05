@@ -1,8 +1,7 @@
 import asyncio
 import logging
-import json
-from aiohttp import ClientTimeout
 
+from aiohttp import ClientTimeout
 from src.llm.llm import LLMFile
 from src.agents import Agent
 from src.prompts import PromptEngine
@@ -13,7 +12,7 @@ engine = PromptEngine()
 
 
 class ReportAgent(Agent):
-    async def create_report(self, file: LLMFile, materiality_topics: dict[str, str]) -> str:
+    async def create_report_async(self, file: LLMFile, materiality_topics: dict[str, str]) -> str:
         materiality = materiality_topics if materiality_topics else "No Materiality topics identified."
 
         async with asyncio.TaskGroup() as tg:
@@ -78,7 +77,7 @@ class ReportAgent(Agent):
 
         return f"{report}\n\n{report_conclusion}"
 
-    async def create_local_report(self, file: LLMFile, materiality_topics: dict[str, str]) -> str:
+    async def create_report_synchronous(self, file: LLMFile, materiality_topics: dict[str, str]) -> str:
         materiality = materiality_topics if materiality_topics else "No Materiality topics identified."
         timeout = ClientTimeout(total=60*10)
 
@@ -92,24 +91,23 @@ class ReportAgent(Agent):
             timeout=timeout
         )
 
-        categories = {}
-
-        for category in QUESTIONS.keys():
-            categories[category] = []
-            for question in QUESTIONS[category]:
-                logger.info(f"Processing report question for category: {category}")
-                task = await self.llm.chat_with_file(
-                    self.model,
-                    system_prompt=engine.load_prompt("report-question-system-prompt"),
-                    user_prompt=question["prompt"],
-                    files=[file],
-                    agent="report",
-                    timeout=timeout
-                )
-                categories[category].append({
-                    "report_heading": question["report_heading"],
-                    "task": task
-                })
+        categorized_tasks = {
+                category: [
+                    {
+                        "report_heading": question["report_heading"],
+                        "task": await self.llm.chat_with_file(
+                            self.model,
+                            system_prompt=engine.load_prompt("report-question-system-prompt"),
+                            user_prompt=question["prompt"],
+                            files=[file],
+                            agent="report",
+                            timeout=timeout
+                        ),
+                    }
+                    for question in QUESTIONS[category]
+                ]
+                for category in QUESTIONS.keys()
+            }
 
         logger.info("Processing materiality section")
         materiality = await self.llm.chat_with_file(
@@ -122,9 +120,9 @@ class ReportAgent(Agent):
         )
 
         esg_report_result = ""
-        for category in categories.keys():
+        for category in categorized_tasks.keys():
             esg_report_result += f"\n## {category}\n"
-            for i, task in enumerate(categories[category], start=1):
+            for i, task in enumerate(categorized_tasks[category], start=1):
                 esg_report_result += f"\n### {i}. {task['report_heading']}\n{task['task']}\n"
 
         report = engine.load_template(
@@ -143,17 +141,13 @@ class ReportAgent(Agent):
 
         return f"{report}\n\n{report_conclusion}"
 
-    async def get_company_name(self, file: LLMFile, create_local_report: bool) -> str:
-        system_prompt_file = (
-            "find-company-name-from-file-system-prompt-name-only" if create_local_report
-            else "find-company-name-from-file-system-prompt"
-        )
+    async def get_company_name(self, file: LLMFile) -> str:
         response = await self.llm.chat_with_file(
             self.model,
-            system_prompt=engine.load_prompt(system_prompt_file),
+            system_prompt=engine.load_prompt("find-company-name-from-file-system-prompt-name-only"),
             user_prompt=engine.load_prompt("find-company-name-from-file-user-prompt"),
             files=[file],
             agent="report",
-            return_json = not create_local_report
+            return_json=False
         )
-        return response if create_local_report else json.loads(response)["company_name"]
+        return response
