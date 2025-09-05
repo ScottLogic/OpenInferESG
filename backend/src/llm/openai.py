@@ -12,7 +12,7 @@ from src.session.llm_file_upload import (
     reset_llm_file_uploads,
 )
 from openai import NOT_GIVEN, AsyncOpenAI, OpenAIError
-from openai.types.beta.threads import Text, TextContentBlock
+from openai.types.beta.threads import Text
 
 logger = logging.getLogger(__name__)
 config = Config()

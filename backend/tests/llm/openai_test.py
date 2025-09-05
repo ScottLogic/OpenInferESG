@@ -3,8 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from unittest.mock import patch, AsyncMock
-from openai.types.beta.threads import Text, FileCitationAnnotation, TextContentBlock
-from openai.types.beta.threads.file_citation_annotation import FileCitation
+from openai.types.beta.threads import TextContentBlock
 
 from src.llm import LLMFile
 from src.llm.openai import OpenAI
