@@ -144,7 +144,7 @@ class ReportAgent(Agent):
     async def get_company_name(self, file: LLMFile) -> str:
         response = await self.llm.chat_with_file(
             self.model,
-            system_prompt=engine.load_prompt("find-company-name-from-file-system-prompt-name-only"),
+            system_prompt=engine.load_prompt("find-company-name-from-file-system-prompt"),
             user_prompt=engine.load_prompt("find-company-name-from-file-user-prompt"),
             files=[file],
             agent="report",
