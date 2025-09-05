@@ -1,7 +1,7 @@
 import datetime
 import sys
 from fastapi import HTTPException
-from backend.src.agents.report_agent import ReportAgent
+from src.agents.report_agent import ReportAgent
 from src.utils import Config
 from src.llm.llm import LLMFile
 from src.session.file_uploads import (

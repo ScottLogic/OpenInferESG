@@ -73,7 +73,12 @@ async def test_create_report_from_file(mocker):
     file_contents = await file.read()
     response = await create_report_from_file(file_contents, filename, str(mock_id) )
 
-    expected_response = {"filename": filename, "id": str(mock_id), "report": mock_report, "answer": expected_answer_async}
+    expected_response = {
+        "filename": filename,
+        "id": str(mock_id),
+        "report": mock_report,
+        "answer": expected_answer_async
+    }
 
     mock_store_report.assert_called_once_with(expected_response)
 

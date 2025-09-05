@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import AsyncMock, patch, MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import src.agents.report_agent as report_agent_module
 
@@ -20,7 +20,7 @@ def mock_engine(monkeypatch):
 
 @pytest.fixture
 def mock_questions(monkeypatch):
-    QUESTIONS = {
+    mock_questions = {
         "Environment": [
             {"report_heading": "Env Heading 1", "prompt": "Env Q1"},
             {"report_heading": "Env Heading 2", "prompt": "Env Q2"},
@@ -29,8 +29,8 @@ def mock_questions(monkeypatch):
             {"report_heading": "Soc Heading 1", "prompt": "Soc Q1"},
         ]
     }
-    monkeypatch.setattr(report_agent_module, "QUESTIONS", QUESTIONS)
-    return QUESTIONS
+    monkeypatch.setattr(report_agent_module, "QUESTIONS", mock_questions)
+    return mock_questions
 
 @pytest.fixture
 def agent(mock_llm, mock_engine, mock_questions):
@@ -47,7 +47,7 @@ async def test_get_company_name(agent):
     result = await agent.get_company_name(file)
     assert result == "Test Company"
     agent.llm.chat_with_file.assert_awaited_once()
-    
+
 @pytest.mark.asyncio
 async def test_create_report_synchronous(agent, mock_engine, mock_questions):
     agent.llm.chat_with_file.side_effect = [
