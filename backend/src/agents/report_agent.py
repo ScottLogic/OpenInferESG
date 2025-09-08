@@ -1,7 +1,7 @@
 import asyncio
-import json
 import logging
 
+from aiohttp import ClientTimeout
 from src.llm.llm import LLMFile
 from src.agents import Agent
 from src.prompts import PromptEngine
@@ -12,7 +12,7 @@ engine = PromptEngine()
 
 
 class ReportAgent(Agent):
-    async def create_report(self, file: LLMFile, materiality_topics: dict[str, str]) -> str:
+    async def create_report_async(self, file: LLMFile, materiality_topics: dict[str, str]) -> str:
         materiality = materiality_topics if materiality_topics else "No Materiality topics identified."
 
         async with asyncio.TaskGroup() as tg:
@@ -77,6 +77,70 @@ class ReportAgent(Agent):
 
         return f"{report}\n\n{report_conclusion}"
 
+    async def create_report_synchronous(self, file: LLMFile, materiality_topics: dict[str, str]) -> str:
+        materiality = materiality_topics if materiality_topics else "No Materiality topics identified."
+        timeout = ClientTimeout(total=60*10)
+
+        logger.info("Starting report generation process")
+        overview = await self.llm.chat_with_file(
+            self.model,
+            system_prompt=engine.load_prompt("create-report-overview"),
+            user_prompt="Generate an ESG report about the attached document.",
+            files=[file],
+            agent="report",
+            timeout=timeout
+        )
+
+        categorized_tasks = {
+                category: [
+                    {
+                        "report_heading": question["report_heading"],
+                        "task": await self.llm.chat_with_file(
+                            self.model,
+                            system_prompt=engine.load_prompt("report-question-system-prompt"),
+                            user_prompt=question["prompt"],
+                            files=[file],
+                            agent="report",
+                            timeout=timeout
+                        ),
+                    }
+                    for question in QUESTIONS[category]
+                ]
+                for category in QUESTIONS.keys()
+            }
+
+        logger.info("Processing materiality section")
+        materiality = await self.llm.chat_with_file(
+            self.model,
+            system_prompt=engine.load_prompt("create-report-materiality"),
+            user_prompt=engine.load_prompt("create-report-materiality-user-prompt", materiality=materiality),
+            files=[file],
+            agent="report",
+            timeout=timeout
+        )
+
+        esg_report_result = ""
+        for category in categorized_tasks.keys():
+            esg_report_result += f"\n## {category}\n"
+            for i, task in enumerate(categorized_tasks[category], start=1):
+                esg_report_result += f"\n### {i}. {task['report_heading']}\n{task['task']}\n"
+
+        report = engine.load_template(
+            template_name="report-template",
+            overview=overview,
+            esg_report_result=esg_report_result,
+            materiality=materiality,
+        )
+
+        report_conclusion = await self.llm.chat(
+            self.model,
+            system_prompt=engine.load_prompt("create-report-conclusion"),
+            user_prompt=f"The document is as follows\n{report}",
+            agent="report"
+        )
+
+        return f"{report}\n\n{report_conclusion}"
+
     async def get_company_name(self, file: LLMFile) -> str:
         response = await self.llm.chat_with_file(
             self.model,
@@ -84,6 +148,6 @@ class ReportAgent(Agent):
             user_prompt=engine.load_prompt("find-company-name-from-file-user-prompt"),
             files=[file],
             agent="report",
-            return_json=True
+            return_json=False
         )
-        return json.loads(response)["company_name"]
+        return response
