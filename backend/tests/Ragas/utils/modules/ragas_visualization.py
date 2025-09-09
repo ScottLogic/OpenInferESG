@@ -38,7 +38,7 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
         # Handle the "AVERAGE" row - exclude it from plotting
         avg_row = df[df['question'] == 'AVERAGE']
         plot_df = df[df['question'] != 'AVERAGE']
-        
+
         # Get metrics columns (all columns except 'question')
         metrics = [col for col in plot_df.columns if col != 'question']
         
@@ -54,7 +54,7 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
 
         # Set up x-axis with question labels
         question_labels = [f"Question {i+1}" for i in range(len(plot_df))]
-        plt.xticks([j + width * (len(metrics) - 1) / 2 for j in range(len(plot_df))], 
+        plt.xticks([j + width * (len(metrics) - 1) / 2 for j in range(len(plot_df))],
                    question_labels, rotation=45, ha='right')
 
         # Add average lines if available
@@ -76,7 +76,7 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
         output_image_path = json_file_path.replace('.json', '_chart.png')
         plt.savefig(output_image_path, dpi=300, bbox_inches='tight')
         plt.close()
-        
+
         return output_image_path
 
     except Exception as e:

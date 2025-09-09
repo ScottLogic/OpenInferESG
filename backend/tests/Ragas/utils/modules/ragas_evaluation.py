@@ -4,9 +4,8 @@ RAGAS Evaluation Module
 Core functions for running RAGAS evaluations on question-answering data.
 """
 import os
-from typing import List, Dict, Any, Optional
+from typing import Optional, List, Dict, Any
 import pandas as pd
-import numpy as np
 
 # Set flag for RAGAS availability
 RAGAS_AVAILABLE = False
@@ -33,16 +32,16 @@ except ImportError as e:
 def create_ragas_dataset(data):
     """
     Create a RAGAS evaluation dataset from the input data.
-    
+
     Args:
         data: List of dictionaries containing evaluation samples
-        
+
     Returns:
         Tuple of (EvaluationDataset object, processed samples list)
     """
     if not RAGAS_AVAILABLE or SingleTurnSample is None or EvaluationDataset is None:
         raise ImportError("RAGAS components are not available. Please install the RAGAS package.")
-        
+
     samples = []
     for sample in data:
         # Skip samples without responses
@@ -93,7 +92,7 @@ def create_ragas_llm():
         model="gpt-4o",
         temperature=0  # Use temperature=0 for more consistent evaluations
     )
-    
+
     return LangchainLLMWrapper(chat_model)
 
 
@@ -112,30 +111,30 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
     # Import locally to avoid circular imports
     from .ragas_utils import load_jsonl_data, save_results_to_json
     from .ragas_visualization import generate_bar_chart
-    
+
     print("Setting up RAGAS evaluation...")
     print(f"Loading data from {jsonl_path}...")
     data = load_jsonl_data(jsonl_path)
     print(f"Loaded {len(data)} samples for evaluation")
-    
+
     try:
         # Make sure all required RAGAS functions are available
         if not RAGAS_AVAILABLE or None in (evaluate, answer_correctness, faithfulness, answer_relevancy):
             raise ImportError("Required RAGAS metrics or evaluation function not available")
-            
+
         # Create LLM for evaluation
         llm = create_ragas_llm()
         
         # Create dataset
         dataset, samples = create_ragas_dataset(data)
-            
+
         # Define standard metrics to evaluate
         metrics = [answer_correctness, faithfulness, answer_relevancy]
 
         # Run the evaluation
         print("Running RAGAS evaluation (this may take a while)...")
         results = evaluate(dataset=dataset, metrics=metrics, llm=llm)
-        
+
         # Process results into a pandas DataFrame
         if not hasattr(results, 'to_pandas'):
             error_msg = (
@@ -143,7 +142,7 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
                 "which is required for extracting evaluation results. Please use RAGAS version 0.3.0 or later."
             )
             raise ImportError(error_msg)
-            
+
         # Extract metrics from results
         scores_df = results.to_pandas()
         print(f"Results DataFrame columns: {list(scores_df.columns)}")
@@ -152,7 +151,7 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
         expected_metrics = ["answer_correctness", "faithfulness", "answer_relevancy"]
         available_metrics = [col for col in scores_df.columns if col in expected_metrics]
         print(f"Found metrics: {available_metrics}")
-        
+
         # Process results into a consistent format
         result_data = []
         for i, (_, row) in enumerate(scores_df.iterrows()):
@@ -169,22 +168,21 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
                     # Convert Series to scalar if needed
                     if hasattr(value, 'iloc') and len(value) > 0:
                         value = value.iloc[0]
-                    
+
                     # Validate the value
                     if value is not None and (not isinstance(value, float) or 
                                             (value == value and value != float('inf') and value != float('-inf'))):
                         result_row[metric] = value
                 except Exception as e:
                     print(f"Error extracting {metric}: {e}")
-            
             result_data.append(result_row)
-        
+
         # Create DataFrame from results data
         results_df = pd.DataFrame(result_data)
         
         # Calculate and add average scores
         expected_metrics = ["answer_correctness", "faithfulness", "answer_relevancy"]
-        
+
         # Create average row with the proper types
         avg_data = {}
         avg_data["question"] = "AVERAGE"
@@ -199,7 +197,7 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
                 else:
                     avg_data[metric] = float('nan')  # Use NaN for missing values
                     print(f"No valid values for {metric}")
-        
+
         # Add averages row to the DataFrame
         results_df = pd.concat([results_df, pd.DataFrame([avg_data])], ignore_index=True)
 
