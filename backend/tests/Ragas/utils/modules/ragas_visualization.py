@@ -41,7 +41,7 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
 
         # Get metrics columns (all columns except 'question')
         metrics = [col for col in plot_df.columns if col != 'question']
-        
+
         # Set up the plot
         plt.figure(figsize=(12, 8))
         width = 0.8 / len(metrics)  # Width for each metric bar

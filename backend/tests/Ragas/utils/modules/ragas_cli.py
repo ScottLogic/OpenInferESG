@@ -31,7 +31,7 @@ async def run_evaluation(input_path: str, output_path: str, skip_chart: bool = F
     # Run RAGAS evaluation
     print(f"Running RAGAS evaluation on {input_path}...")
     results_df = await evaluate_with_ragas(input_path, output_path, skip_chart)
-    
+
     print(f"Evaluation complete! Results saved to {output_path}")
     if not skip_chart:
         chart_path = output_path.replace('.json', '_chart.png')
@@ -64,7 +64,7 @@ async def main():
     if not os.path.exists(args.input_jsonl):
         print(f"Error: Input file not found: {args.input_jsonl}")
         sys.exit(1)
-    
+
     print(f"Input file: {args.input_jsonl}")
     print(f"Output file: {args.output}")
     if args.no_chart:

@@ -4,7 +4,7 @@ RAGAS Evaluation Module
 Core functions for running RAGAS evaluations on question-answering data.
 """
 import os
-from typing import Optional, List, Dict, Any
+from typing import Optional
 import pandas as pd
 
 # Set flag for RAGAS availability
@@ -55,7 +55,7 @@ def create_ragas_dataset(data):
         reference_contexts = sample.get("reference_contexts", [])
         if not reference and reference_contexts and len(reference_contexts) > 0:
             reference = reference_contexts[0]
-            
+
         # Create a sample using the RAGAS SingleTurnSample class
         eval_sample = SingleTurnSample(
             user_input=sample.get("user_input", ""),
@@ -64,7 +64,7 @@ def create_ragas_dataset(data):
             reference=reference  # Use either provided reference or first context
         )
         samples.append(eval_sample)
-    
+
     print(f"Created {len(samples)} samples for evaluation")
     # Create a dataset using the RAGAS EvaluationDataset class
     return EvaluationDataset(samples=samples), samples
@@ -73,20 +73,20 @@ def create_ragas_dataset(data):
 def create_ragas_llm():
     """
     Create and configure the LLM for RAGAS evaluation.
-    
+
     Returns:
         LangchainLLMWrapper instance
     """
     if not RAGAS_AVAILABLE or ChatOpenAI is None or LangchainLLMWrapper is None:
         raise ImportError("RAGAS components or LangChain are not available. Please install required packages.")
-        
+
     # Use gpt-4o as the judge LLM
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
         raise ValueError("OPENAI_API_KEY environment variable is not set. Please set it before running evaluation.")
-    
+
     print(f"API Key found for ChatOpenAI: {api_key[:5]}...{api_key[-4:] if len(api_key) > 8 else ''}")
-    
+
     # Create the ChatOpenAI model and wrap it with LangchainLLMWrapper
     chat_model = ChatOpenAI(
         model="gpt-4o",
@@ -96,7 +96,8 @@ def create_ragas_llm():
     return LangchainLLMWrapper(chat_model)
 
 
-async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] = None, skip_chart: bool = False) -> pd.DataFrame:
+async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] = None, 
+                              skip_chart: bool = False) -> pd.DataFrame:
     """
     Evaluate responses using RAGAS metrics
 
@@ -124,7 +125,7 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
 
         # Create LLM for evaluation
         llm = create_ragas_llm()
-        
+
         # Create dataset
         dataset, samples = create_ragas_dataset(data)
 
@@ -146,7 +147,7 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
         # Extract metrics from results
         scores_df = results.to_pandas()
         print(f"Results DataFrame columns: {list(scores_df.columns)}")
-        
+
         # Define expected metrics and find which ones are available
         expected_metrics = ["answer_correctness", "faithfulness", "answer_relevancy"]
         available_metrics = [col for col in scores_df.columns if col in expected_metrics]
@@ -160,7 +161,7 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
                 "question": samples[i].user_input if i < len(samples) else f"Question {i+1}",
                 **{metric: None for metric in expected_metrics}  # Initialize all metrics as None
             }
-            
+
             # Fill in available metrics
             for metric in available_metrics:
                 try:
@@ -170,7 +171,7 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
                         value = value.iloc[0]
 
                     # Validate the value
-                    if value is not None and (not isinstance(value, float) or 
+                    if value is not None and (not isinstance(value, float) or
                                             (value == value and value != float('inf') and value != float('-inf'))):
                         result_row[metric] = value
                 except Exception as e:
@@ -179,14 +180,14 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
 
         # Create DataFrame from results data
         results_df = pd.DataFrame(result_data)
-        
+
         # Calculate and add average scores
         expected_metrics = ["answer_correctness", "faithfulness", "answer_relevancy"]
 
         # Create average row with the proper types
         avg_data = {}
         avg_data["question"] = "AVERAGE"
-        
+
         # Calculate means for each metric using non-null values
         for metric in expected_metrics:
             if metric in results_df.columns:
