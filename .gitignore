@@ -183,9 +183,12 @@ poetry.toml
 node_modules/
 
 # IDE stuff
-.vscode
+.vscode/*
+# Don't exclude launch.json - This contains user agnostic launch scripts that are useful to share
+!.vscode/launch.json
 /.idea/material_theme_project_new.xml
 
 
 /logs/*
 /backend/logs/*
+/backend/reports/*

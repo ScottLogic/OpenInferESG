@@ -9,7 +9,7 @@ from src.websockets.confirmations_manager import confirmations_manager
 
 logger = logging.getLogger(__name__)
 
-heartbeat_timeout = 30
+heartbeat_timeout = 90
 pong = json.dumps({"type": MessageTypes.PONG.value})
 
 
