@@ -60,7 +60,7 @@ set LMSTUDIO_URL=http://localhost:1234
 4. Run the app
 
 ```bash
-uvicorn src.api:app --port 8250
+uvicorn src.api:app --port 8250 --ws websockets
 ```
 
 5. Check the backend app is running at [http://localhost:8250/health](http://localhost:8250/health)
