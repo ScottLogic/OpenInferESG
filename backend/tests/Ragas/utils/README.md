@@ -1,158 +1,112 @@
-# OpenInferESG API Testing and Evaluation
+# OpenInferESG RAGAS Evaluation
 
-This directory contains scripts for testing the OpenInferESG API with a set of questions and evaluating the responses.
+This directory contains scripts for evaluating OpenInferESG API responses using the RAGAS framework.
 
-## Setup and Installation
+## Quick Start
 
-### Setting up a Virtual Environment
+### Prerequisites
 
-Before running the scripts, it's recommended to create a virtual environment:
-
+1. Set up environment variables:
 ```bash
-# Navigate to the OpenInferESG directory
-cd /path/to/OpenInferESG
-
-# Create a virtual environment
-python -m venv venv
-
-# Activate the virtual environment
-# On Windows:
-venv\Scripts\activate
-# On macOS/Linux:
-# source venv/bin/activate
-```
-
-### Installing Dependencies
-
-After activating the virtual environment, install the required dependencies:
-
-```bash
-# Navigate to the Ragas utils directory
-cd backend/tests/Ragas/utils
-
-# Install the requirements
-pip install -r requirements.txt
-```
-
-## Files
-
-- `csv_to_jsonl_converter.py`: Converts question and ground truth CSV data to JSONL format
-- `enhanced_run_evaluation_pipeline.py`: Enhanced pipeline with improved error handling and batch processing
-- `requirements.txt`: Contains all the Python dependencies needed to run the scripts
-
-## Process Overview
-
-1. **CSV to JSONL Conversion**: 
-   - Converts the question_and_groundtruth_dataset.csv to JSONL format
-   - The JSONL file includes: user_input, reference, reference_contexts
-
-2. **API Response Collection**:
-   - Makes API calls to OpenInferESG's chat endpoint
-   - Adds API responses to the JSONL file
-   - The enriched JSONL includes: user_input, response, reference, reference_contexts
-
-(Pending)
-3. **Response Evaluation**:
-   - Uses RAGAS metrics to evaluate the quality of responses
-   - Calculates metrics such as accuracy, faithfulness, answer relevancy, etc.
-   - Saves evaluation results to a CSV file
-
-## Usage
-
-### Using the Enhanced Pipeline
-
-The enhanced pipeline includes better error handling, batch processing, and improved reporting.
-
-#### Check Backend Status
-
-Before running the pipeline, check if the OpenInferESG backend is available:
-
-```bash
-cd backend/tests/Ragas/utils
-python enhanced_run_evaluation_pipeline.py --check
-```
-
-#### Run the Enhanced Pipeline
-
-A PDF file path is required:
-
-```bash
-cd backend/tests/Ragas/utils
-python enhanced_run_evaluation_pipeline.py /path/to/your/document.pdf
-```
-
-#### Process Limited Number of Questions
-
-To process only a specific number of questions (e.g., just three), provide both the PDF path and question limit:
-
-```bash
-python enhanced_run_evaluation_pipeline.py /path/to/your/document.pdf 3
-```
-
-#### Running the Evaluation
-
-The evaluation is integrated into the enhanced pipeline. Results will be saved automatically.
-
-### Test a Single Question Directly
-
-```bash
-python enhanced_run_evaluation_pipeline.py /path/to/your/document.pdf 1
-```
-
-### Run Individual Steps
-
-1. Convert CSV to JSONL:
-```bash
-python csv_to_jsonl_converter.py
-```
-
-### Configuration
-
-#### Environment Variables
-
-Before running the scripts, make sure to set up the required environment variables:
-
-```bash
-# On Windows:
+# On Windows
 set OPENINFERESG_API_URL=http://localhost:8250
 set OPENAI_KEY=your-openai-api-key-here
 
-# On macOS/Linux:
-# export OPENINFERESG_API_URL=http://localhost:8250
-# export OPENAI_KEY=your-openai-api-key-here
+# Or create a .env file in the utils directory
 ```
 
-Or create a `.env` file in the utils directory with the following content:
+2. Setup Python environment:
+```bash
+# Navigate to OpenInferESG root directory
+cd /path/to/OpenInferESG
 
-```
-OPENINFERESG_API_URL=http://localhost:8250
-OPENAI_KEY=your-openai-api-key-here
+# Create and activate virtual environment
+python -m venv venv
+venv\Scripts\activate  # On Windows
+# source venv/bin/activate  # On macOS/Linux
+
+# Install dependencies
+cd backend/tests/Ragas/utils
+pip install -r requirements.txt
 ```
 
-- API URL: Set the environment variable `OPENINFERESG_API_URL` to specify the API endpoint
-  - Default: http://localhost:8250
-- RAGAS Evaluation: Requires OpenAI API key set as `OPENAI_KEY` environment variable
+## Evaluation Process
+
+The evaluation follows this flow:
+
+1. **Run the enhanced pipeline** to:
+   - Convert CSV data to JSONL
+   - Query the OpenInferESG API
+   - Generate response JSONL files
+
+2. **Run RAGAS evaluation** on the responses to:
+   - Calculate quality metrics
+   - Generate results and visualization
+
+## Usage
+
+### Complete Evaluation Pipeline
+
+```bash
+# Check backend availability
+python enhanced_run_evaluation_pipeline.py --check
+
+# Run full pipeline with document
+python enhanced_run_evaluation_pipeline.py /path/to/your/document.pdf
+
+# Limit number of questions (e.g., just 3)
+python enhanced_run_evaluation_pipeline.py /path/to/your/document.pdf 3
+```
+
+### Run RAGAS Evaluation Separately
+
+If you already have the `ragas_evaluation_with_responses.jsonl` file:
+
+```bash
+python ragas_evaluate.py
+
+# With custom input/output paths
+python ragas_evaluate.py --input path/to/input.jsonl --output path/to/output.json
+
+# Skip chart generation
+python ragas_evaluate.py --no-chart
+```
+
+## Key Files
+
+- **Input/Process Scripts**:
+  - `enhanced_run_evaluation_pipeline.py`: Main pipeline that converts CSV to JSONL and collects API responses
+  - `csv_to_jsonl_converter.py`: Converts question and ground truth CSV data to JSONL format
+
+- **Evaluation Script**:
+  - `ragas_evaluate.py`: Evaluates responses using RAGAS metrics
+
+- **Module Structure**:
+   - **For Enhanced Pipeline**:
+    - `modules/pipeline.py`: Main pipeline orchestration and workflow management
+    - `modules/api_client.py`: API communication with OpenInferESG backend
+    - `modules/data_utils.py`: Data processing and transformation utilities
+   
+   - **For RAGAS Evaluation**:
+    - `modules/ragas_utils.py`: Utility functions for file operations and API key setup
+    - `modules/ragas_evaluation.py`: Core evaluation functions using RAGAS metrics
+    - `modules/ragas_visualization.py`: Chart generation for result visualization
+    - `modules/ragas_cli.py`: Command-line interface for evaluation
+  
 
 ## Output Files
 
-All output files will be stored inside the Files folder within the Ragas folder:
+All output files are stored in `../files/`:
 
-- `ragas_evaluation_dataset.jsonl`: Initial JSONL file with questions and references
-- `ragas_evaluation_with_responses.jsonl`: Enriched JSONL with API responses
-- `evaluation_results.csv`: Evaluation metrics for each question and average scores (will be generated after implementation of the next evaluation step of calling Ragas to generate metrics)
+- `ragas_evaluation_dataset.jsonl`: Initial questions and references
+- `ragas_evaluation_with_responses.jsonl`: Questions with API responses
+- `ragas_eval_result.json`: Evaluation metrics (answer correctness, faithfulness, relevancy)
+- `ragas_eval_result_chart.png`: Visualization of evaluation results
 
 ## Troubleshooting
 
-If you encounter issues with the enhanced pipeline:
-
-1. **Backend not available**: 
-   - Make sure Docker containers are running: `docker-compose up -d backend redis`
-   - Check logs: `docker-compose logs -f backend`
-
-2. **API timeouts**: 
-   - The enhanced pipeline has automatic retries and batch processing
-   - If timeouts persist, try reducing the batch size in the script
-
-3. **RAGAS evaluation errors**:
-   - Ensure your OpenAI API key is set correctly
-   - Check that the JSONL file has the correct format
+- **Backend issues**: Ensure Docker containers are running (`docker-compose up -d backend redis`)
+- **API timeouts**: The pipeline has automatic retries; try reducing batch size if needed
+- **RAGAS errors**: 
+  - Verify OpenAI API key is set correctly
+  - Ensure RAGAS version 0.3.0+ is installed
