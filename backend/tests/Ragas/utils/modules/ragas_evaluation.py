@@ -96,7 +96,7 @@ def create_ragas_llm():
     return LangchainLLMWrapper(chat_model)
 
 
-async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] = None, 
+async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] = None,
                               skip_chart: bool = False) -> pd.DataFrame:
     """
     Evaluate responses using RAGAS metrics
