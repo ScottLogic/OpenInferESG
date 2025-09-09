@@ -15,7 +15,7 @@ python-multipart==0.0.20
 pillow==11.3.0
 pypdf==5.9.0
 redis==6.3.0
-
+websockets==15.0.1
 
 # tests
 pytest==8.4.1
