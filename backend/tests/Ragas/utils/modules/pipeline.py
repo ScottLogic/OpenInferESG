@@ -83,7 +83,7 @@ def collect_api_responses(
 
         # Wait for report generation
         print("Waiting for report generation...")
-        report_ready = client.wait_for_report(file_id)
+        report_ready = client.wait_for_report(file_id, max_wait_time=60000)
         if report_ready:
             print("Report is ready!")
         else:
