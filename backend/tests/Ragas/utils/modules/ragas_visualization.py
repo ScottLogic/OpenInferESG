@@ -58,12 +58,17 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
                    question_labels, rotation=45, ha='right')
 
         # Add average lines if available
-        if not avg_row.empty:
+        if len(avg_row) > 0:  # Check length instead of using empty property
             for i, metric in enumerate(metrics):
-                if metric in avg_row.columns and not avg_row[metric].isna().all():
-                    avg_value = avg_row[metric].iloc[0]
-                    if avg_value is not None:
-                        plt.axhline(y=avg_value, color=f'C{i}', linestyle='--', alpha=0.7)
+                if metric in avg_row.columns:
+                    # Get first value safely
+                    metric_series = avg_row[metric]
+                    if len(metric_series) > 0:
+                        # Access first element using integer indexing
+                        avg_value = metric_series.iat[0] if isinstance(metric_series, pd.Series) else None
+                        # Check if it's not a NaN value
+                        if avg_value is not None and pd.notna(avg_value):
+                            plt.axhline(y=avg_value, color=f'C{i}', linestyle='--', alpha=0.7)
 
         # Format and save the plot
         plt.ylabel('Score (0-1)')

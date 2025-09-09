@@ -134,6 +134,9 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
 
         # Run the evaluation
         print("Running RAGAS evaluation (this may take a while)...")
+        # Check if evaluate is None before calling it
+        if evaluate is None:
+            raise ImportError("RAGAS evaluate function is not available")
         results = evaluate(dataset=dataset, metrics=metrics, llm=llm)
 
         # Process results into a pandas DataFrame
@@ -167,7 +170,8 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
                 try:
                     value = row[metric]
                     # Convert Series to scalar if needed
-                    if hasattr(value, 'iloc') and len(value) > 0:
+                    # Check for pandas Series type specifically
+                    if isinstance(value, pd.Series) and len(value) > 0:
                         value = value.iloc[0]
 
                     # Validate the value
