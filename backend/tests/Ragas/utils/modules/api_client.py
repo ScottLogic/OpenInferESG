@@ -127,7 +127,7 @@ class OpenInferESGClient:
                     print(f"Report generation completed after {time.time() - start_time:.1f} seconds")
                     return True
                 else:
-                    print("Waiting for report to be generated...")
+                    print("Generating report...")
 
             except Exception as e:
                 print(f"Error checking report status: {str(e)}")
