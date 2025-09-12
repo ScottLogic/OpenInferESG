@@ -37,8 +37,10 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
         valid_metrics = []
         for metric in metrics:
             # Use pandas methods safely with explicit checking
-            if isinstance(plot_df[metric], pd.Series) and plot_df[metric].notna().any():
-                valid_metrics.append(metric)
+            metric_data = plot_df[metric]
+            if isinstance(metric_data, pd.Series):
+                if metric_data.notna().any():
+                    valid_metrics.append(metric)
         
         metrics = valid_metrics
         
@@ -61,14 +63,15 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
         for i, metric in enumerate(metrics):
             positions = [j + width * i for j in range(len(plot_df))]
             # Handle None/null values by replacing them with NaN
-            if isinstance(plot_df[metric], pd.Series):
-                values = plot_df[metric].apply(lambda x: float('nan') if x is None else x).tolist()
+            metric_data = plot_df[metric]
+            if isinstance(metric_data, pd.Series):
+                values = metric_data.map(lambda x: float('nan') if x is None else x).tolist()
             else:
                 # Convert to list and handle None values
-                values = [float('nan') if val is None else val for val in plot_df[metric]]
+                values = [float('nan') if val is None else val for val in metric_data]
             # Filter out NaN values for plotting
-            valid_positions = [positions[j] for j in range(len(values)) if pd.notna(values[j])]
-            valid_values = [values[j] for j in range(len(values)) if pd.notna(values[j])]
+            valid_positions = [positions[j] for j in range(len(values)) if not pd.isna(values[j])]
+            valid_values = [values[j] for j in range(len(values)) if not pd.isna(values[j])]
             plt.bar(valid_positions, valid_values, width=width, label=metric)
 
         # Set up x-axis with question labels
@@ -94,7 +97,7 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
                             # Access first element using integer indexing
                             avg_value = metric_series.iat[0] if isinstance(metric_series, pd.Series) else None
                             # Check if it's not a NaN value or None
-                            if avg_value is not None and pd.notna(avg_value) and isinstance(avg_value, (int, float)):
+                            if avg_value is not None and not pd.isna(avg_value) and isinstance(avg_value, (int, float)):
                                 plt.axhline(y=avg_value, color=f'C{i}', linestyle='--', alpha=0.7)
                                 # Add a text label with the average value
                                 plt.text(len(plot_df) - 0.5, avg_value + 0.02, 
