@@ -5,7 +5,7 @@ import os
 import sys
 import time
 from typing import List, Dict, Optional
-
+from pathlib import Path
 from modules.api_client import OpenInferESGClient
 from modules.data_utils import (
     create_simplified_record,
@@ -13,6 +13,12 @@ from modules.data_utils import (
     write_jsonl,
     save_error_log
 )
+from dotenv import load_dotenv
+
+# Find the project root (where .env is located)
+project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
+env_path = project_root / '.env'
+load_dotenv(dotenv_path=env_path)
 
 def collect_api_responses(
     input_jsonl_path: str,
@@ -33,9 +39,7 @@ def collect_api_responses(
         limit: Optional limit on number of questions to process
         batch_size: Number of questions to process in each batch
     """
-    # Set default API URL if not provided
-    if api_url is None:
-        api_url = "http://localhost:8250"
+    api_url = os.environ.get("BACKEND_URL")
 
     filename = os.path.basename(file_path)
     client = OpenInferESGClient(api_url)
@@ -207,7 +211,7 @@ def main(file_path: Optional[str] = None, question_limit: Optional[int] = None) 
     ragas_dir = os.path.dirname(utils_dir)   # Ragas folder
 
     # Get the API URL
-    api_url = os.environ.get("OPENINFERESG_API_URL", "http://localhost:8250")
+    api_url = os.environ.get("BACKEND_URL")
 
     # Check if the server is available before proceeding
     client = OpenInferESGClient(api_url)
@@ -262,7 +266,7 @@ def main(file_path: Optional[str] = None, question_limit: Optional[int] = None) 
 
 def check_backend_status() -> None:
     """Check if the backend is running without running the full pipeline"""
-    api_url = os.environ.get("OPENINFERESG_API_URL", "http://localhost:8250")
+    api_url = os.environ.get("BACKEND_URL", "http://localhost:8250")
     print("\n=== BACKEND STATUS CHECK ===")
     client = OpenInferESGClient(api_url)
     available = client.check_availability()

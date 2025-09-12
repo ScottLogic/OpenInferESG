@@ -8,11 +8,12 @@ This directory contains scripts for evaluating OpenInferESG API responses using 
 
 1. Set up environment variables:
 ```bash
-# On Windows
-set OPENINFERESG_API_URL=http://localhost:8250
-set OPENAI_KEY=your-openai-api-key-here
+# Ensure the following variables are set in the project root .env file:
+# OPENAI_KEY=your-openai-api-key-here
+# RAGAS_OPENAI_MODEL=gpt-4o  # Options: gpt-4o, gpt-4-turbo, gpt-3.5-turbo, etc.
 
-# Or create a .env file in the utils directory
+# For API testing, you can set:
+# BACKEND_URL=http://localhost:8250
 ```
 
 2. Setup Python environment:
@@ -32,35 +33,37 @@ pip install -r requirements.txt
 
 ## Evaluation Process
 
-The evaluation follows this flow:
+The evaluation follows this two-step process (each step requires running a separate script):
 
-1. **Run the enhanced pipeline** to:
+1. **Run the enhanced pipeline** (`enhanced_run_evaluation_pipeline.py`) to:
    - Convert CSV data to JSONL
    - Query the OpenInferESG API
    - Generate response JSONL files
 
-2. **Run RAGAS evaluation** on the responses to:
+2. **Run RAGAS evaluation** (`ragas_evaluate.py`) on the responses to:
    - Calculate quality metrics
    - Generate results and visualization
 
 ## Usage
 
-### Complete Evaluation Pipeline
+### Step 1: Run Enhanced Evaluation Pipeline
+
+This first step creates the necessary JSONL file with API responses, but does not perform RAGAS evaluation:
 
 ```bash
 # Check backend availability
 python enhanced_run_evaluation_pipeline.py --check
 
-# Run full pipeline with document
+# Run pipeline with document (prepares data for RAGAS evaluation)
 python enhanced_run_evaluation_pipeline.py /path/to/your/document.pdf
 
 # Limit number of questions (e.g., just 3)
 python enhanced_run_evaluation_pipeline.py /path/to/your/document.pdf 3
 ```
 
-### Run RAGAS Evaluation Separately
+### Run RAGAS Evaluation (Step 2)
 
-If you already have the `ragas_evaluation_with_responses.jsonl` file:
+After running the enhanced pipeline which produces the `ragas_evaluation_with_responses.jsonl` file, you must run the RAGAS evaluation script:
 
 ```bash
 python ragas_evaluate.py
@@ -71,6 +74,17 @@ python ragas_evaluate.py --input path/to/input.jsonl --output path/to/output.jso
 # Skip chart generation
 python ragas_evaluate.py --no-chart
 ```
+
+## Environment Variables
+
+The RAGAS evaluation uses the following environment variables from the root `.env` file:
+
+- **OPENAI_KEY**: Your OpenAI API key required for RAGAS evaluation
+- **RAGAS_OPENAI_MODEL**: The OpenAI model to use for evaluations (default: gpt-4o)
+- **RAGAS_METRICS**: Comma-separated list of metrics to evaluate:
+  - `factual_correctness`: Measures accuracy of factual content
+  - `semantic_similarity`: Evaluates meaning preservation
+  - `answer_accuracy`: Assesses overall answer quality
 
 ## Key Files
 
@@ -100,7 +114,7 @@ All output files are stored in `../files/`:
 
 - `ragas_evaluation_dataset.jsonl`: Initial questions and references
 - `ragas_evaluation_with_responses.jsonl`: Questions with API responses
-- `ragas_eval_result.json`: Evaluation metrics (answer correctness, faithfulness, relevancy)
+- `ragas_eval_result.json`: Evaluation metrics as configured in RAGAS_METRICS (default: factual_correctness, semantic_similarity, answer_accuracy)
 - `ragas_eval_result_chart.png`: Visualization of evaluation results
 
 ## Troubleshooting
@@ -108,5 +122,7 @@ All output files are stored in `../files/`:
 - **Backend issues**: Ensure Docker containers are running (`docker-compose up -d backend redis`)
 - **API timeouts**: The pipeline has automatic retries; try reducing batch size if needed
 - **RAGAS errors**: 
-  - Verify OpenAI API key is set correctly
+  - Verify the OPENAI_KEY is set correctly in the root .env file
+  - Check that RAGAS_OPENAI_MODEL is set to a valid model (default: gpt-4o)
+  - Ensure RAGAS_METRICS contains the desired metrics (default: factual_correctness,semantic_similarity,answer_accuracy)
   - Ensure RAGAS version 0.3.0+ is installed

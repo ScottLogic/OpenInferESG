@@ -4,29 +4,24 @@ RAGAS Evaluation Module
 Core functions for running RAGAS evaluations on question-answering data.
 """
 import os
+import sys
+from pathlib import Path
 from typing import Optional
 import pandas as pd
+from ragas import evaluate, EvaluationDataset, SingleTurnSample
+from ragas.llms import LangchainLLMWrapper
+from langchain_openai import ChatOpenAI
+from ragas.metrics import FactualCorrectness, SemanticSimilarity
+from ragas.metrics._nv_metrics import AnswerAccuracy
+from ragas.embeddings import LangchainEmbeddingsWrapper
+from langchain_openai import OpenAIEmbeddings
+from dotenv import load_dotenv
 
-# Set flag for RAGAS availability
-RAGAS_AVAILABLE = False
-
-# Try to import RAGAS components - all these imports might be None if import fails
-try:
-    # Import RAGAS evaluation components
-    from ragas.metrics import faithfulness, answer_relevancy, answer_correctness
-    from ragas import evaluate, EvaluationDataset, SingleTurnSample
-    from ragas.llms import LangchainLLMWrapper
-    # Import LangChain components
-    from langchain_openai import ChatOpenAI
-    # Set flag to indicate successful imports
-    RAGAS_AVAILABLE = True
-except ImportError as e:
-    # In case of import failure, define empty variables to avoid undefined errors
-    faithfulness = answer_relevancy = answer_correctness = None
-    evaluate = EvaluationDataset = SingleTurnSample = None
-    LangchainLLMWrapper = ChatOpenAI = None
-    print(f"Warning: RAGAS imports failed: {e}")
-    print("RAGAS evaluation will not be available unless you install required packages.")
+    
+# Find the project root (where .env is located)
+project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
+env_path = project_root / '.env'
+load_dotenv(dotenv_path=env_path)
 
 
 def create_ragas_dataset(data):
@@ -39,8 +34,6 @@ def create_ragas_dataset(data):
     Returns:
         Tuple of (EvaluationDataset object, processed samples list)
     """
-    if not RAGAS_AVAILABLE or SingleTurnSample is None or EvaluationDataset is None:
-        raise ImportError("RAGAS components are not available. Please install the RAGAS package.")
 
     samples = []
     for sample in data:
@@ -75,25 +68,32 @@ def create_ragas_llm():
     Create and configure the LLM for RAGAS evaluation.
 
     Returns:
-        LangchainLLMWrapper instance
-    """
-    if not RAGAS_AVAILABLE or ChatOpenAI is None or LangchainLLMWrapper is None:
-        raise ImportError("RAGAS components or LangChain are not available. Please install required packages.")
+        tuple: (LangchainLLMWrapper, LangchainEmbeddingsWrapper)
+    """    
+    # Use the specified OpenAI model from .env or default to gpt-4o
+    model_name = os.getenv("RAGAS_OPENAI_MODEL", "gpt-4o")
+    api_key = os.getenv("OPENAI_KEY")
 
-    # Use gpt-4o as the judge LLM
-    api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:
-        raise ValueError("OPENAI_API_KEY environment variable is not set. Please set it before running evaluation.")
+        raise ValueError("OPENAI_KEY environment variable is not set. Please set it in the root .env file.")
 
     print(f"API Key found for ChatOpenAI: {api_key[:5]}...{api_key[-4:] if len(api_key) > 8 else ''}")
+    print(f"Using model: {model_name}")
 
     # Create the ChatOpenAI model and wrap it with LangchainLLMWrapper
     chat_model = ChatOpenAI(
-        model="gpt-4o",
+        model=model_name,
         temperature=0  # Use temperature=0 for more consistent evaluations
     )
+    
+    # Initialize the OpenAIEmbeddings - pass API key through environment variable
+    # which OpenAIEmbeddings will use automatically
+    embeddings = OpenAIEmbeddings()
+    
+    # Create RAGAS embeddings wrapper
+    ragas_embeddings = LangchainEmbeddingsWrapper(embeddings)
 
-    return LangchainLLMWrapper(chat_model)
+    return LangchainLLMWrapper(chat_model), ragas_embeddings
 
 
 async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] = None,
@@ -118,99 +118,84 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
     data = load_jsonl_data(jsonl_path)
     print(f"Loaded {len(data)} samples for evaluation")
 
+  
     try:
-        # Make sure all required RAGAS functions are available
-        if not RAGAS_AVAILABLE or None in (evaluate, answer_correctness, faithfulness, answer_relevancy):
-            raise ImportError("Required RAGAS metrics or evaluation function not available")
-
-        # Create LLM for evaluation
-        llm = create_ragas_llm()
+        # Create LLM and embeddings for evaluation
+        llm, embeddings_wrapper = create_ragas_llm()
 
         # Create dataset
         dataset, samples = create_ragas_dataset(data)
-
-        # Define standard metrics to evaluate
-        metrics = [answer_correctness, faithfulness, answer_relevancy]
+        
+        # Define metrics to use for evaluation
+        print("Configuring default RAGAS metrics: factual_correctness, semantic_similarity, answer_accuracy")
+        metrics = [
+            FactualCorrectness(llm=llm),
+            SemanticSimilarity(embeddings=embeddings_wrapper),
+            AnswerAccuracy(llm=llm)
+        ]
 
         # Run the evaluation
         print("Running RAGAS evaluation (this may take a while)...")
-        # Check if evaluate is None before calling it
-        if evaluate is None:
-            raise ImportError("RAGAS evaluate function is not available")
         results = evaluate(dataset=dataset, metrics=metrics, llm=llm)
 
-        # Process results into a pandas DataFrame
-        if not hasattr(results, 'to_pandas'):
-            error_msg = (
-                "Incompatible RAGAS version detected. The RAGAS library doesn't provide the 'to_pandas' method "
-                "which is required for extracting evaluation results. Please use RAGAS version 0.3.0 or later."
-            )
-            raise ImportError(error_msg)
-
-        # Extract metrics from results
-        scores_df = results.to_pandas()
-        print(f"Results DataFrame columns: {list(scores_df.columns)}")
-
-        # Define expected metrics and find which ones are available
-        expected_metrics = ["answer_correctness", "faithfulness", "answer_relevancy"]
-        available_metrics = [col for col in scores_df.columns if col in expected_metrics]
-        print(f"Found metrics: {available_metrics}")
-
-        # Process results into a consistent format
+        # Define the expected metrics we want in our final output
+        expected_metrics = ["factual_correctness", "semantic_similarity", "answer_accuracy"]
+        
+        # Create a base DataFrame for our results
         result_data = []
-        for i, (_, row) in enumerate(scores_df.iterrows()):
-            # Create base result row with question and null metrics
-            result_row = {
-                "question": samples[i].user_input if i < len(samples) else f"Question {i+1}",
+        
+        # Create results for each sample with placeholder metric values
+        for i, sample in enumerate(samples):
+            result_data.append({
+                "question": sample.user_input,
                 **{metric: None for metric in expected_metrics}  # Initialize all metrics as None
-            }
-
-            # Fill in available metrics
-            for metric in available_metrics:
-                try:
-                    value = row[metric]
-                    # Convert Series to scalar if needed
-                    # Check for pandas Series type specifically
-                    if isinstance(value, pd.Series) and len(value) > 0:
-                        value = value.iloc[0]
-
-                    # Validate the value
-                    if value is not None and (not isinstance(value, float) or
-                                            (value == value and value != float('inf') and value != float('-inf'))):
-                        result_row[metric] = value
-                except Exception as e:
-                    print(f"Error extracting {metric}: {e}")
-            result_data.append(result_row)
-
-        # Create DataFrame from results data
+            })
+        
+        try:
+            if hasattr(results, 'to_pandas'):
+                scores_df = results.to_pandas()
+                available_columns = list(scores_df.columns)
+                print(f"Results DataFrame columns: {available_columns}")
+                
+                # Map available columns to expected metrics
+                for i, (_, row) in enumerate(scores_df.iterrows()):
+                    if i < len(result_data):
+                        for col in available_columns:
+                            matching_metric = next((m for m in expected_metrics if m in col.lower() or col.lower() in m), None)
+                            if matching_metric and i < len(result_data):
+                                result_data[i][matching_metric] = row[col]
+                success = True
+        except Exception as e:
+            print(f"Could not convert results to DataFrame: {e}")
+        
+        # Create DataFrame from the results
         results_df = pd.DataFrame(result_data)
-
+        
         # Calculate and add average scores
-        expected_metrics = ["answer_correctness", "faithfulness", "answer_relevancy"]
-
-        # Create average row with the proper types
-        avg_data = {}
-        avg_data["question"] = "AVERAGE"
-
+        # Type annotation to avoid type checking issues
+        avg_data: dict = {"question": "AVERAGE"}
+        
         # Calculate means for each metric using non-null values
         for metric in expected_metrics:
             if metric in results_df.columns:
                 non_null_values = results_df[metric].dropna()
                 if len(non_null_values) > 0:
-                    avg_data[metric] = float(non_null_values.mean())
-                    print(f"Average {metric}: {avg_data[metric]:.4f} from {len(non_null_values)} values")
+                    avg_value = float(non_null_values.mean())
+                    # Convert to float for consistency
+                    avg_data[metric] = avg_value  # Using a dict with explicit type annotation allows mixed types
+                    print(f"Average {metric}: {avg_value:.4f} from {len(non_null_values)} values")
                 else:
-                    avg_data[metric] = float('nan')  # Use NaN for missing values
+                    avg_data[metric] = None  # None is fine for a dict with explicit type annotation
                     print(f"No valid values for {metric}")
-
+                    
         # Add averages row to the DataFrame
         results_df = pd.concat([results_df, pd.DataFrame([avg_data])], ignore_index=True)
-
+        
         # Save results and generate visualization
         if output_json_path:
             # Save results to JSON
             save_results_to_json(results_df, output_json_path)
-
+            
             # Generate visualization if not disabled
             if not skip_chart:
                 try:
@@ -219,10 +204,9 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
                         print(f"Chart generated: {chart_path}")
                 except Exception as e:
                     print(f"Chart generation failed: {e}")
-
+                    
         return results_df
-
-    except ImportError as e:
-        raise ImportError(f"RAGAS components could not be imported. Please ensure RAGAS is installed: {e}")
+        
     except Exception as e:
+        print(f"RAGAS evaluation failed: {str(e)}")
         raise RuntimeError(f"RAGAS evaluation failed: {e}")
