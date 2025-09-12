@@ -13,7 +13,7 @@ def setup_api_key() -> None:
     """
     Set up the OpenAI API key from environment variables.
     Will exit if the key is not found.
-    
+
     Returns:
         None
     """
@@ -22,7 +22,7 @@ def setup_api_key() -> None:
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
     env_path = project_root / '.env'
     load_dotenv(dotenv_path=env_path)
-    
+
     # Check if API key is available
     api_key = os.environ.get("OPENAI_API_KEY")
     if not api_key:

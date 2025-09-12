@@ -4,7 +4,6 @@ RAGAS Evaluation Module
 Core functions for running RAGAS evaluations on question-answering data.
 """
 import os
-import sys
 from pathlib import Path
 from typing import Optional
 import pandas as pd
@@ -17,7 +16,7 @@ from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
 
-    
+
 # Find the project root (where .env is located)
 project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
 env_path = project_root / '.env'
@@ -69,7 +68,7 @@ def create_ragas_llm():
 
     Returns:
         tuple: (LangchainLLMWrapper, LangchainEmbeddingsWrapper)
-    """    
+    """
     # Use the specified OpenAI model from .env or default to gpt-4o
     model_name = os.getenv("RAGAS_OPENAI_MODEL", "gpt-4o")
     api_key = os.getenv("OPENAI_KEY")
@@ -85,11 +84,11 @@ def create_ragas_llm():
         model=model_name,
         temperature=0  # Use temperature=0 for more consistent evaluations
     )
-    
+
     # Initialize the OpenAIEmbeddings - pass API key through environment variable
     # which OpenAIEmbeddings will use automatically
     embeddings = OpenAIEmbeddings()
-    
+
     # Create RAGAS embeddings wrapper
     ragas_embeddings = LangchainEmbeddingsWrapper(embeddings)
 
@@ -118,14 +117,14 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
     data = load_jsonl_data(jsonl_path)
     print(f"Loaded {len(data)} samples for evaluation")
 
-  
+
     try:
         # Create LLM and embeddings for evaluation
         llm, embeddings_wrapper = create_ragas_llm()
 
         # Create dataset
         dataset, samples = create_ragas_dataset(data)
-        
+
         # Define metrics to use for evaluation
         print("Configuring default RAGAS metrics: factual_correctness, semantic_similarity, answer_accuracy")
         metrics = [
@@ -140,41 +139,41 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
 
         # Define the expected metrics we want in our final output
         expected_metrics = ["factual_correctness", "semantic_similarity", "answer_accuracy"]
-        
+
         # Create a base DataFrame for our results
         result_data = []
-        
+
         # Create results for each sample with placeholder metric values
         for i, sample in enumerate(samples):
             result_data.append({
                 "question": sample.user_input,
                 **{metric: None for metric in expected_metrics}  # Initialize all metrics as None
             })
-        
+
         try:
             if hasattr(results, 'to_pandas'):
                 scores_df = results.to_pandas()
                 available_columns = list(scores_df.columns)
                 print(f"Results DataFrame columns: {available_columns}")
-                
+
                 # Map available columns to expected metrics
                 for i, (_, row) in enumerate(scores_df.iterrows()):
                     if i < len(result_data):
                         for col in available_columns:
-                            matching_metric = next((m for m in expected_metrics if m in col.lower() or col.lower() in m), None)
+                            matching_metric = next((m for m in expected_metrics if m in col.lower()
+                                                     or col.lower() in m), None)
                             if matching_metric and i < len(result_data):
                                 result_data[i][matching_metric] = row[col]
-                success = True
         except Exception as e:
             print(f"Could not convert results to DataFrame: {e}")
-        
+
         # Create DataFrame from the results
         results_df = pd.DataFrame(result_data)
-        
+
         # Calculate and add average scores
         # Type annotation to avoid type checking issues
         avg_data: dict = {"question": "AVERAGE"}
-        
+
         # Calculate means for each metric using non-null values
         for metric in expected_metrics:
             if metric in results_df.columns:
@@ -187,15 +186,15 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
                 else:
                     avg_data[metric] = None  # None is fine for a dict with explicit type annotation
                     print(f"No valid values for {metric}")
-                    
+
         # Add averages row to the DataFrame
         results_df = pd.concat([results_df, pd.DataFrame([avg_data])], ignore_index=True)
-        
+
         # Save results and generate visualization
         if output_json_path:
             # Save results to JSON
             save_results_to_json(results_df, output_json_path)
-            
+
             # Generate visualization if not disabled
             if not skip_chart:
                 try:
@@ -204,9 +203,9 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
                         print(f"Chart generated: {chart_path}")
                 except Exception as e:
                     print(f"Chart generation failed: {e}")
-                    
+
         return results_df
-        
+
     except Exception as e:
         print(f"RAGAS evaluation failed: {str(e)}")
         raise RuntimeError(f"RAGAS evaluation failed: {e}")

@@ -32,7 +32,7 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
 
         # Get metrics columns (all columns except 'question')
         metrics = [col for col in plot_df.columns if col != 'question']
-        
+
         # Filter out metrics that have all None values
         valid_metrics = []
         for metric in metrics:
@@ -41,13 +41,13 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
             if isinstance(metric_data, pd.Series):
                 if metric_data.notna().any():
                     valid_metrics.append(metric)
-        
+
         metrics = valid_metrics
-        
+
         if not metrics:
             print("No valid metrics found with non-null values for plotting")
             return None
-            
+
         # Keep all questions regardless of count
         question_count = len(plot_df)
         print(f"Plotting all {question_count} questions")
@@ -55,7 +55,7 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
         # Set up the plot with larger figure for many questions
         question_count = len(plot_df)
         # Dynamically adjust figure width based on number of questions
-        fig_width = max(12, question_count * 0.3)  
+        fig_width = max(12, question_count * 0.3)
         plt.figure(figsize=(fig_width, 10))
         width = 0.8 / len(metrics)  # Width for each metric bar
 
@@ -78,7 +78,7 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
         question_count = len(plot_df)
         question_labels = [f"Q{i+1}" for i in range(question_count)]
         tick_positions = [j + width * (len(metrics) - 1) / 2 for j in range(question_count)]
-        
+
         if tick_positions:  # Make sure we have tick positions before setting them
             # If we have many questions, adjust the rotation and font size
             if question_count > 20:
@@ -100,8 +100,8 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
                             if avg_value is not None and not pd.isna(avg_value) and isinstance(avg_value, (int, float)):
                                 plt.axhline(y=avg_value, color=f'C{i}', linestyle='--', alpha=0.7)
                                 # Add a text label with the average value
-                                plt.text(len(plot_df) - 0.5, avg_value + 0.02, 
-                                         f'Avg: {avg_value:.2f}', 
+                                plt.text(len(plot_df) - 0.5, avg_value + 0.02,
+                                         f'Avg: {avg_value:.2f}',
                                          color=f'C{i}', fontsize=9, ha='right')
                     except Exception as e:
                         print(f"Error adding average line for {metric}: {e}")
@@ -111,20 +111,20 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
         plt.title(f'RAGAS Evaluation Results\n{", ".join(metrics)}')
         plt.ylim(0, 1.05)
         plt.grid(axis='y', linestyle='--', alpha=0.3)
-        
+
         # For many questions, make more room at the bottom for labels
         question_count = len(plot_df)
         if question_count > 20:
             plt.subplots_adjust(bottom=0.2)
-        
+
         # Add a horizontal line at 0.5 for reference
         plt.axhline(y=0.5, color='gray', linestyle='-', alpha=0.3)
-        
+
         plt.tight_layout()
-        
+
         # Position legend based on number of metrics
         legend_cols = min(len(metrics), 3)  # Max 3 columns for readability
-        plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15), 
+        plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.15),
                   ncol=legend_cols, frameon=True, fancybox=True, shadow=True)
 
         # Save and close
