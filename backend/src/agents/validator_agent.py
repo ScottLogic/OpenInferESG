@@ -10,7 +10,13 @@ engine = PromptEngine()
 
 class ValidatorAgent(Agent):
     async def validate(self, utterance: str) -> str:
-        answer = await self.llm.chat(self.model, engine.load_prompt("validator"), utterance, agent="validator", return_json=True)
+        answer = await self.llm.chat(
+            self.model,
+            engine.load_prompt("validator"),
+            utterance,
+            agent="validator",
+            return_json=True
+        )
         response = json.loads(answer)['response']
         await publish_log_info(LogPrefix.USER, f"Validating: '{utterance}' Answer: '{response}'", __name__)
 
