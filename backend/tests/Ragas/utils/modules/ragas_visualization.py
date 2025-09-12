@@ -36,7 +36,8 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
         # Filter out metrics that have all None values
         valid_metrics = []
         for metric in metrics:
-            if plot_df[metric].notna().any():  # Check if any non-null values exist
+            # Use pandas methods safely with explicit checking
+            if isinstance(plot_df[metric], pd.Series) and plot_df[metric].notna().any():
                 valid_metrics.append(metric)
         
         metrics = valid_metrics
@@ -60,7 +61,11 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
         for i, metric in enumerate(metrics):
             positions = [j + width * i for j in range(len(plot_df))]
             # Handle None/null values by replacing them with NaN
-            values = plot_df[metric].apply(lambda x: float('nan') if x is None else x).tolist()
+            if isinstance(plot_df[metric], pd.Series):
+                values = plot_df[metric].apply(lambda x: float('nan') if x is None else x).tolist()
+            else:
+                # Convert to list and handle None values
+                values = [float('nan') if val is None else val for val in plot_df[metric]]
             # Filter out NaN values for plotting
             valid_positions = [positions[j] for j in range(len(values)) if pd.notna(values[j])]
             valid_values = [values[j] for j in range(len(values)) if pd.notna(values[j])]

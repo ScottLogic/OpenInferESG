@@ -39,7 +39,7 @@ def collect_api_responses(
         limit: Optional limit on number of questions to process
         batch_size: Number of questions to process in each batch
     """
-    api_url = os.environ.get("BACKEND_URL")
+    api_url = os.environ.get("BACKEND_URL", "http://localhost:8250")  # Provide default value
 
     filename = os.path.basename(file_path)
     client = OpenInferESGClient(api_url)
@@ -211,7 +211,7 @@ def main(file_path: Optional[str] = None, question_limit: Optional[int] = None) 
     ragas_dir = os.path.dirname(utils_dir)   # Ragas folder
 
     # Get the API URL
-    api_url = os.environ.get("BACKEND_URL")
+    api_url = os.environ.get("BACKEND_URL", "http://localhost:8250")  # Provide default value
 
     # Check if the server is available before proceeding
     client = OpenInferESGClient(api_url)

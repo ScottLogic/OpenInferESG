@@ -9,6 +9,27 @@ import json
 from typing import List, Dict, Any
 from dotenv import load_dotenv
 
+def setup_api_key() -> None:
+    """
+    Set up the OpenAI API key from environment variables.
+    Will exit if the key is not found.
+    
+    Returns:
+        None
+    """
+    # Find the project root (where .env is located)
+    from pathlib import Path
+    project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
+    env_path = project_root / '.env'
+    load_dotenv(dotenv_path=env_path)
+    
+    # Check if API key is available
+    api_key = os.environ.get("OPENAI_API_KEY")
+    if not api_key:
+        print("Error: OpenAI API key not found in environment variables.")
+        print("Please set the OPENAI_API_KEY environment variable.")
+        sys.exit(1)
+
 def load_jsonl_data(file_path: str) -> List[Dict[str, Any]]:
     """
     Load data from a JSONL file
