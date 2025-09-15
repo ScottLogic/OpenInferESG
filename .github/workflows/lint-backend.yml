@@ -16,9 +16,16 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v6
 
-      - name: Lint
+      - name: Format Backend
         uses: astral-sh/ruff-action@v1
         with:
           src: ./backend
           args: "format --check"
+          changed-files: "true"
+
+      - name: Lint Backend
+        uses: astral-sh/ruff-action@v1
+        with:
+          src: ./backend
+          args: "check"
           changed-files: "true"
