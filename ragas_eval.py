@@ -2,6 +2,14 @@ import os
 import asyncio
 from dotenv import load_dotenv
 
+# Set up LLM and Embeddings
+from ragas.llms import LangchainLLMWrapper
+from ragas.embeddings import LangchainEmbeddingsWrapper
+from langchain_openai import ChatOpenAI
+from langchain_openai import OpenAIEmbeddings
+from ragas import SingleTurnSample
+from ragas.metrics import AspectCritic
+
 # Load OpenAI API Key
 load_dotenv()
 open_api_key = os.getenv("OPENAI_KEY")
@@ -11,13 +19,6 @@ if not open_api_key:
     )
 os.environ["OPENAI_API_KEY"] = open_api_key
 
-# Set up LLM and Embeddings
-from ragas.llms import LangchainLLMWrapper
-from ragas.embeddings import LangchainEmbeddingsWrapper
-from langchain_openai import ChatOpenAI
-from langchain_openai import OpenAIEmbeddings
-from ragas import SingleTurnSample
-from ragas.metrics import AspectCritic
 
 # Initialize LLM and Embeddings for Evaluation
 evaluator_llm = LangchainLLMWrapper(ChatOpenAI(model="gpt-4o"))

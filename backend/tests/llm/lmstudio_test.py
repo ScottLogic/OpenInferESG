@@ -173,7 +173,7 @@ async def test_remove_think_tags_with_tag():
     Here is the actual response to the user."""
 
     result = lmstudio._remove_think_tags(content_with_tag)
-    
+
     # Verify that the tag and its content have been removed
     assert result == "Here is the actual response to the user."
     assert "<think>" not in result
@@ -185,9 +185,9 @@ async def test_remove_think_tags_without_tag():
     """Test that content without tags remains unchanged"""
     lmstudio = LMStudio()
     content_without_tag = "This is a normal response with no tags."
-    
+
     result = lmstudio._remove_think_tags(content_without_tag)
-    
+
     # Verify that the content is unchanged
     assert result == content_without_tag
 
@@ -205,7 +205,7 @@ async def test_remove_think_tags_with_other_tag():
     Based on my analysis, the answer is 42."""
 
     result = lmstudio._remove_think_tags(content_with_tag)
-    
+
     # Verify that the tag and its content have been removed
     assert result == "Based on my analysis, the answer is 42."
     assert "<reasoning>" not in result
