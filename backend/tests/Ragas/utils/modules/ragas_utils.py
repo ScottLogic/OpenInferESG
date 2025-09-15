@@ -8,6 +8,7 @@ import sys
 import json
 from typing import List, Dict, Any
 from dotenv import load_dotenv
+from pathlib import Path
 
 def setup_api_key() -> None:
     """
@@ -18,7 +19,6 @@ def setup_api_key() -> None:
         None
     """
     # Find the project root (where .env is located)
-    from pathlib import Path
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
     env_path = project_root / '.env'
     load_dotenv(dotenv_path=env_path)
