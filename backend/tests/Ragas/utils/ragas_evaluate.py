@@ -4,12 +4,14 @@ RAGAS Evaluation Command Line Tool
 ---------------------------------
 A command-line tool to evaluate question-answering systems using RAGAS metrics.
 """
+
 import os
 import sys
 import argparse
 import asyncio
 import pandas as pd
 from modules.ragas_evaluation import evaluate_with_ragas
+
 
 async def run_evaluation(input_path: str, output_path: str, skip_chart: bool = False) -> pd.DataFrame:
     """
@@ -30,10 +32,11 @@ async def run_evaluation(input_path: str, output_path: str, skip_chart: bool = F
 
     print(f"Evaluation complete! Results saved to {output_path}")
     if not skip_chart:
-        chart_path = output_path.replace('.json', '_chart.png')
+        chart_path = output_path.replace(".json", "_chart.png")
         print(f"Chart saved to {chart_path}")
 
     return results_df
+
 
 async def main():
     """Main entry point for command-line execution"""
@@ -45,8 +48,7 @@ async def main():
 
     # Parse command line arguments
     parser = argparse.ArgumentParser(description="Evaluate responses using RAGAS metrics")
-    parser.add_argument("--input", "-i", dest="input_jsonl",
-                      help="Path to input JSONL file", default=default_input)
+    parser.add_argument("--input", "-i", dest="input_jsonl", help="Path to input JSONL file", default=default_input)
     parser.add_argument("--output", "-o", help="Path to save JSON output", default=default_output)
     parser.add_argument("--no-chart", action="store_true", help="Skip chart visualization")
     args = parser.parse_args()
@@ -67,6 +69,7 @@ async def main():
     except Exception as e:
         print(f"Error during evaluation: {str(e)}")
         sys.exit(1)
+
 
 if __name__ == "__main__":
     asyncio.run(main())
