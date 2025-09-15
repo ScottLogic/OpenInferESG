@@ -169,7 +169,7 @@ async def test_remove_think_tags_with_tag():
     This is my internal thought process.
     I'm working through the problem step by step.
     </think>
-    
+
     Here is the actual response to the user."""
 
     result = lmstudio._remove_think_tags(content_with_tag)
@@ -201,7 +201,7 @@ async def test_remove_think_tags_with_other_tag():
     First, I'll consider the input data.
     Then I'll apply the appropriate algorithm.
     </reasoning>
-    
+
     Based on my analysis, the answer is 42."""
 
     result = lmstudio._remove_think_tags(content_with_tag)
