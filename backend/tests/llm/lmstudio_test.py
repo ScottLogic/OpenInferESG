@@ -159,3 +159,54 @@ async def test_chat_request_json(lmstudio_instance):
     # Parse it to verify it's valid JSON
     parsed = json.loads(response)
     assert parsed["result"] == "success"
+
+
+@pytest.mark.asyncio
+async def test_remove_think_tags_with_tag():
+    """Test removing think tags from content"""
+    lmstudio = LMStudio()
+    content_with_tag = """<think>
+    This is my internal thought process.
+    I'm working through the problem step by step.
+    </think>
+    
+    Here is the actual response to the user."""
+
+    result = lmstudio._remove_think_tags(content_with_tag)
+    
+    # Verify that the tag and its content have been removed
+    assert result == "Here is the actual response to the user."
+    assert "<think>" not in result
+    assert "internal thought process" not in result
+
+
+@pytest.mark.asyncio
+async def test_remove_think_tags_without_tag():
+    """Test that content without tags remains unchanged"""
+    lmstudio = LMStudio()
+    content_without_tag = "This is a normal response with no tags."
+    
+    result = lmstudio._remove_think_tags(content_without_tag)
+    
+    # Verify that the content is unchanged
+    assert result == content_without_tag
+
+
+@pytest.mark.asyncio
+async def test_remove_think_tags_with_other_tag():
+    """Test removing other XML-style tags from content"""
+    lmstudio = LMStudio()
+    content_with_tag = """<reasoning>
+    Let me analyze this problem step by step.
+    First, I'll consider the input data.
+    Then I'll apply the appropriate algorithm.
+    </reasoning>
+    
+    Based on my analysis, the answer is 42."""
+
+    result = lmstudio._remove_think_tags(content_with_tag)
+    
+    # Verify that the tag and its content have been removed
+    assert result == "Based on my analysis, the answer is 42."
+    assert "<reasoning>" not in result
+    assert "step by step" not in result
