@@ -140,9 +140,6 @@ class LMStudio(LLM):
                     # Remove <think> tags if they exist in the response
                     content = self._remove_think_tags(content)
 
-                    # Remove <think> tags if they exist in the response
-                    content = self._remove_think_tags(content)
-
                     # Return either raw content or validated JSON
                     return self._process_content(content, return_json) if return_json else content
         except Exception as e:
