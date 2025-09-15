@@ -56,7 +56,7 @@ async def test_select_agent_for_task_given_agent_failed_only_once_then_selects_t
     mocker.patch("src.router.get_chat_agents", return_value=mock_agents)
     mocker.patch("src.router.config.router_model", new_callable=MagicMock)
     mock_llm.chat = mocker.AsyncMock(return_value=json.dumps(plan))
-    spy_chat = mocker.spy(mock_llm, 'chat')
+    spy_chat = mocker.spy(mock_llm, "chat")
 
     agent, tool, parameters = await select_tool_for_question("task1", chat_agent_failures)
 

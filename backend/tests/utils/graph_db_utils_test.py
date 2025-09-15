@@ -77,6 +77,7 @@ def test_populate_db_throws_exception(mocker, mock_driver, mock_session):
     mock_driver.session.return_value.__exit__.assert_called_once()
     mock_driver.close.assert_called_once()
 
+
 def test_is_db_populated_returns_true(mocker, mock_driver, mock_session):
     mocker.patch("src.utils.graph_db_utils.driver", mock_driver)
 
@@ -91,6 +92,7 @@ def test_is_db_populated_returns_true(mocker, mock_driver, mock_session):
     assert is_db_populated()
     mock_driver.session.return_value.__exit__.assert_called_once()
     mock_driver.close.assert_called_once()
+
 
 def test_is_db_populated_returns_false(mocker, mock_driver, mock_session):
     mocker.patch("src.utils.graph_db_utils.driver", mock_driver)

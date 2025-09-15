@@ -11,6 +11,7 @@ if not os.path.exists(JSON_FILE_PATH):
 openai_power_stats = None
 model_power_dict = None
 
+
 def calculate_model_power(model: str, openai_power_stats: dict[str, dict]) -> float | None:
     model_stats = openai_power_stats.get(model)
     if model_stats is None:
@@ -30,6 +31,7 @@ def calculate_model_power(model: str, openai_power_stats: dict[str, dict]) -> fl
     effective_power = ((gpu_power * total_gpu_utilisation) + (non_gpu_power * total_non_gpu_utilisation)) * pue
 
     return effective_power
+
 
 def calculate_power_usage(duration_seconds: float, model: str) -> float | None:
     global model_power_dict

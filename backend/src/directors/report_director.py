@@ -4,12 +4,7 @@ from fastapi import HTTPException
 from src.agents.report_agent import ReportAgent
 from src.utils import Config
 from src.llm.llm import LLMFile
-from src.session.file_uploads import (
-    FileUpload,
-    ReportResponse,
-    store_report,
-    update_session_file_uploads
-)
+from src.session.file_uploads import FileUpload, ReportResponse, store_report, update_session_file_uploads
 from src.agents import get_report_agent, get_materiality_agent
 from pathlib import Path
 
@@ -18,24 +13,19 @@ REPORT_DIR = Path("reports")
 REPORT_DIR.mkdir(exist_ok=True)
 config = Config()
 
-def prepare_file_for_report(file_contents: bytes, filename: str, file_id:  str):
+
+def prepare_file_for_report(file_contents: bytes, filename: str, file_id: str):
     file_size = sys.getsizeof(file_contents)
 
     if file_size > MAX_FILE_SIZE:
         raise HTTPException(status_code=413, detail=f"File upload must be less than {MAX_FILE_SIZE} bytes")
 
-    session_file = FileUpload(
-        id=file_id,
-        filename=filename,
-        upload_id=None,
-        content=None
-    )
+    session_file = FileUpload(id=file_id, filename=filename, upload_id=None, content=None)
 
     update_session_file_uploads(session_file)
 
 
-async def create_report_from_file(file_contents: bytes, filename: str, file_id:  str) -> ReportResponse:
-
+async def create_report_from_file(file_contents: bytes, filename: str, file_id: str) -> ReportResponse:
     file = LLMFile(filename=filename, file=file_contents)
 
     report_agent = get_report_agent()
@@ -68,9 +58,7 @@ async def create_report_from_file(file_contents: bytes, filename: str, file_id: 
 
 
 def create_report_chat_message(file_name: str, company_name: str, topics: dict[str, str]) -> str:
-    topics_with_markdown = [
-        f"{key}\n{value}" for key, value in topics.items()
-    ]
+    topics_with_markdown = [f"{key}\n{value}" for key, value in topics.items()]
     topics_summary = "\n\n".join(topics_with_markdown)
 
     return (
@@ -79,12 +67,10 @@ def create_report_chat_message(file_name: str, company_name: str, topics: dict[s
         f"{topics_summary}"
     )
 
+
 async def create_report(
-        file: LLMFile,
-        materiality_topics: dict[str, str],
-        create_local_report: bool,
-        report_agent: ReportAgent
-    ) -> str:
+    file: LLMFile, materiality_topics: dict[str, str], create_local_report: bool, report_agent: ReportAgent
+) -> str:
     if create_local_report:
         return await report_agent.create_report_synchronous(file, materiality_topics)
     else:

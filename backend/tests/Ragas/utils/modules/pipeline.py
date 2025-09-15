@@ -1,18 +1,15 @@
 """
 Main pipeline for running Ragas evaluations with OpenInferESG.
 """
+
 import os
 import sys
 import time
 from typing import List, Dict, Optional
 
 from modules.api_client import OpenInferESGClient
-from modules.data_utils import (
-    create_simplified_record,
-    read_jsonl,
-    write_jsonl,
-    save_error_log
-)
+from modules.data_utils import create_simplified_record, read_jsonl, write_jsonl, save_error_log
+
 
 def collect_api_responses(
     input_jsonl_path: str,
@@ -20,7 +17,7 @@ def collect_api_responses(
     file_path: str,
     api_url: Optional[str] = None,
     limit: Optional[int] = None,
-    batch_size: int = 3
+    batch_size: int = 3,
 ) -> None:
     """
     Make API calls to OpenInferESG's endpoint with file reference and collect responses
@@ -97,7 +94,7 @@ def collect_api_responses(
             start_idx=start_idx,
             total_records=len(records),
             enriched_records=enriched_records,
-            errors=errors
+            errors=errors,
         )
 
     # Write the enriched records to the output JSONL file
@@ -111,6 +108,7 @@ def collect_api_responses(
         error_log_path = os.path.join(os.path.dirname(output_jsonl_path), "api_errors.json")
         save_error_log(error_log_path, errors)
 
+
 def process_batch(
     client: OpenInferESGClient,
     batch_records: List[Dict],
@@ -118,7 +116,7 @@ def process_batch(
     start_idx: int,
     total_records: int,
     enriched_records: List[Dict],
-    errors: List[Dict]
+    errors: List[Dict],
 ) -> None:
     """
     Process a batch of records
@@ -138,7 +136,7 @@ def process_batch(
 
         original_question = record["user_input"]
         file_question = f"Using the file {filename}, {original_question}"
-        print(f"Processing question {i+1}/{total_records}: {file_question[:70]}...")
+        print(f"Processing question {i + 1}/{total_records}: {file_question[:70]}...")
 
         # Check if we should skip due to too many timeouts
         if i > 0 and len(errors) >= 3 and all("timeout" in err.get("error", "").lower() for err in errors[-3:]):
@@ -171,6 +169,7 @@ def process_batch(
         # Add a delay between questions to avoid overwhelming the API
         time.sleep(5)
 
+
 def print_backend_help() -> None:
     """Print helpful information about starting the backend"""
     print("\n=============================================")
@@ -190,6 +189,7 @@ def print_backend_help() -> None:
     print("- Look for errors in logs: 'docker-compose logs backend'")
     print("=============================================\n")
 
+
 def main(file_path: Optional[str] = None, question_limit: Optional[int] = None) -> None:
     """
     Main function to run the entire process with file upload:
@@ -204,7 +204,7 @@ def main(file_path: Optional[str] = None, question_limit: Optional[int] = None) 
     # Get directory paths
     script_dir = os.path.dirname(os.path.abspath(__file__))
     utils_dir = os.path.dirname(script_dir)  # utils folder
-    ragas_dir = os.path.dirname(utils_dir)   # Ragas folder
+    ragas_dir = os.path.dirname(utils_dir)  # Ragas folder
 
     # Get the API URL
     api_url = os.environ.get("OPENINFERESG_API_URL", "http://localhost:8250")
@@ -219,7 +219,7 @@ def main(file_path: Optional[str] = None, question_limit: Optional[int] = None) 
     print("Step 1: Converting CSV to JSONL...")
 
     # Dynamically import csv_to_jsonl_converter.py from utils directory
-    converter_path = os.path.join(utils_dir, 'csv_to_jsonl_converter.py')
+    converter_path = os.path.join(utils_dir, "csv_to_jsonl_converter.py")
     try:
         # Add the utils directory to the Python path temporarily
         sys.path.insert(0, utils_dir)
@@ -244,8 +244,8 @@ def main(file_path: Optional[str] = None, question_limit: Optional[int] = None) 
         sys.exit(1)
 
     # Get the path of the created JSONL file
-    input_jsonl_path = os.path.join(ragas_dir, 'files', 'ragas_evaluation_dataset.jsonl')
-    output_jsonl_path = os.path.join(ragas_dir, 'files', 'ragas_evaluation_with_responses.jsonl')
+    input_jsonl_path = os.path.join(ragas_dir, "files", "ragas_evaluation_dataset.jsonl")
+    output_jsonl_path = os.path.join(ragas_dir, "files", "ragas_evaluation_with_responses.jsonl")
 
     # Require a file path to be provided
     if file_path is None:
@@ -259,6 +259,7 @@ def main(file_path: Optional[str] = None, question_limit: Optional[int] = None) 
 
     print("\nProcess completed successfully!")
     print(f"Final enriched JSONL file saved to: {output_jsonl_path}")
+
 
 def check_backend_status() -> None:
     """Check if the backend is running without running the full pipeline"""
@@ -277,6 +278,7 @@ def check_backend_status() -> None:
         print_backend_help()
 
     print("\n===========================")
+
 
 if __name__ == "__main__":
     # Check if we're just checking server status

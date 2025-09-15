@@ -38,5 +38,6 @@ def add_llm_file_upload(file_id: str, filename: str):
     files.append({"file_id": file_id, "filename": filename})
     redis_client.set(UPLOAD_SESSION_KEY, json.dumps(files))
 
+
 def reset_llm_file_uploads():
     redis_client.set(UPLOAD_SESSION_KEY, json.dumps([]))

@@ -3,12 +3,14 @@ from unittest.mock import AsyncMock, MagicMock
 
 import src.agents.report_agent as report_agent_module
 
+
 @pytest.fixture
 def mock_llm():
     llm = MagicMock()
     llm.chat_with_file = AsyncMock()
     llm.chat = AsyncMock()
     return llm
+
 
 @pytest.fixture
 def mock_engine(monkeypatch):
@@ -17,6 +19,7 @@ def mock_engine(monkeypatch):
     engine.load_template = MagicMock(side_effect=lambda template_name, **kwargs: f"template-{template_name}-{kwargs}")
     monkeypatch.setattr(report_agent_module, "engine", engine)
     return engine
+
 
 @pytest.fixture
 def mock_questions(monkeypatch):
@@ -27,10 +30,11 @@ def mock_questions(monkeypatch):
         ],
         "Social": [
             {"report_heading": "Soc Heading 1", "prompt": "Soc Q1"},
-        ]
+        ],
     }
     monkeypatch.setattr(report_agent_module, "QUESTIONS", mock_questions)
     return mock_questions
+
 
 @pytest.fixture
 def agent(mock_llm, mock_engine, mock_questions):
@@ -38,7 +42,9 @@ def agent(mock_llm, mock_engine, mock_questions):
         def __init__(self):
             self.llm = mock_llm
             self.model = "test-model"
+
     return DummyAgent()
+
 
 @pytest.mark.asyncio
 async def test_get_company_name(agent):
@@ -48,6 +54,7 @@ async def test_get_company_name(agent):
     assert result == "Test Company"
     agent.llm.chat_with_file.assert_awaited_once()
 
+
 @pytest.mark.asyncio
 async def test_create_report_synchronous(agent, mock_engine, mock_questions):
     agent.llm.chat_with_file.side_effect = [
@@ -55,7 +62,7 @@ async def test_create_report_synchronous(agent, mock_engine, mock_questions):
         "Env Answer 1",
         "Env Answer 2",
         "Soc Answer 1",
-        "Materiality text"
+        "Materiality text",
     ]
     agent.llm.chat.return_value = "Conclusion text"
     file = MagicMock()
@@ -70,6 +77,7 @@ async def test_create_report_synchronous(agent, mock_engine, mock_questions):
     assert "Conclusion text" in result
     assert "report-template" in result
 
+
 @pytest.mark.asyncio
 async def test_create_report_synchronous_no_materiality(agent, mock_engine):
     agent.llm.chat_with_file.side_effect = [
@@ -77,11 +85,11 @@ async def test_create_report_synchronous_no_materiality(agent, mock_engine):
         "Env Answer 1",
         "Env Answer 2",
         "Soc Answer 1",
-        "Materiality text"
+        "Materiality text",
     ]
     agent.llm.chat.return_value = "Conclusion text"
     file = MagicMock()
     materiality_topics = {}
 
     await agent.create_report_synchronous(file, materiality_topics)
-    assert "No Materiality topics identified." in mock_engine.load_prompt.call_args_list[5][1]['materiality']
+    assert "No Materiality topics identified." in mock_engine.load_prompt.call_args_list[5][1]["materiality"]

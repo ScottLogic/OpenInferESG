@@ -31,18 +31,14 @@ def list_excluded_agents(chat_agent_failures: list[ChatAgentFailure]) -> list[st
 
 
 async def select_tool_for_question(
-    task: str,
-    chat_agent_failures: list[ChatAgentFailure]
+    task: str, chat_agent_failures: list[ChatAgentFailure]
 ) -> Tuple[ChatAgent | None, str, dict[str, Any]]:
     if not config.router_model:
         raise Exception("Router config model missing")
 
     excluded_agents = list_excluded_agents(chat_agent_failures)
 
-    agents = [
-        agent.get_agent_details()
-        for agent in get_chat_agents() if agent.name not in excluded_agents
-    ]
+    agents = [agent.get_agent_details() for agent in get_chat_agents() if agent.name not in excluded_agents]
     logger.info("#####  ~  Calling LLM for next best step  ~  #####")
     logger.info(f"Agents: {agents}")
     logger.info(f"Excluded agents: {excluded_agents}")
@@ -54,10 +50,10 @@ async def select_tool_for_question(
             "agent-selection-user-prompt",
             list_of_agents_and_tools=agents,
             agent_failure_message=create_agent_failure_message(chat_agent_failures, excluded_agents),
-            question=task
+            question=task,
         ),
         agent="router",
-        return_json=True
+        return_json=True,
     )
 
     best_next_step = to_json(best_next_step_response, "Failed to interpret LLM next step format from step string")

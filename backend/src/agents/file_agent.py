@@ -18,7 +18,7 @@ def generate_files_description(self) -> str:
     file_meta = get_session_file_uploads_meta() or []
     filenames = [file["filename"] for file in file_meta]
 
-    return f"Extract parts of the following files {", ".join(filenames)}"
+    return f"Extract parts of the following files {', '.join(filenames)}"
 
 
 @tool(
@@ -47,16 +47,12 @@ async def read_file(user_question, filename: str, llm, model) -> ToolActionSucce
         user_prompt=user_question,
         files=[LLMFile(file["filename"], bytes())],
         agent="file_agent",
-        return_json=True
+        return_json=True,
     )
 
     return ToolActionSuccess(to_json(final_info))
 
 
-@chat_agent(
-    name="FileAgent",
-    description=generate_files_description,
-    tools=[read_file]
-)
+@chat_agent(name="FileAgent", description=generate_files_description, tools=[read_file])
 class FileAgent(BaseChatAgent):
     pass

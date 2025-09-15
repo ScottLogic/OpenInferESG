@@ -17,6 +17,7 @@ def test_to_json_failure():
 
     assert str(error.value) == f'Failed to interpret JSON: "{input}"'
 
+
 def test_try_pretty_print():
     obj = {"key": "value", "error": Exception("some error")}
     output = try_pretty_print(obj)

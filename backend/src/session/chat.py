@@ -7,8 +7,9 @@ logger = logging.getLogger(__name__)
 
 CHAT_SESSION_KEY = "chat"
 
+
 class Message(TypedDict):
-    role: str | None # user or system
+    role: str | None  # user or system
     content: str | None
 
 

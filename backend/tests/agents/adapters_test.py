@@ -17,12 +17,12 @@ def test_given_valid_params_then_extract_tool_success():
 
 
 def test_given_incorrect_tool_then_extract_tool_throws_tool_not_found():
-    with pytest.raises(Exception, match="Unable to find tool \"Mock Tool Z\" in available tools"):
+    with pytest.raises(Exception, match='Unable to find tool "Mock Tool Z" in available tools'):
         extract_tool("Mock Tool Z", mock_tools, valid_params)
 
 
 def test_given_empty_tool_name_then_extract_tool_throws_tool_not_found():
-    with pytest.raises(Exception, match="Unable to find tool \"\" in available tools"):
+    with pytest.raises(Exception, match='Unable to find tool "" in available tools'):
         extract_tool("", mock_tools, valid_params)
 
 
@@ -34,9 +34,7 @@ def test_when_given_parameter_that_does_not_exist_then_extract_tool_throws_inval
 
 
 def test_when_given_input_missing_an_optional_parameter_then_extract_tool_succeeds():
-    missing_optional_params = {
-        "input": "An example string value for input"
-    }
+    missing_optional_params = {"input": "An example string value for input"}
     assert extract_tool(mock_tool_a_name, mock_tools, missing_optional_params) == mock_tool_a
 
 
@@ -52,10 +50,7 @@ def test_when_given_input_missing_a_required_parameter_then_extract_tool_throws_
 
 
 def test_when_given_incorrect_parameter_and_missing_required_parameter_then_extract_tool_throws_exception():
-    bad_params = {
-        "optional": "An example optional string value for optional",
-        "incorrect_param": "incorrect"
-    }
+    bad_params = {"optional": "An example optional string value for optional", "incorrect_param": "incorrect"}
     with pytest.raises(Exception) as exception:
         extract_tool(mock_tool_a_name, mock_tools, bad_params)
     assert "Unknown Parameters: {'incorrect_param'}." in exception.value.args[0]

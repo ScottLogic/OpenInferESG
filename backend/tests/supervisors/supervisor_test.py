@@ -8,7 +8,7 @@ from src.supervisors import (
     solve_question,
     no_questions_response,
     unsolvable_response,
-    no_agent_response
+    no_agent_response,
 )
 
 mock_model = "mockmodel"
@@ -48,11 +48,10 @@ async def test_solve_questions(mocker):
     chat_agent_success_1 = ChatAgentSuccess("MockChatAgent", "mock answer 1")
     chat_agent_success_2 = ChatAgentSuccess("MockChatAgent", "mock answer 2")
     chat_agent.invoke = mocker.AsyncMock(side_effect=[chat_agent_success_1, chat_agent_success_2])
-    spy_invoke = mocker.spy(chat_agent, 'invoke')
+    spy_invoke = mocker.spy(chat_agent, "invoke")
 
     patched_get_agent = mocker.patch(
-        "src.supervisors.supervisor.select_tool_for_question",
-        return_value=(chat_agent, mock_tool_a_name, {})
+        "src.supervisors.supervisor.select_tool_for_question", return_value=(chat_agent, mock_tool_a_name, {})
     )
     mock_scratchpad = mocker.patch("src.supervisors.supervisor.update_scratchpad")
     await solve_questions(["question1", "question2"])
@@ -68,11 +67,10 @@ async def test_solve_questions(mocker):
 async def test_solve_question_when_first_agent_succeeds(mocker):
     expected = ChatAgentSuccess("MockChatAgent", mock_answer)
     chat_agent.invoke = mocker.AsyncMock(return_value=expected)
-    spy_invoke = mocker.spy(chat_agent, 'invoke')
+    spy_invoke = mocker.spy(chat_agent, "invoke")
 
     patched_get_agent = mocker.patch(
-        "src.supervisors.supervisor.select_tool_for_question",
-        return_value=(chat_agent, mock_tool_a_name, {})
+        "src.supervisors.supervisor.select_tool_for_question", return_value=(chat_agent, mock_tool_a_name, {})
     )
     answer = await solve_question(task)
 
@@ -84,15 +82,13 @@ async def test_solve_question_when_first_agent_succeeds(mocker):
 @pytest.mark.asyncio
 async def test_solve_question_when_agent_fails_first_attempt_and_succeeds_on_retry(mocker):
     expected = ChatAgentSuccess("MockChatAgent", mock_answer)
-    chat_agent.invoke = mocker.AsyncMock(side_effect=[
-        ChatAgentFailure("MockChatAgent", "failure", retry=True),
-        expected
-    ])
-    spy_invoke = mocker.spy(chat_agent, 'invoke')
+    chat_agent.invoke = mocker.AsyncMock(
+        side_effect=[ChatAgentFailure("MockChatAgent", "failure", retry=True), expected]
+    )
+    spy_invoke = mocker.spy(chat_agent, "invoke")
 
     patched_get_agent = mocker.patch(
-        "src.supervisors.supervisor.select_tool_for_question",
-        return_value=(chat_agent, mock_tool_a_name, {})
+        "src.supervisors.supervisor.select_tool_for_question", return_value=(chat_agent, mock_tool_a_name, {})
     )
     answer = await solve_question(task)
 
@@ -111,12 +107,12 @@ async def test_solve_question_when_first_agent_fails_no_retry_and_second_agent_s
     good_agent.invoke = mocker.AsyncMock(return_value=expected)
     bad_agent.invoke = mocker.AsyncMock(return_value=ChatAgentFailure("MockChatAgent", "failure"))
 
-    good_agent_spy_invoke = mocker.spy(good_agent, 'invoke')
-    bad_agent_spy_invoke = mocker.spy(bad_agent, 'invoke')
+    good_agent_spy_invoke = mocker.spy(good_agent, "invoke")
+    bad_agent_spy_invoke = mocker.spy(bad_agent, "invoke")
 
     patched_get_agent = mocker.patch(
         "src.supervisors.supervisor.select_tool_for_question",
-        side_effect=[(bad_agent, mock_tool_a_name, {}), (good_agent, mock_tool_a_name, {})]
+        side_effect=[(bad_agent, mock_tool_a_name, {}), (good_agent, mock_tool_a_name, {})],
     )
     answer = await solve_question(task)
 
@@ -132,20 +128,16 @@ async def test_solve_question_when_no_agents_succeed_will_default_to_generalist(
 
     bad_agent = MockChatAgent("mockllm", mock_model)
     bad_agent.invoke = mocker.AsyncMock(return_value=ChatAgentFailure("MockChatAgent", "failure", retry=True))
-    bad_agent_spy_invoke = mocker.spy(bad_agent, 'invoke')
+    bad_agent_spy_invoke = mocker.spy(bad_agent, "invoke")
 
     generalist_agent = GeneralistAgent("mockllm", mock_model)
     generalist_agent.generalist_answer = mocker.AsyncMock(return_value=expected)
-    generalist_agent_spy_invoke = mocker.spy(generalist_agent, 'generalist_answer')
+    generalist_agent_spy_invoke = mocker.spy(generalist_agent, "generalist_answer")
 
     patched_get_agent = mocker.patch(
-        "src.supervisors.supervisor.select_tool_for_question",
-        return_value=(bad_agent, mock_tool_a_name, {})
+        "src.supervisors.supervisor.select_tool_for_question", return_value=(bad_agent, mock_tool_a_name, {})
     )
-    patched_generalist = mocker.patch(
-        "src.supervisors.supervisor.get_generalist_agent",
-        return_value=generalist_agent
-    )
+    patched_generalist = mocker.patch("src.supervisors.supervisor.get_generalist_agent", return_value=generalist_agent)
     answer = await solve_question(task)
 
     assert patched_get_agent.call_count == 4

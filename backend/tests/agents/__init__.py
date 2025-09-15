@@ -56,9 +56,7 @@ async def mock_tool_failure(input: str, retry: bool, llm, model) -> ToolActionSu
 @tool(
     name=mock_utterance_tool_name,
     description="Used for mocking a failure response from the tool",
-    parameters={
-        **CommonParameters.USER_QUESTION
-    }
+    parameters={**CommonParameters.USER_QUESTION},
 )
 async def mock_utterance_tool(user_question: str, llm, model) -> ToolActionSuccess | ToolActionFailure:
     return ToolActionSuccess(user_question)
@@ -66,6 +64,7 @@ async def mock_utterance_tool(user_question: str, llm, model) -> ToolActionSucce
 
 def agent_desc(agent: ChatAgent) -> str:
     return f"A test agent called {agent.name}"
+
 
 mock_agent_description = agent_desc
 mock_agent_name = "Mock Agent"
@@ -91,5 +90,5 @@ __all__ = [
     "mock_tool_a_name",
     "mock_tool_b_name",
     "mock_tool_failure_name",
-    "mock_utterance_tool_name"
+    "mock_utterance_tool_name",
 ]

@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 def extract_tool(tool_name: str, agent_tools: List[Tool], parameters: dict[str, Any]) -> Tool:
     tool = next((tool for tool in agent_tools if tool.name == tool_name), None)
     if not tool:
-        raise Exception(f"Unable to find tool \"{tool_name}\" in available tools")
+        raise Exception(f'Unable to find tool "{tool_name}" in available tools')
     validate_args(tool, parameters)
     return tool
 

@@ -82,13 +82,15 @@ async def scrape_content(url, limit=100000) -> str:
 
 
 async def summarise_content(search_query, contents, llm, model) -> str | None:
-    response = json.loads(await llm.chat(
-        model,
-        engine.load_prompt("web_page_scrape_summary_system_prompt", question=search_query, content=contents),
-        "",
-        agent="web-scraper",
-        return_json=True
-    ))
+    response = json.loads(
+        await llm.chat(
+            model,
+            engine.load_prompt("web_page_scrape_summary_system_prompt", question=search_query, content=contents),
+            "",
+            agent="web-scraper",
+            return_json=True,
+        )
+    )
     if "relevant" in response and response["relevant"].lower() == "true" and "summary" in response:
         return response["summary"]
     return None

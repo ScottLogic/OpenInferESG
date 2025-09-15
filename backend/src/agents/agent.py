@@ -75,20 +75,17 @@ class ChatAgent(Agent):
                 {
                     "name": tool.name,
                     "description": tool.description,
-                    "parameters": {
-                        key: dataclasses.asdict(parameter) for key, parameter in tool.parameters.items()
-                    }
+                    "parameters": {key: dataclasses.asdict(parameter) for key, parameter in tool.parameters.items()},
                 }
                 for tool in self.tools
-            ]
+            ],
         }
 
 
-T = TypeVar('T', bound=ChatAgent)
+T = TypeVar("T", bound=ChatAgent)
 
 
 def chat_agent(name: str, description: str | Callable, tools: List[Tool]):
-
     def decorator(_chat_agent: Type[T]) -> Type[T]:
         setattr(_chat_agent, "name", name)
         if callable(description):

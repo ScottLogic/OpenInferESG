@@ -11,5 +11,5 @@ __all__ = [
     "CypherQuery",
     "clear_session_cypher_query",
     "get_session_cypher_query",
-    "update_session_cypher_query"
+    "update_session_cypher_query",
 ]
