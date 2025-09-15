@@ -22,13 +22,13 @@ class LMStudio(LLM):
     """
 
     async def chat(
-            self,
-            model,
-            system_prompt: str,
-            user_prompt: str,
-            agent: str,
-            return_json=False,
-            timeout: ClientTimeout | None = None
+        self,
+        model,
+        system_prompt: str,
+        user_prompt: str,
+        agent: str,
+        return_json=False,
+        timeout: ClientTimeout | None = None,
     ) -> str:
         logger.debug(
             "Called LMStudio llm. Waiting on response with prompt {0}.".format(str([system_prompt, user_prompt]))
@@ -198,7 +198,7 @@ class LMStudio(LLM):
         files: list[LLMFile],
         agent: str,
         return_json=False,
-        timeout: ClientTimeout | None = None
+        timeout: ClientTimeout | None = None,
     ) -> str:
         try:
             file_contents = []

@@ -74,7 +74,7 @@ def get_chat_agents() -> List[ChatAgent]:
             DatastoreAgent(config.datastore_agent_llm, config.datastore_agent_model),
             WebAgent(config.web_agent_llm, config.web_agent_model),
             MaterialityAgent(config.materiality_agent_llm, config.materiality_agent_model),
-            FileAgent(config.file_agent_llm, config.file_agent_model)
+            FileAgent(config.file_agent_llm, config.file_agent_model),
         ]
 
 
@@ -90,5 +90,5 @@ __all__ = [
     "get_materiality_agent",
     "get_generalist_agent",
     "Parameter",
-    "tool"
+    "tool",
 ]

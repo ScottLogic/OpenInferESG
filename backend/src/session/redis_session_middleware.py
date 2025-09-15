@@ -26,7 +26,7 @@ class RedisSessionMiddleware(BaseHTTPMiddleware):
 
         redis_healthy = test_redis_connection()
 
-        if (not redis_healthy or ignore_request(request)):
+        if not redis_healthy or ignore_request(request):
             response = await call_next(request)
         else:
             session_data = get_redis_session(request)
@@ -39,9 +39,9 @@ class RedisSessionMiddleware(BaseHTTPMiddleware):
                 SESSION_COOKIE_NAME,
                 session_id,
                 domain=request.url.hostname,
-                samesite='strict',
+                samesite="strict",
                 httponly=True,
-                secure=config.redis_host != "redis"
+                secure=config.redis_host != "redis",
             )
 
             redis_client.set(session_id, json.dumps(request.state.session))
@@ -51,7 +51,7 @@ class RedisSessionMiddleware(BaseHTTPMiddleware):
 
 def ignore_request(request: Request) -> bool:
     # prevent generating new session for each health check request
-    return request.url.path == '/health' or request.method == 'OPTIONS'
+    return request.url.path == "/health" or request.method == "OPTIONS"
 
 
 def get_session(key: str, default: Optional[list] = None):
@@ -84,4 +84,3 @@ def get_redis_session(request: Request):
             if parsed_session_data:
                 return parsed_session_data
     return {}
-

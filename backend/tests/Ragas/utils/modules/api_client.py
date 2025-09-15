@@ -1,11 +1,13 @@
 """
 API Client for interacting with the OpenInferESG API.
 """
+
 import requests
 import time
 import socket
 import uuid
 from typing import Dict, Optional, Any, Tuple
+
 
 class OpenInferESGClient:
     def __init__(self, api_url: str = "http://localhost:8250"):
@@ -19,15 +21,13 @@ class OpenInferESGClient:
         self.chat_endpoint = f"{api_url}/chat"
         self.upload_endpoint = f"{api_url}/report"
         self.session = requests.Session()
-        self.session.headers.update({
-            "User-Agent": "OpenInferESG-Script/1.0",
-            "Accept": "application/json",
-            "Connection": "keep-alive"
-        })
+        self.session.headers.update(
+            {"User-Agent": "OpenInferESG-Script/1.0", "Accept": "application/json", "Connection": "keep-alive"}
+        )
         self.session.cookies.clear()
         id = str(uuid.uuid4())
         self.session.cookies.set("session_id", id)
-        print("Session ID: {id}")
+        print(f"Session ID: {id}")
 
     def check_availability(self) -> bool:
         """
@@ -86,17 +86,17 @@ class OpenInferESGClient:
             File ID if successful, None otherwise
         """
         try:
-            with open(file_path, 'rb') as f:
-                files = {'file': (file_path.split('/')[-1], f)}
+            with open(file_path, "rb") as f:
+                files = {"file": (file_path.split("/")[-1], f)}
                 upload_response = self.session.post(
                     self.upload_endpoint,
                     files=files,
-                    timeout=300  # 5 minute timeout
+                    timeout=300,  # 5 minute timeout
                 )
 
             if upload_response.status_code == 200:
                 upload_data = upload_response.json()
-                return upload_data.get('id')
+                return upload_data.get("id")
             else:
                 print(f"Upload failed with status {upload_response.status_code}: {upload_response.text}")
                 return None
@@ -122,11 +122,7 @@ class OpenInferESGClient:
 
         while time.time() - start_time < max_wait_time:
             try:
-                response = self.session.get(
-                    report_endpoint,
-                    headers={"Accept": "text/markdown"},
-                    timeout=10
-                )
+                response = self.session.get(report_endpoint, headers={"Accept": "text/markdown"}, timeout=10)
 
                 if response.status_code == 200:
                     print(f"Report generation completed after {time.time() - start_time:.1f} seconds")
@@ -159,11 +155,7 @@ class OpenInferESGClient:
         for attempt in range(retries):
             try:
                 params = {"utterance": question}
-                response = self.session.get(
-                    self.chat_endpoint,
-                    params=params,
-                    timeout=timeout
-                )
+                response = self.session.get(self.chat_endpoint, params=params, timeout=timeout)
 
                 if response.status_code == 200:
                     return response.json(), None

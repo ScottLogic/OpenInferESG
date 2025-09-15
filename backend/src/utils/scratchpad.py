@@ -15,27 +15,32 @@ class Answer(TypedDict):
     error: str | None
     timestamp: str
 
+
 scratchpad_context = contextvars.ContextVar("scratchpad", default=[])
 
 Scratchpad = list[Answer]
+
 
 class ScratchPadMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
         scratchpad_context.set([])
         return await call_next(request)
 
+
 def get_scratchpad() -> Scratchpad:
     return scratchpad_context.get()
 
 
 def update_scratchpad(agent_name=None, question=None, result=None, error=None):
-    get_scratchpad().append({
-        "agent_name": agent_name,
-        "question": question,
-        "result": result,
-        "error": error,
-        "timestamp": str(datetime.now())
-    })
+    get_scratchpad().append(
+        {
+            "agent_name": agent_name,
+            "question": question,
+            "result": result,
+            "error": error,
+            "timestamp": str(datetime.now()),
+        }
+    )
 
 
 def clear_scratchpad():

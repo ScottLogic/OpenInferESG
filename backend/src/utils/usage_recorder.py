@@ -66,7 +66,7 @@ class ConsoleUsageRecorder(UsageRecorder):
                 "agent": agent,
                 "token_usage": token_usage,
                 "duration": duration,
-                "power_usage": power_usage
+                "power_usage": power_usage,
             }
         )
 

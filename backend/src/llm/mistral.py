@@ -66,7 +66,7 @@ class Mistral(LLM):
         files: list[LLMFile],
         agent: str,
         return_json=False,
-        timeout=None
+        timeout=None,
     ) -> str:
         try:
             for file in files:

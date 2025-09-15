@@ -22,7 +22,7 @@ class ReportAgent(Agent):
                     system_prompt=engine.load_prompt("create-report-overview"),
                     user_prompt="Generate an ESG report about the attached document.",
                     files=[file],
-                    agent="report"
+                    agent="report",
                 ),
             )
 
@@ -36,7 +36,7 @@ class ReportAgent(Agent):
                                 system_prompt=engine.load_prompt("report-question-system-prompt"),
                                 user_prompt=question["prompt"],
                                 files=[file],
-                                agent="report"
+                                agent="report",
                             ),
                         ),
                     }
@@ -51,7 +51,7 @@ class ReportAgent(Agent):
                     system_prompt=engine.load_prompt("create-report-materiality"),
                     user_prompt=engine.load_prompt("create-report-materiality-user-prompt", materiality=materiality),
                     files=[file],
-                    agent="report"
+                    agent="report",
                 ),
             )
 
@@ -72,14 +72,14 @@ class ReportAgent(Agent):
             self.model,
             system_prompt=engine.load_prompt("create-report-conclusion"),
             user_prompt=f"The document is as follows\n{report}",
-            agent="report"
+            agent="report",
         )
 
         return f"{report}\n\n{report_conclusion}"
 
     async def create_report_synchronous(self, file: LLMFile, materiality_topics: dict[str, str]) -> str:
         materiality = materiality_topics if materiality_topics else "No Materiality topics identified."
-        timeout = ClientTimeout(total=60*10)
+        timeout = ClientTimeout(total=60 * 10)
 
         logger.info("Starting report generation process")
         overview = await self.llm.chat_with_file(
@@ -88,26 +88,26 @@ class ReportAgent(Agent):
             user_prompt="Generate an ESG report about the attached document.",
             files=[file],
             agent="report",
-            timeout=timeout
+            timeout=timeout,
         )
 
         categorized_tasks = {
-                category: [
-                    {
-                        "report_heading": question["report_heading"],
-                        "task": await self.llm.chat_with_file(
-                            self.model,
-                            system_prompt=engine.load_prompt("report-question-system-prompt"),
-                            user_prompt=question["prompt"],
-                            files=[file],
-                            agent="report",
-                            timeout=timeout
-                        ),
-                    }
-                    for question in QUESTIONS[category]
-                ]
-                for category in QUESTIONS.keys()
-            }
+            category: [
+                {
+                    "report_heading": question["report_heading"],
+                    "task": await self.llm.chat_with_file(
+                        self.model,
+                        system_prompt=engine.load_prompt("report-question-system-prompt"),
+                        user_prompt=question["prompt"],
+                        files=[file],
+                        agent="report",
+                        timeout=timeout,
+                    ),
+                }
+                for question in QUESTIONS[category]
+            ]
+            for category in QUESTIONS.keys()
+        }
 
         logger.info("Processing materiality section")
         materiality = await self.llm.chat_with_file(
@@ -116,7 +116,7 @@ class ReportAgent(Agent):
             user_prompt=engine.load_prompt("create-report-materiality-user-prompt", materiality=materiality),
             files=[file],
             agent="report",
-            timeout=timeout
+            timeout=timeout,
         )
 
         esg_report_result = ""
@@ -136,7 +136,7 @@ class ReportAgent(Agent):
             self.model,
             system_prompt=engine.load_prompt("create-report-conclusion"),
             user_prompt=f"The document is as follows\n{report}",
-            agent="report"
+            agent="report",
         )
 
         return f"{report}\n\n{report_conclusion}"
@@ -148,6 +148,6 @@ class ReportAgent(Agent):
             user_prompt=engine.load_prompt("find-company-name-from-file-user-prompt"),
             files=[file],
             agent="report",
-            return_json=False
+            return_json=False,
         )
         return response

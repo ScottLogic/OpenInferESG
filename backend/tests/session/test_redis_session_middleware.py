@@ -4,19 +4,16 @@ from unittest.mock import patch, MagicMock
 from uuid import uuid4
 from starlette.requests import Request
 from starlette.responses import Response
-from src.session.redis_session_middleware import (
-    get_session,
-    reset_session,
-    set_session,
-    get_redis_session
-)
+from src.session.redis_session_middleware import get_session, reset_session, set_session, get_redis_session
+
 
 @pytest.fixture
 def mock_redis():
-    with patch('src.session.redis_session_middleware.redis_client') as mock_redis:
+    with patch("src.session.redis_session_middleware.redis_client") as mock_redis:
         mock_instance = MagicMock()
         mock_redis.return_value = mock_instance
         yield mock_instance
+
 
 @pytest.fixture
 def mock_request():
@@ -26,18 +23,22 @@ def mock_request():
     request.state.session.get.return_value = {}
     return request
 
+
 @pytest.fixture
 def mock_call_next():
     async def call_next(request):
         return Response("test response")
+
     return call_next
+
 
 @pytest.fixture
 def mock_request_context():
-    with patch('src.session.redis_session_middleware.request_context'):
+    with patch("src.session.redis_session_middleware.request_context"):
         mock_instance = MagicMock()
         mock_instance.get.return_value.state.session = {}
         yield mock_instance
+
 
 def test_get_session(mocker, mock_request_context):
     mocker.patch("src.session.redis_session_middleware.request_context", mock_request_context)
@@ -64,6 +65,7 @@ def test_get_redis_session(mocker, mock_request, mock_redis):
 
     assert result == {"user_id": 1}
     mock_redis.get.assert_called_once_with(session_id)
+
 
 def test_reset_session(mocker, mock_request_context):
     mocker.patch("src.session.redis_session_middleware.request_context", mock_request_context)

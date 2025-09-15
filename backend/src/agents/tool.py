@@ -10,9 +10,7 @@ class Parameter:
 
 
 class CommonParameters:
-    USER_QUESTION = {
-        "user_question": Parameter("string", "The full question asked by the user.")
-    }
+    USER_QUESTION = {"user_question": Parameter("string", "The full question asked by the user.")}
 
 
 ToolAnswerType = str | list[Any] | dict[str, Any]
@@ -40,11 +38,7 @@ class Tool:
     parameters: dict[str, Parameter]
 
 
-def tool(
-    name: str,
-    description: str,
-    parameters: dict[str, Parameter]
-) -> Callable[[ToolAction], Tool]:
+def tool(name: str, description: str, parameters: dict[str, Parameter]) -> Callable[[ToolAction], Tool]:
     def create_tool_from(action: ToolAction) -> Tool:
         return Tool(name, description, action, parameters)
 

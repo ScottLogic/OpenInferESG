@@ -95,7 +95,7 @@ class OpenAI(LLM):
         files: list[LLMFile],
         agent: str,
         return_json=False,
-        timeout=None
+        timeout=None,
     ) -> str:
         client = AsyncOpenAI(api_key=config.openai_key)
         start_time = time.time()

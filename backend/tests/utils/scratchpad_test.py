@@ -15,7 +15,7 @@ def test_scratchpad():
             "question": "example question",
             "result": "example result",
             "error": None,
-            "timestamp": ANY
+            "timestamp": ANY,
         }
     ]
 
