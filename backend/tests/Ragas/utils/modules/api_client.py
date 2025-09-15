@@ -27,7 +27,7 @@ class OpenInferESGClient:
         self.session.cookies.clear()
         id = str(uuid.uuid4())
         self.session.cookies.set("session_id", id)
-        print("Session ID: {id}")
+        print(f"Session ID: {id}")
 
     def check_availability(self) -> bool:
         """
