@@ -21,11 +21,9 @@ class OpenInferESGClient:
         self.chat_endpoint = f"{api_url}/chat"
         self.upload_endpoint = f"{api_url}/report"
         self.session = requests.Session()
-        self.session.headers.update({
-            "User-Agent": "OpenInferESG-Script/1.0",
-            "Accept": "application/json",
-            "Connection": "keep-alive"
-        })
+        self.session.headers.update(
+            {"User-Agent": "OpenInferESG-Script/1.0", "Accept": "application/json", "Connection": "keep-alive"}
+        )
         self.session.cookies.clear()
         id = str(uuid.uuid4())
         self.session.cookies.set("session_id", id)
