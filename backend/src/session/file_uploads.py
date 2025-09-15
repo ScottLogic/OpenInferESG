@@ -80,7 +80,7 @@ def get_file_content_for_filename(filename: str) -> str | None:
     return None
 
 
-def set_file_content_for_filename(filename: str, content:str):
+def set_file_content_for_filename(filename: str, content: str):
     file_meta = get_file_meta_for_filename(filename)
     if file_meta:
         file = get_session_file_upload(file_meta["id"])
@@ -114,7 +114,7 @@ def clear_session_file_uploads():
 def get_uploaded_report() -> ReportResponse | None:
     session_file_meta = get_session_file_uploads_meta()
     if session_file_meta:
-        upload_id = session_file_meta[0]['id']
+        upload_id = session_file_meta[0]["id"]
         return get_report(upload_id)
     else:
         logger.warning("No session report uploads found.")

@@ -80,7 +80,7 @@ class LLM(ABC, metaclass=LLMMeta):
         files: list[LLMFile],
         agent: str,
         return_json: bool = False,
-        timeout: ClientTimeout | None = None
+        timeout: ClientTimeout | None = None,
     ) -> Coroutine:
         pass
 

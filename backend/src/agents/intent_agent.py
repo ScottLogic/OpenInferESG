@@ -21,8 +21,7 @@ class IntentAgent(Agent):
         session_report = get_uploaded_report()
         if session_report and session_report.get("filename") and session_report.get("report"):
             report_prompt = report_prompt_template.format(
-                filename=session_report.get("filename"),
-                report_content=session_report.get("report")
+                filename=session_report.get("filename"), report_content=session_report.get("report")
             )
         else:
             report_prompt = "There is no report content"
@@ -34,10 +33,7 @@ class IntentAgent(Agent):
                 chat_history=session_chat if session_chat else "There is no chat history",
                 report_prompt=report_prompt,
             ),
-            user_prompt=engine.load_prompt(
-                "intent",
-                question=utterance
-            ),
+            user_prompt=engine.load_prompt("intent", question=utterance),
             agent="intent",
-            return_json=True
+            return_json=True,
         )

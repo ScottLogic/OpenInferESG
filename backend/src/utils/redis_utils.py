@@ -8,6 +8,7 @@ config = Config()
 
 redis_client = redis.Redis(host=config.redis_host, port=6379)
 
+
 def test_redis_connection():
     connection_healthy = False
     try:

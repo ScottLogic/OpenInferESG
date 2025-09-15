@@ -57,6 +57,7 @@ def populate_db(query, data) -> None:
     finally:
         driver.close()
 
+
 def is_db_populated() -> bool:
     has_data = False
     try:

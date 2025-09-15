@@ -168,7 +168,7 @@ async def report(file: UploadFile, background_tasks: BackgroundTasks):
         return JSONResponse(status_code=500, content=file_upload_failed_response)
 
 
-async def generate_report(file_contents: bytes, filename: str, file_id: str ):
+async def generate_report(file_contents: bytes, filename: str, file_id: str):
     try:
         logger.info(f"Generating report for file: {filename} with ID: {file_id}")
         progress_message = Message(type=MessageTypes.REPORT_IN_PROGRESS, data="Report generation started")
@@ -192,6 +192,7 @@ async def generate_report(file_contents: bytes, filename: str, file_id: str ):
         logger.exception(f"Error generating report: {e}")
         error_message = Message(type=MessageTypes.REPORT_FAILED, data="Report generation failed")
         await connection_manager.broadcast(error_message)
+
 
 @app.get("/report/{id}")
 def download_report(id: str):

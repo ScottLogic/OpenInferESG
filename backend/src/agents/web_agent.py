@@ -4,12 +4,7 @@ from src.agents.agent import chat_agent
 from src.agents.base_chat_agent import BaseChatAgent
 from src.agents.tool import tool, Parameter, ToolActionSuccess, ToolActionFailure
 from src.utils import Config
-from src.utils.web_utils import (
-    search_urls,
-    scrape_content,
-    summarise_content,
-    summarise_pdf_content
-)
+from src.utils.web_utils import search_urls, scrape_content, summarise_content, summarise_pdf_content
 import aiohttp
 import io
 from pypdf import PdfReader
@@ -137,7 +132,9 @@ async def perform_scrape(url: str) -> str:
     try:
         if not str(url).startswith("https"):
             return ""
-        scrape_result_json = await scrape_content(url, )
+        scrape_result_json = await scrape_content(
+            url,
+        )
         scrape_result = json.loads(scrape_result_json)
         if scrape_result["status"] == "error":
             return ""
@@ -162,7 +159,7 @@ async def perform_pdf_summarization(content: str, llm: Any, model: str) -> str:
 @chat_agent(
     name="WebAgent",
     description="This agent can search the internet to answer questions which require current information or general "
-                "ESG or company related questions.",
+    "ESG or company related questions.",
     tools=[web_general_search],
 )
 class WebAgent(BaseChatAgent):

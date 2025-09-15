@@ -81,8 +81,8 @@ async def question(question: str) -> ChatResponse:
 
 
 async def __create_final_answer(question: str) -> FinalAnswer:
-    datastore_agents = [scratch for scratch in get_scratchpad() if scratch['agent_name'] == 'DatastoreAgent']
-    query_result = datastore_agents[-1]['result'] if datastore_agents else None
+    datastore_agents = [scratch for scratch in get_scratchpad() if scratch["agent_name"] == "DatastoreAgent"]
+    query_result = datastore_agents[-1]["result"] if datastore_agents else None
 
     message = await get_answer_agent().create_answer(question)
 
@@ -104,4 +104,3 @@ async def dataset_upload() -> None:
 
     populate_db(knowledge_graph_config["cypher_query"], csv_data)
     asyncio.create_task(initialize_semantic_layer())
-

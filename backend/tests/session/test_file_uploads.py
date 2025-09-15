@@ -108,6 +108,7 @@ def test_clear_session_file_uploads_meta(mocker, mock_redis, mock_request_contex
     mock_redis.delete.assert_any_call("file_upload_12345")
     mock_redis.delete.assert_any_call("report_12345")
 
+
 def test_store_report(mocker, mock_redis):
     mocker.patch("src.session.file_uploads.redis_client", mock_redis)
     report = ReportResponse(filename="test.txt", id="12", report="test report", answer="chat message")

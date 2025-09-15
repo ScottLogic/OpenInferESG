@@ -8,6 +8,7 @@ logger = logging.getLogger(__name__)
 
 CYPHER_QUERY_SESSION_KEY = "cypher_query"
 
+
 class CypherQuery(TypedDict):
     queryId: uuid.UUID
     cypher_query: str

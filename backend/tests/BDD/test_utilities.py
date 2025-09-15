@@ -23,9 +23,10 @@ async def send_prompt(prompt: str):
     start_response = client.get(START_ENDPOINT_URL.format(utterance=prompt))
     return start_response
 
+
 # Evaluators
 # Evaluation LLM
-llm = ChatOpenAI(api_key=config.openai_key, model="gpt-4o-mini", temperature=0, max_retries=2) # type: ignore
+llm = ChatOpenAI(api_key=config.openai_key, model="gpt-4o-mini", temperature=0, max_retries=2)  # type: ignore
 
 correctness_evaluator: StringEvaluator = load_evaluator(  # type: ignore
     EvaluatorType.LABELED_CRITERIA, criteria="correctness", llm=llm

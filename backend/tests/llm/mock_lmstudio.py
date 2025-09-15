@@ -2,6 +2,7 @@
 Mock version of the LMStudio class for testing without requiring real dependencies
 """
 
+
 class MockLMStudio:
     """
     Mock implementation of LMStudio for testing
@@ -18,24 +19,26 @@ class MockLMStudio:
         if "not JSON" in content:
             return "Error: The LLM returned invalid JSON format"
 
-        if '```json' in content:
+        if "```json" in content:
             # Extract from code block
             import re
-            code_block_pattern = r'```(?:json)?\s*([\s\S]*?)\s*```'
+
+            code_block_pattern = r"```(?:json)?\s*([\s\S]*?)\s*```"
             match = re.search(code_block_pattern, content)
             if match:
                 return match.group(1).strip()
 
-        if '{' in content and '}' in content and not content.strip().startswith('{'):
+        if "{" in content and "}" in content and not content.strip().startswith("{"):
             # Extract with regex
             import re
-            json_pattern = r'(\{[\s\S]*\})'
+
+            json_pattern = r"(\{[\s\S]*\})"
             match = re.search(json_pattern, content)
             if match:
                 return match.group(1)
 
         # Return as is if it looks like JSON
-        if content.strip().startswith('{') and content.strip().endswith('}'):
+        if content.strip().startswith("{") and content.strip().endswith("}"):
             return content
 
         return content

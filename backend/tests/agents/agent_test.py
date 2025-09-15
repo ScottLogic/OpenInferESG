@@ -26,18 +26,23 @@ def mock_response(tool_name: str, tool_parameters: dict[str, Any]) -> str:
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("pass_validation, expected", [
+@pytest.mark.parametrize(
+    "pass_validation, expected",
+    [
         (True, ChatAgentSuccess("MockChatAgentWithValidation", valid_params["input"])),
-        (False, ChatAgentFailure(
-            "MockChatAgentWithValidation",
-            "MockChatAgentWithValidation failed to create a response that would pass validation",
-            True
-        ))
+        (
+            False,
+            ChatAgentFailure(
+                "MockChatAgentWithValidation",
+                "MockChatAgentWithValidation failed to create a response that would pass validation",
+                True,
+            ),
+        ),
     ],
     ids=[
         "When appropriate tool selected, Chat Agent invokes func with params and passes validation then success result",
         "When appropriate tool selected, Chat Agent invokes func with params and fails validation then failure result",
-    ]
+    ],
 )
 async def test_chat_agent_invoke_tool(
     mocker,
@@ -57,22 +62,28 @@ async def test_chat_agent_invoke_tool(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("tool_name, expected", [
+@pytest.mark.parametrize(
+    "tool_name, expected",
+    [
         (
             "Mock Tool 1234",
-            ChatAgentFailure("MockChatAgent", "MockChatAgent raised the following exception: Unable to find "
-                                              "tool \"Mock Tool 1234\" in available tools")
+            ChatAgentFailure(
+                "MockChatAgent",
+                'MockChatAgent raised the following exception: Unable to find tool "Mock Tool 1234" in available tools',
+            ),
         ),
         (
             "",
-            ChatAgentFailure("MockChatAgent", "MockChatAgent raised the following exception: Unable to find "
-                                              "tool \"\" in available tools")
-        )
+            ChatAgentFailure(
+                "MockChatAgent",
+                'MockChatAgent raised the following exception: Unable to find tool "" in available tools',
+            ),
+        ),
     ],
     ids=[
         "When incorrect tool select then Chat Agent will return failure with reason",
-        "When \"\" tool selected then Chat Agent will return failure with reason",
-    ]
+        'When "" tool selected then Chat Agent will return failure with reason',
+    ],
 )
 async def test_chat_agent_tool_selection_failure(
     mocker,
@@ -84,30 +95,26 @@ async def test_chat_agent_tool_selection_failure(
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("input_params, expected", [
+@pytest.mark.parametrize(
+    "input_params, expected",
+    [
         (
             {"input": tool_input},
-            ChatAgentFailure("MockChatAgent", "MockChatAgent failed to create a response that would pass validation")
+            ChatAgentFailure("MockChatAgent", "MockChatAgent failed to create a response that would pass validation"),
         ),
         (
             {"input": tool_input, "retry:": False},
             ChatAgentFailure(
-                "MockChatAgent",
-                "MockChatAgent failed to create a response that would pass validation",
-                False
-            )
-        )
+                "MockChatAgent", "MockChatAgent failed to create a response that would pass validation", False
+            ),
+        ),
     ],
     ids=[
         "When mock failure tool selected, Chat Agent will return failure result with retry option",
         "When mock failure tool selected (no retry), Chat Agent will return failure result with no retry",
-    ]
+    ],
 )
-async def test_chat_agent_tool_failure(
-    mocker,
-    input_params: dict[str, str],
-    expected: str
-):
+async def test_chat_agent_tool_failure(mocker, input_params: dict[str, str], expected: str):
     with raises(Exception) as error:
         await mock_agent_instance.invoke("Mock task to solve", mock_tool_a_name, input_params)
 
