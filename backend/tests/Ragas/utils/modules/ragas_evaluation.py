@@ -3,6 +3,7 @@ RAGAS Evaluation Module
 ----------------------
 Core functions for running RAGAS evaluations on question-answering data.
 """
+
 import os
 from pathlib import Path
 from typing import Optional
@@ -19,7 +20,7 @@ from dotenv import load_dotenv
 
 # Find the project root (where .env is located)
 project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
-env_path = project_root / '.env'
+env_path = project_root / ".env"
 load_dotenv(dotenv_path=env_path)
 
 
@@ -53,7 +54,7 @@ def create_ragas_dataset(data):
             user_input=sample.get("user_input", ""),
             retrieved_contexts=[context for context in sample.get("reference_contexts", []) if context],
             response=sample.get("response", ""),
-            reference=reference  # Use either provided reference or first context
+            reference=reference,  # Use either provided reference or first context
         )
         samples.append(eval_sample)
 
@@ -82,7 +83,7 @@ def create_ragas_llm():
     # Create the ChatOpenAI model and wrap it with LangchainLLMWrapper
     chat_model = ChatOpenAI(
         model=model_name,
-        temperature=0  # Use temperature=0 for more consistent evaluations
+        temperature=0,  # Use temperature=0 for more consistent evaluations
     )
 
     # Initialize the OpenAIEmbeddings - pass API key through environment variable
@@ -95,8 +96,9 @@ def create_ragas_llm():
     return LangchainLLMWrapper(chat_model), ragas_embeddings
 
 
-async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] = None,
-                              skip_chart: bool = False) -> pd.DataFrame:
+async def evaluate_with_ragas(
+    jsonl_path: str, output_json_path: Optional[str] = None, skip_chart: bool = False
+) -> pd.DataFrame:
     """
     Evaluate responses using RAGAS metrics
 
@@ -117,7 +119,6 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
     data = load_jsonl_data(jsonl_path)
     print(f"Loaded {len(data)} samples for evaluation")
 
-
     try:
         # Create LLM and embeddings for evaluation
         llm, embeddings_wrapper = create_ragas_llm()
@@ -130,7 +131,7 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
         metrics = [
             FactualCorrectness(llm=llm),
             SemanticSimilarity(embeddings=embeddings_wrapper),
-            AnswerAccuracy(llm=llm)
+            AnswerAccuracy(llm=llm),
         ]
 
         # Run the evaluation
@@ -145,13 +146,15 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
 
         # Create results for each sample with placeholder metric values
         for i, sample in enumerate(samples):
-            result_data.append({
-                "question": sample.user_input,
-                **{metric: None for metric in expected_metrics}  # Initialize all metrics as None
-            })
+            result_data.append(
+                {
+                    "question": sample.user_input,
+                    **{metric: None for metric in expected_metrics},  # Initialize all metrics as None
+                }
+            )
 
         try:
-            if hasattr(results, 'to_pandas'):
+            if hasattr(results, "to_pandas"):
                 scores_df = results.to_pandas()
                 available_columns = list(scores_df.columns)
                 print(f"Results DataFrame columns: {available_columns}")
@@ -160,8 +163,9 @@ async def evaluate_with_ragas(jsonl_path: str, output_json_path: Optional[str] =
                 for i, (_, row) in enumerate(scores_df.iterrows()):
                     if i < len(result_data):
                         for col in available_columns:
-                            matching_metric = next((m for m in expected_metrics if m in col.lower()
-                                                     or col.lower() in m), None)
+                            matching_metric = next(
+                                (m for m in expected_metrics if m in col.lower() or col.lower() in m), None
+                            )
                             if matching_metric and i < len(result_data):
                                 result_data[i][matching_metric] = row[col]
         except Exception as e:

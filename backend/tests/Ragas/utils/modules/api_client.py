@@ -24,6 +24,10 @@ class OpenInferESGClient:
         self.session.headers.update(
             {"User-Agent": "OpenInferESG-Script/1.0", "Accept": "application/json", "Connection": "keep-alive"}
         )
+        self.session.cookies.clear()
+        id = str(uuid.uuid4())
+        self.session.cookies.set("session_id", id)
+        print(f"Session ID: {id}")
 
     def check_availability(self) -> bool:
         """

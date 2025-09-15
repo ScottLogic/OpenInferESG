@@ -8,18 +8,14 @@ import time
 from typing import List, Dict, Optional
 from pathlib import Path
 from modules.api_client import OpenInferESGClient
-from modules.data_utils import (
-    create_simplified_record,
-    read_jsonl,
-    write_jsonl,
-    save_error_log
-)
+from modules.data_utils import create_simplified_record, read_jsonl, write_jsonl, save_error_log
 from dotenv import load_dotenv
 
 # Find the project root (where .env is located)
 project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
-env_path = project_root / '.env'
+env_path = project_root / ".env"
 load_dotenv(dotenv_path=env_path)
+
 
 def collect_api_responses(
     input_jsonl_path: str,

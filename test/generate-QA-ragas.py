@@ -7,7 +7,6 @@ from ragas.metrics import faithfulness, answer_relevancy
 from ragas import EvaluationDataset, SingleTurnSample
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
 from dotenv import load_dotenv
 
 # Load the OpenAI API key

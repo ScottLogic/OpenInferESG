@@ -3,12 +3,14 @@ RAGAS Evaluation Utilities
 --------------------------
 Utility functions for RAGAS evaluation, including file loading, API key setup, etc.
 """
+
 import os
 import sys
 import json
 from typing import List, Dict, Any
 from dotenv import load_dotenv
 from pathlib import Path
+
 
 def setup_api_key() -> None:
     """
@@ -20,7 +22,7 @@ def setup_api_key() -> None:
     """
     # Find the project root (where .env is located)
     project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
-    env_path = project_root / '.env'
+    env_path = project_root / ".env"
     load_dotenv(dotenv_path=env_path)
 
     # Check if API key is available
@@ -29,6 +31,7 @@ def setup_api_key() -> None:
         print("Error: OpenAI API key not found in environment variables.")
         print("Please set the OPENAI_API_KEY environment variable.")
         sys.exit(1)
+
 
 def load_jsonl_data(file_path: str) -> List[Dict[str, Any]]:
     """
@@ -41,10 +44,11 @@ def load_jsonl_data(file_path: str) -> List[Dict[str, Any]]:
         List of dictionaries containing the loaded data
     """
     data = []
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         for line in file:
             data.append(json.loads(line))
     return data
+
 
 def save_results_to_json(results_df, output_path):
     """
@@ -58,8 +62,8 @@ def save_results_to_json(results_df, output_path):
         None
     """
     # Convert DataFrame to JSON format
-    json_results = results_df.to_dict(orient='records')
-    with open(output_path, 'w', encoding='utf-8') as f:
+    json_results = results_df.to_dict(orient="records")
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(json_results, f, indent=2)
 
     print(f"Results saved to: {output_path}")
