@@ -1,35 +1,40 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Python: Uvicorn (src.api:app)",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "uvicorn",
-            "args": [
-                "src.api:app",
-                "--port",
-                "8250",
-                "--reload"
-            ],
-            "cwd": "${workspaceFolder}/backend",
-            "console": "integratedTerminal",
-            "justMyCode": true,
-            "jinja": true,
-            "env": {
-                "PYTHONPATH": "${workspaceFolder}"
-            }
-        },
-                {
-            "name": "Frontend: npm start",
-            "type": "node",
-            "request": "launch",
-            "cwd": "${workspaceFolder}/frontend",
-            "runtimeExecutable": "npm",
-            "runtimeArgs": [
-                "start"
-            ],
-            "console": "integratedTerminal"
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Python: Uvicorn (src.api:app)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": ["src.api:app", "--port", "8250", "--reload"],
+      "cwd": "${workspaceFolder}/backend",
+      "console": "integratedTerminal",
+      "justMyCode": true,
+      "jinja": true,
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}"
+      }
+    },
+    {
+        "name": "Python: Launch Evaluator",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "enhanced_run_evaluation_pipeline.py",
+        "args": ["../../../library/ScottLogicEnvironmentalImpactReport2024.pdf", "1"],
+        "cwd": "${workspaceFolder}/backend/tests/Ragas/utils",
+        "justMyCode": true,
+        "env": {
+            "PYTHONPATH": "${workspaceFolder}",
         }
-    ]
+    },
+    {
+      "name": "Frontend: npm start",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["start"],
+      "console": "integratedTerminal"
+    }
+  ]
 }
