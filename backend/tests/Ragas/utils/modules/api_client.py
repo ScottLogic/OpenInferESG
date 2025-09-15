@@ -4,6 +4,7 @@ API Client for interacting with the OpenInferESG API.
 import requests
 import time
 import socket
+import uuid
 from typing import Dict, Optional, Any, Tuple
 
 class OpenInferESGClient:
@@ -23,6 +24,10 @@ class OpenInferESGClient:
             "Accept": "application/json",
             "Connection": "keep-alive"
         })
+        self.session.cookies.clear()
+        id = str(uuid.uuid4())
+        self.session.cookies.set("session_id", id)
+        print("Session ID: {id}")
 
     def check_availability(self) -> bool:
         """
