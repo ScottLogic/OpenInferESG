@@ -137,11 +137,44 @@ class LMStudio(LLM):
                     logger.info(f"Successfully got response from LM Studio: {content[:100]}...")
                     logger.debug(f"Duration: {duration:.2f}s, Token usage: {token_info}")
 
+                    # Remove <think> tags if they exist in the response
+                    content = self._remove_think_tags(content)
+
                     # Return either raw content or validated JSON
                     return self._process_content(content, return_json) if return_json else content
         except Exception as e:
             logger.error(f"Error in HTTP request: {str(e)}")
             return f"Error connecting to the local LLM server: {str(e)}"
+
+    def _remove_think_tags(self, content: str) -> str:
+        """
+        Remove any XML-style tags and their content from the beginning of the LLM response.
+        This handles various kinds of tags like <think>, <reasoning>, etc.
+
+        Args:
+            content: The raw content from the LLM response
+
+        Returns:
+            The content with opening tags and their content removed
+        """
+        # Pattern to match any XML-style tags at the beginning of the response
+        # This will match <tag ...>content</tag> where tag can contain any characters except > and space
+        # It also handles namespaced tags like <function_calls>
+        tag_pattern = r"^\s*<([\w:.-]+)(?:\s+[^>]*)?>([\s\S]*?)</\1>"
+
+        # Try to match and remove tag at the beginning
+        match = re.match(tag_pattern, content)
+
+        # If there's a match at the beginning, remove it
+        if match:
+            tag_name = match.group(1)
+            # Remove the matched tag and its content
+            content = content[match.end() :]
+            # Trim leading whitespace
+            content = content.lstrip()
+            logger.info(f"Removed <{tag_name}> tags from the beginning of LM Studio response")
+
+        return content
 
     def _process_content(self, content: str, return_json: bool) -> str:
         """

@@ -43,6 +43,25 @@ class MockLMStudio:
 
         return content
 
+    def _remove_think_tags(self, content):
+        """Mock implementation of _remove_think_tags"""
+        import re
+
+        # Pattern to match any XML-style tags at the beginning of the response
+        tag_pattern = r"^\s*<([\w:.-]+)(?:\s+[^>]*)?>([\s\S]*?)</\1>"
+
+        # Try to match and remove tag at the beginning
+        match = re.match(tag_pattern, content)
+
+        # If there's a match at the beginning, remove it
+        if match:
+            # Remove the matched tag and its content
+            content = content[match.end() :]
+            # Trim leading whitespace
+            content = content.lstrip()
+
+        return content
+
     async def chat_with_file(self, model, system_prompt, user_prompt, files, agent, return_json=False):
         """Mock implementation of chat_with_file"""
         file_names = [f.filename for f in files]
