@@ -173,7 +173,7 @@ async def evaluate_with_ragas(
                 column_metric_mapping = {
                     "nv_accuracy": "answer_accuracy",
                     "factual_correctness(mode=f1)": "factual_correctness",
-                    "semantic_similarity": "semantic_similarity"
+                    "semantic_similarity": "semantic_similarity",
                 }
 
                 # Map available columns to expected metrics
