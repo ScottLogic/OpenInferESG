@@ -70,20 +70,20 @@ def create_ragas_llm():
     Returns:
         tuple: (LangchainLLMWrapper, LangchainEmbeddingsWrapper)
     """
-    # Import locally to avoid circular imports
-    from .ragas_utils import setup_api_key
+    import sys
 
     # Use the specified OpenAI model from .env or default to gpt-4o
     model_name = os.getenv("RAGAS_OPENAI_MODEL", "gpt-4o")
 
-    # Setup API key - this will handle both OPENAI_KEY and OPENAI_API_KEY variables
-    setup_api_key()
-
-    # Get the API key after setup to ensure we have the right one
-    api_key = os.environ.get("OPENAI_API_KEY")
+    # Get API key from the root .env file
+    api_key = os.environ.get("OPENAI_KEY")
 
     if not api_key:
-        raise ValueError("OpenAI API key not set. Please set OPENAI_KEY or OPENAI_API_KEY in the root .env file.")
+        print("OpenAI API key not set. Please set OPENAI_KEY in the root .env file.")
+        sys.exit(1)
+
+    # Set OPENAI_API_KEY to support libraries that require this specific env variable
+    os.environ["OPENAI_API_KEY"] = api_key
 
     print(f"API Key found for ChatOpenAI: {api_key[:5]}...{api_key[-4:] if len(api_key) > 8 else ''}")
     print(f"Using model: {model_name}")
