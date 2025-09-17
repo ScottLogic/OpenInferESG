@@ -72,16 +72,16 @@ def create_ragas_llm():
     """
     # Import locally to avoid circular imports
     from .ragas_utils import setup_api_key
-    
+
     # Use the specified OpenAI model from .env or default to gpt-4o
     model_name = os.getenv("RAGAS_OPENAI_MODEL", "gpt-4o")
-    
+
     # Setup API key - this will handle both OPENAI_KEY and OPENAI_API_KEY variables
     setup_api_key()
-    
+
     # Get the API key after setup to ensure we have the right one
     api_key = os.environ.get("OPENAI_API_KEY")
-    
+
     if not api_key:
         raise ValueError("OpenAI API key not set. Please set OPENAI_KEY or OPENAI_API_KEY in the root .env file.")
 

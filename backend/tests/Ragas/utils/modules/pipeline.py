@@ -38,7 +38,7 @@ def collect_api_responses(
     """
     api_url = os.environ.get("BACKEND_URL", "http://localhost:8250")  # Provide default value
 
-    filename = os.path.basename(file_path)
+    # Get the client (removed unused filename variable)
     client = OpenInferESGClient(api_url)
 
     # Read the existing JSONL file with questions
@@ -50,7 +50,7 @@ def collect_api_responses(
     # Process each record and make API calls with file reference
     enriched_records = []
     errors = []
-    
+
     # Upload the file once before processing batches
     print("Uploading file...")
     file_id = client.upload_file(file_path)
@@ -73,7 +73,7 @@ def collect_api_responses(
         print("Report is ready!")
     else:
         print("Report may not be fully ready. Proceeding with caution.")
-        
+
     # Loop through batches
     for batch_num in range(num_batches):
         start_idx = batch_num * batch_size

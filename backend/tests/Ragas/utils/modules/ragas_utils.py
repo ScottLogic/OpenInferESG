@@ -16,7 +16,7 @@ def setup_api_key() -> None:
     """
     Set up the OpenAI API key from environment variables.
     Will exit if the key is not found.
-    
+
     First tries OPENAI_API_KEY, then falls back to OPENAI_KEY.
 
     Returns:
@@ -29,7 +29,7 @@ def setup_api_key() -> None:
 
     # Check if API key is available as OPENAI_API_KEY
     api_key = os.environ.get("OPENAI_API_KEY")
-    
+
     # If not found, try OPENAI_KEY
     if not api_key:
         openai_key = os.environ.get("OPENAI_KEY")
@@ -38,7 +38,7 @@ def setup_api_key() -> None:
             os.environ["OPENAI_API_KEY"] = openai_key
             api_key = openai_key
             print("Set OPENAI_API_KEY from OPENAI_KEY environment variable.")
-    
+
     # Final check if we have a key
     if not api_key:
         print("Error: OpenAI API key not found in environment variables.")
