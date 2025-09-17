@@ -139,7 +139,7 @@ class OpenInferESGClient:
         return False
 
     def get_answer(
-        self, question: str, file_id: Optional[str] = None, timeout: int = 120, retries: int = 3
+        self, question: str, file_id: str, timeout: int = 120, retries: int = 3
     ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
         """
         Get an answer from the OpenInferESG API

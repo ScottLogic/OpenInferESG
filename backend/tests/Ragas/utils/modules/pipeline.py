@@ -38,7 +38,6 @@ def collect_api_responses(
     """
     api_url = os.environ.get("BACKEND_URL", "http://localhost:8250")  # Provide default value
 
-    # Get the client (removed unused filename variable)
     client = OpenInferESGClient(api_url)
 
     # Read the existing JSONL file with questions
