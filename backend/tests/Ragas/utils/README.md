@@ -50,6 +50,8 @@ The evaluation follows this two-step process (each step requires running a separ
 
 This first step creates the necessary JSONL file with API responses, but does not perform RAGAS evaluation:
 
+> **Important**: Before running the enhanced evaluation pipeline, it's adviced to set `ALLOWED_CHAT_AGENTS="fileagent"` in your `.env` file. This ensures agent usage to just the file agent, which is all that's needed for document processing during evaluation.
+
 ```bash
 # Check backend availability
 python enhanced_run_evaluation_pipeline.py --check
@@ -124,5 +126,4 @@ All output files are stored in `../files/`:
 - **RAGAS errors**: 
   - Verify the OPENAI_KEY is set correctly in the root .env file
   - Check that RAGAS_OPENAI_MODEL is set to a valid model (default: gpt-4o)
-  - Ensure RAGAS_METRICS contains the desired metrics (default: factual_correctness,semantic_similarity,answer_accuracy)
   - Ensure RAGAS version 0.3.0+ is installed

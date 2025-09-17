@@ -139,13 +139,15 @@ class OpenInferESGClient:
         return False
 
     def get_answer(
-        self, question: str, timeout: int = 120, retries: int = 3
+        self, question: str, file_id: Optional[str] = None,
+        timeout: int = 120, retries: int = 3
     ) -> Tuple[Optional[Dict[str, Any]], Optional[str]]:
         """
         Get an answer from the OpenInferESG API
 
         Args:
             question: The question to ask
+            file_id: Optional ID of the uploaded file to reference
             timeout: Timeout in seconds
             retries: Number of retry attempts
 
@@ -155,6 +157,8 @@ class OpenInferESGClient:
         for attempt in range(retries):
             try:
                 params = {"utterance": question}
+                if file_id:
+                    params["file_id"] = file_id
                 response = self.session.get(self.chat_endpoint, params=params, timeout=timeout)
 
                 if response.status_code == 200:

@@ -50,7 +50,30 @@ def collect_api_responses(
     # Process each record and make API calls with file reference
     enriched_records = []
     errors = []
+    
+    # Upload the file once before processing batches
+    print("Uploading file...")
+    file_id = client.upload_file(file_path)
+    if not file_id:
+        for _ in range(2):  # Try one more time
+            print("Retrying upload...")
+            time.sleep(30)
+            file_id = client.upload_file(file_path)
+            if file_id:
+                break
 
+    if not file_id:
+        print("Failed to upload file after multiple attempts. Exiting.")
+        return
+
+    # Wait for report generation once before processing batches
+    print("Waiting for report generation...")
+    report_ready = client.wait_for_report(file_id, max_wait_time=60000)
+    if report_ready:
+        print("Report is ready!")
+    else:
+        print("Report may not be fully ready. Proceeding with caution.")
+        
     # Loop through batches
     for batch_num in range(num_batches):
         start_idx = batch_num * batch_size
@@ -62,39 +85,11 @@ def collect_api_responses(
             f"(questions {start_idx + 1}-{end_idx} of {len(records)})..."
         )
 
-        # After each batch (except the first), take a longer break
-        if batch_num > 0:
-            print("Taking a break between batches...")
-            time.sleep(60)  # 1 minute pause between batches
-
-        # Upload the file for this batch
-        print("Uploading file for this batch...")
-        file_id = client.upload_file(file_path)
-        if not file_id:
-            for _ in range(2):  # Try one more time
-                print("Retrying upload...")
-                time.sleep(30)
-                file_id = client.upload_file(file_path)
-                if file_id:
-                    break
-
-        if not file_id:
-            print("Failed to upload file after multiple attempts. Skipping this batch.")
-            continue
-
-        # Wait for report generation
-        print("Waiting for report generation...")
-        report_ready = client.wait_for_report(file_id, max_wait_time=60000)
-        if report_ready:
-            print("Report is ready!")
-        else:
-            print("Report may not be fully ready. Proceeding with caution.")
-
         # Process records in the current batch
         process_batch(
             client=client,
             batch_records=batch_records,
-            filename=filename,
+            file_id=file_id,
             start_idx=start_idx,
             total_records=len(records),
             enriched_records=enriched_records,
@@ -116,7 +111,7 @@ def collect_api_responses(
 def process_batch(
     client: OpenInferESGClient,
     batch_records: List[Dict],
-    filename: str,
+    file_id: str,
     start_idx: int,
     total_records: int,
     enriched_records: List[Dict],
@@ -129,6 +124,7 @@ def process_batch(
         client: The OpenInferESG API client
         batch_records: The records to process in this batch
         filename: The name of the file being referenced
+        file_id: The ID of the uploaded file
         start_idx: The starting index of this batch in the overall record list
         total_records: The total number of records being processed
         enriched_records: The list of enriched records to append to
@@ -139,15 +135,14 @@ def process_batch(
         i = start_idx + batch_i
 
         original_question = record["user_input"]
-        file_question = f"Using the file {filename}, {original_question}"
-        print(f"Processing question {i + 1}/{total_records}: {file_question[:70]}...")
+        print(f"Processing question {i + 1}/{total_records}: {original_question[:70]}...")
 
         # Check if we should skip due to too many timeouts
         if i > 0 and len(errors) >= 3 and all("timeout" in err.get("error", "").lower() for err in errors[-3:]):
             print("Multiple consecutive timeouts detected. Skipping to prevent API overload.")
             error_msg = "Question skipped due to multiple previous timeouts"
-            errors.append({"question": file_question, "error": error_msg})
-            enriched_record = create_simplified_record(file_question, None, record)
+            errors.append({"question": original_question, "error": error_msg})
+            enriched_record = create_simplified_record(original_question, None, record)
             enriched_records.append(enriched_record)
 
             # Take a longer break to let the API recover
@@ -158,15 +153,15 @@ def process_batch(
         time.sleep(10)
 
         # Get answer from the API
-        api_response, error_msg = client.get_answer(file_question)
+        api_response, error_msg = client.get_answer(original_question, file_id=file_id)
 
         if api_response:
-            enriched_record = create_simplified_record(file_question, api_response, record)
+            enriched_record = create_simplified_record(original_question, api_response, record)
             enriched_records.append(enriched_record)
             print(f"Got API response ({len(str(api_response))} chars)")
         else:
-            errors.append({"question": file_question, "error": error_msg})
-            enriched_record = create_simplified_record(file_question, None, record)
+            errors.append({"question": original_question, "error": error_msg})
+            enriched_record = create_simplified_record(original_question, None, record)
             enriched_records.append(enriched_record)
             print(f"Error: {error_msg}")
 
