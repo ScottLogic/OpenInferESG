@@ -17,6 +17,8 @@ def setup_api_key() -> None:
     Set up the OpenAI API key from environment variables.
     Will exit if the key is not found.
 
+    First tries OPENAI_API_KEY, then falls back to OPENAI_KEY.
+
     Returns:
         None
     """
@@ -25,11 +27,22 @@ def setup_api_key() -> None:
     env_path = project_root / ".env"
     load_dotenv(dotenv_path=env_path)
 
-    # Check if API key is available
+    # Check if API key is available as OPENAI_API_KEY
     api_key = os.environ.get("OPENAI_API_KEY")
+
+    # If not found, try OPENAI_KEY
+    if not api_key:
+        openai_key = os.environ.get("OPENAI_KEY")
+        if openai_key:
+            # Set OPENAI_API_KEY from OPENAI_KEY
+            os.environ["OPENAI_API_KEY"] = openai_key
+            api_key = openai_key
+            print("Set OPENAI_API_KEY from OPENAI_KEY environment variable.")
+
+    # Final check if we have a key
     if not api_key:
         print("Error: OpenAI API key not found in environment variables.")
-        print("Please set the OPENAI_API_KEY environment variable.")
+        print("Please set the OPENAI_API_KEY or OPENAI_KEY environment variable.")
         sys.exit(1)
 
 
