@@ -166,15 +166,30 @@ async def evaluate_with_ragas(
                 available_columns = list(scores_df.columns)
                 print(f"Results DataFrame columns: {available_columns}")
 
+                # Special mapping for known column name mismatches
+                # The AnswerAccuracy metric uses 'nv_accuracy' as its internal name
+                # but we want to use 'answer_accuracy' in our output for consistency
+                column_metric_mapping = {
+                    "nv_accuracy": "answer_accuracy",
+                    "factual_correctness(mode=f1)": "factual_correctness",
+                    "semantic_similarity": "semantic_similarity",
+                }
+
                 # Map available columns to expected metrics
                 for i, (_, row) in enumerate(scores_df.iterrows()):
                     if i < len(result_data):
                         for col in available_columns:
-                            matching_metric = next(
-                                (m for m in expected_metrics if m in col.lower() or col.lower() in m), None
-                            )
-                            if matching_metric and i < len(result_data):
+                            # First check the mapping dictionary
+                            if col in column_metric_mapping:
+                                matching_metric = column_metric_mapping[col]
                                 result_data[i][matching_metric] = row[col]
+                            else:
+                                # Fall back to fuzzy matching
+                                matching_metric = next(
+                                    (m for m in expected_metrics if m in col.lower() or col.lower() in m), None
+                                )
+                                if matching_metric and i < len(result_data):
+                                    result_data[i][matching_metric] = row[col]
         except Exception as e:
             print(f"Could not convert results to DataFrame: {e}")
 
