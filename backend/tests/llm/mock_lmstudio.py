@@ -66,3 +66,20 @@ class MockLMStudio:
         """Mock implementation of chat_with_file"""
         file_names = [f.filename for f in files]
         return f"Mock response with files: {', '.join(file_names)}"
+
+    def measure_cpu_time(self) -> list[float]:
+        """Mock implementation of measure_cpu_time"""
+        import psutil
+
+        total_user = 0.0
+        total_system = 0.0
+
+        for proc in psutil.process_iter(["name"]):
+            if proc.info["name"] == "LM Studio.exe":
+                try:
+                    time = proc.cpu_times()
+                    total_user += time.user
+                    total_system += time.system
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+        return [total_user, total_system]

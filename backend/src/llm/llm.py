@@ -63,6 +63,7 @@ class LLM(ABC, metaclass=LLMMeta):
             token_usage: Dictionary containing token usage information
             duration: Time taken for the request in seconds
             power_usage: Power usage of the request in watt-hours
+            cpu_time: Total CPU time used for the request in seconds
         """
         self.usage_recorder.record_activity(model, provider, agent, token_usage, duration, power_usage, cpu_time)
 

@@ -11,6 +11,7 @@ from .llm import LLM, LLMFile
 from aiohttp import ClientTimeout
 import psutil
 from src.utils.power_usage import calculate_power_usage
+from typing import List
 
 logger = logging.getLogger(__name__)
 config = Config()
@@ -81,7 +82,7 @@ class LMStudio(LLM):
 
                     end_cpu_time = self.measure_cpu_time()
                     cpu_time = [end_cpu_time[0] - start_cpu_time[0], end_cpu_time[1] - start_cpu_time[1]]
-                    print(f"LM Studio CPU time (user, system): {cpu_time[0]:.2f}s, {cpu_time[1]:.2f}s")
+                    logger.info(f"LM Studio CPU time (user, system): {cpu_time[0]:.2f}s, {cpu_time[1]:.2f}s")
 
                     logger.debug(f"LM Studio API raw response: {response_text}")
 
@@ -269,12 +270,12 @@ class LMStudio(LLM):
             logger.exception(file_error)
             raise HTTPException(status_code=500, detail=f"Failed to process files: {file_error}") from file_error
 
-    def measure_cpu_time(self) -> list[float]:
+    def measure_cpu_time(self) -> List[float]:
         total_user = 0.0
         total_system = 0.0
 
         for proc in psutil.process_iter(["name"]):
-            if proc.info["name"] == "LM Studio.exe":
+            if proc.info["name"] == "LM Studio.exe":  # Note: This process name is specific to Windows
                 try:
                     time = proc.cpu_times()
                     total_user += time.user
