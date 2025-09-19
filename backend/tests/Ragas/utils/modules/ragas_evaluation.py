@@ -170,9 +170,13 @@ async def evaluate_with_ragas(
             results_df = results.to_pandas()[list(columns.keys())].rename(columns=columns)
 
             # Calculate averages for numeric columns
-            avg = results_df.select_dtypes(include=["number"]).mean().to_dict()
+            numeric_df = results_df.select_dtypes(include=["number"])
+            if not numeric_df.empty:
+                avg = numeric_df.mean().to_dict()
+            else:
+                avg = {}
 
-            # Add question identifier after printing metrics
+            # Add question identifier
             avg["question"] = "AVERAGE"
 
             # Add averages row to the DataFrame
