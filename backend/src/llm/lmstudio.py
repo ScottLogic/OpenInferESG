@@ -134,7 +134,7 @@ class LMStudio(LLM):
                         }
 
                     power_usage = calculate_power_usage(duration, "local_lm_studio")
-                        # Log to CSV
+                    # Log to CSV
                     self.record_usage(
                         model=lmstudio_model,
                         provider="lmstudio",
@@ -273,8 +273,8 @@ class LMStudio(LLM):
         total_user = 0.0
         total_system = 0.0
 
-        for proc in psutil.process_iter(['name']):
-            if proc.info['name'] == "LM Studio.exe":
+        for proc in psutil.process_iter(["name"]):
+            if proc.info["name"] == "LM Studio.exe":
                 try:
                     time = proc.cpu_times()
                     total_user += time.user
