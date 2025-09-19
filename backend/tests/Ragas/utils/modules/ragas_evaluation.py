@@ -32,10 +32,11 @@ def create_ragas_dataset(data):
         data: List of dictionaries containing evaluation samples
 
     Returns:
-        Tuple of (EvaluationDataset object, processed samples list)
+        Tuple of (EvaluationDataset object, processed samples list, processed data list)
     """
 
     samples = []
+    processed_data = []
     for sample in data:
         # Skip samples without responses
         if not sample.get("response"):
@@ -57,10 +58,11 @@ def create_ragas_dataset(data):
             reference=reference,  # Use either provided reference or first context
         )
         samples.append(eval_sample)
+        processed_data.append(sample)  # Keep track of the original data for this sample
 
     print(f"Created {len(samples)} samples for evaluation")
     # Create a dataset using the RAGAS EvaluationDataset class
-    return EvaluationDataset(samples=samples), samples
+    return EvaluationDataset(samples=samples), samples, processed_data
 
 
 def create_ragas_llm():
@@ -131,7 +133,7 @@ async def evaluate_with_ragas(
         llm, embeddings_wrapper = create_ragas_llm()
 
         # Create dataset
-        dataset, samples = create_ragas_dataset(data)
+        dataset, samples, processed_data = create_ragas_dataset(data)
 
         # Define metrics to use for evaluation
         print("Configuring default RAGAS metrics: factual_correctness, semantic_similarity, answer_accuracy")
@@ -151,14 +153,18 @@ async def evaluate_with_ragas(
         # Create a base DataFrame for our results
         result_data = []
 
-        # Create results for each sample with placeholder metric values
-        for i, sample in enumerate(samples):
-            result_data.append(
-                {
-                    "question": sample.user_input,
-                    **{metric: None for metric in expected_metrics},  # Initialize all metrics as None
-                }
-            )
+        # Create results for each sample with placeholder metric values and original data
+        for i, (sample, original_data) in enumerate(zip(samples, processed_data)):
+            result_record = {
+                "question": sample.user_input,
+                **{metric: None for metric in expected_metrics},  # Initialize all metrics as None
+            }
+
+            # Include usage data if available in the original data
+            if "llm_usage" in original_data:
+                result_record["llm_usage"] = original_data["llm_usage"]
+
+            result_data.append(result_record)
 
         try:
             if hasattr(results, "to_pandas"):
@@ -197,6 +203,31 @@ async def evaluate_with_ragas(
                 else:
                     avg_data[metric] = None  # None is fine for a dict with explicit type annotation
                     print(f"No valid values for {metric}")
+
+        # Calculate aggregate usage data if available
+        if "llm_usage" in results_df.columns:
+            usage_records = results_df["llm_usage"].dropna()
+            if len(usage_records) > 0:
+                # Aggregate usage statistics
+                total_prompt_tokens = sum(
+                    record.get("prompt_tokens", 0) for record in usage_records if isinstance(record, dict)
+                )
+                total_completion_tokens = sum(
+                    record.get("completion_tokens", 0) for record in usage_records if isinstance(record, dict)
+                )
+                total_tokens = sum(
+                    record.get("total_tokens", 0) for record in usage_records if isinstance(record, dict)
+                )
+                total_duration = sum(
+                    record.get("duration_seconds", 0) for record in usage_records if isinstance(record, dict)
+                )
+
+                avg_data["llm_usage"] = {
+                    "total_prompt_tokens": total_prompt_tokens,
+                    "total_completion_tokens": total_completion_tokens,
+                    "total_tokens": total_tokens,
+                    "total_duration_seconds": total_duration,
+                }
 
         # Add averages row to the DataFrame
         results_df = pd.concat([results_df, pd.DataFrame([avg_data])], ignore_index=True)
