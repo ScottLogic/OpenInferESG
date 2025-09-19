@@ -145,76 +145,46 @@ async def evaluate_with_ragas(
         print("Running RAGAS evaluation (this may take a while)...")
         results = evaluate(dataset=dataset, metrics=metrics, llm=llm)
 
-        # Define the expected metrics we want in our final output
-        expected_metrics = ["factual_correctness", "semantic_similarity", "answer_accuracy"]
-
-        # Create a base DataFrame for our results
-        result_data = []
-
-        # Create results for each sample with placeholder metric values
-        for i, sample in enumerate(samples):
-            result_data.append(
-                {
-                    "question": sample.user_input,
-                    **{metric: None for metric in expected_metrics},  # Initialize all metrics as None
-                }
-            )
-
         try:
-            if hasattr(results, "to_pandas"):
-                scores_df = results.to_pandas()
-                available_columns = list(scores_df.columns)
-                print(f"Results DataFrame columns: {available_columns}")
-
-                # Special mapping for known column name mismatches
-                # The AnswerAccuracy metric uses 'nv_accuracy' as its internal name
-                # but we want to use 'answer_accuracy' in our output for consistency
-                column_metric_mapping = {
-                    "nv_accuracy": "answer_accuracy",
-                    "factual_correctness(mode=f1)": "factual_correctness",
-                    "semantic_similarity": "semantic_similarity",
-                }
-
-                # Map available columns to expected metrics
-                for i, (_, row) in enumerate(scores_df.iterrows()):
-                    if i < len(result_data):
-                        for col in available_columns:
-                            # First check the mapping dictionary
-                            if col in column_metric_mapping:
-                                matching_metric = column_metric_mapping[col]
-                                result_data[i][matching_metric] = row[col]
-                            else:
-                                # Fall back to fuzzy matching
-                                matching_metric = next(
-                                    (m for m in expected_metrics if m in col.lower() or col.lower() in m), None
-                                )
-                                if matching_metric and i < len(result_data):
-                                    result_data[i][matching_metric] = row[col]
+            print("Processing evaluation results...")
+            # Define column mappings for RAGAS output to our desired output format
+            columns = {
+                "nv_accuracy": "answer_accuracy",
+                "factual_correctness(mode=f1)": "factual_correctness",
+                "semantic_similarity": "semantic_similarity",
+                "user_input": "question",
+            }
+            
+            # Convert results to DataFrame, select only needed columns and rename them
+            if not hasattr(results, "to_pandas"):
+                raise ValueError("RAGAS results object does not have to_pandas method")
+                
+            # Print available columns for debugging
+            available_columns = list(results.to_pandas().columns)
+            print(f"Results DataFrame columns: {available_columns}")
+            
+            # Check that all required columns exist
+            missing_columns = [col for col in columns.keys() if col not in available_columns]
+            if missing_columns:
+                raise ValueError(f"Missing expected columns in RAGAS output: {missing_columns}. Update column mappings.")
+            
+            # Create DataFrame with only needed columns and renamed according to our convention
+            results_df = results.to_pandas()[columns.keys()].rename(columns=columns)
+            
+            # Calculate averages for numeric columns
+            avg = results_df.select_dtypes(include=["number"]).mean().to_dict()
+            avg["question"] = "AVERAGE"
+            
+            # Print average values for reporting
+            for metric, value in avg.items():
+                if metric != "question":
+                    print(f"Average {metric}: {value:.4f}")
+            
+            # Add averages row to the DataFrame
+            results_df = pd.concat([results_df, pd.DataFrame([avg])], ignore_index=True)
         except Exception as e:
-            print(f"Could not convert results to DataFrame: {e}")
-
-        # Create DataFrame from the results
-        results_df = pd.DataFrame(result_data)
-
-        # Calculate and add average scores
-        # Type annotation to avoid type checking issues
-        avg_data: dict = {"question": "AVERAGE"}
-
-        # Calculate means for each metric using non-null values
-        for metric in expected_metrics:
-            if metric in results_df.columns:
-                non_null_values = results_df[metric].dropna()
-                if len(non_null_values) > 0:
-                    avg_value = float(non_null_values.mean())
-                    # Convert to float for consistency
-                    avg_data[metric] = avg_value  # Using a dict with explicit type annotation allows mixed types
-                    print(f"Average {metric}: {avg_value:.4f} from {len(non_null_values)} values")
-                else:
-                    avg_data[metric] = None  # None is fine for a dict with explicit type annotation
-                    print(f"No valid values for {metric}")
-
-        # Add averages row to the DataFrame
-        results_df = pd.concat([results_df, pd.DataFrame([avg_data])], ignore_index=True)
+            print(f"Could not process RAGAS results: {e}")
+            raise
 
         # Save results and generate visualization
         if output_json_path:
