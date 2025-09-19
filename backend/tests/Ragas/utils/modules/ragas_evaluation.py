@@ -154,32 +154,25 @@ async def evaluate_with_ragas(
                 "semantic_similarity": "semantic_similarity",
                 "user_input": "question",
             }
-            
-            # Convert results to DataFrame, select only needed columns and rename them
-            if not hasattr(results, "to_pandas"):
-                raise ValueError("RAGAS results object does not have to_pandas method")
-                
+
             # Print available columns for debugging
             available_columns = list(results.to_pandas().columns)
             print(f"Results DataFrame columns: {available_columns}")
-            
+
             # Check that all required columns exist
             missing_columns = [col for col in columns.keys() if col not in available_columns]
             if missing_columns:
-                raise ValueError(f"Missing expected columns in RAGAS output: {missing_columns}. Update column mappings.")
-            
+                raise ValueError(
+                    f"Missing expected columns in RAGAS output: {missing_columns}. Update column mappings."
+                )
+
             # Create DataFrame with only needed columns and renamed according to our convention
             results_df = results.to_pandas()[columns.keys()].rename(columns=columns)
-            
+
             # Calculate averages for numeric columns
             avg = results_df.select_dtypes(include=["number"]).mean().to_dict()
             avg["question"] = "AVERAGE"
-            
-            # Print average values for reporting
-            for metric, value in avg.items():
-                if metric != "question":
-                    print(f"Average {metric}: {value:.4f}")
-            
+
             # Add averages row to the DataFrame
             results_df = pd.concat([results_df, pd.DataFrame([avg])], ignore_index=True)
         except Exception as e:
