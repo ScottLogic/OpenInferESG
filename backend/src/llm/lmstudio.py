@@ -9,6 +9,8 @@ from src.session.file_uploads import get_file_content_for_filename, set_file_con
 from src.utils.file_utils import extract_text
 from .llm import LLM, LLMFile
 from aiohttp import ClientTimeout
+import psutil
+from src.utils.power_usage import calculate_power_usage
 
 logger = logging.getLogger(__name__)
 config = Config()
@@ -69,12 +71,18 @@ class LMStudio(LLM):
         logger.debug(f"LM Studio API request payload: {json.dumps(payload, indent=2)}")
         logger.info(f"Sending direct HTTP request to LM Studio at {url}")
 
+        start_cpu_time = self.measure_cpu_time()
         start_time = time.time()
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(url, json=payload, headers=headers, timeout=timeout) as response:
                     response_text = await response.text()
                     duration = time.time() - start_time
+
+                    end_cpu_time = self.measure_cpu_time()
+                    cpu_time = [end_cpu_time[0] - start_cpu_time[0], end_cpu_time[1] - start_cpu_time[1]]
+                    print(f"LM Studio CPU time (user, system): {cpu_time[0]:.2f}s, {cpu_time[1]:.2f}s")
+
                     logger.debug(f"LM Studio API raw response: {response_text}")
 
                     if response.status != 200:
@@ -125,6 +133,7 @@ class LMStudio(LLM):
                             "total_tokens": "N/A",
                         }
 
+                    power_usage = calculate_power_usage(duration, "local_lm_studio")
                         # Log to CSV
                     self.record_usage(
                         model=lmstudio_model,
@@ -132,6 +141,8 @@ class LMStudio(LLM):
                         agent=agent,
                         token_usage=token_info,
                         duration=duration,
+                        power_usage=power_usage,
+                        cpu_time=cpu_time[0],
                     )
 
                     logger.info(f"Successfully got response from LM Studio: {content[:100]}...")
@@ -257,3 +268,17 @@ class LMStudio(LLM):
         except Exception as file_error:
             logger.exception(file_error)
             raise HTTPException(status_code=500, detail=f"Failed to process files: {file_error}") from file_error
+
+    def measure_cpu_time(self) -> list[float]:
+        total_user = 0.0
+        total_system = 0.0
+
+        for proc in psutil.process_iter(['name']):
+            if proc.info['name'] == "LM Studio.exe":
+                try:
+                    time = proc.cpu_times()
+                    total_user += time.user
+                    total_system += time.system
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+        return [total_user, total_system]
