@@ -6,7 +6,7 @@ Core functions for running RAGAS evaluations on question-answering data.
 
 import os
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional
 import pandas as pd
 from ragas import evaluate, EvaluationDataset, SingleTurnSample
 from ragas.llms import LangchainLLMWrapper
@@ -170,16 +170,11 @@ async def evaluate_with_ragas(
             selected_df = results.to_pandas()[list(columns.keys())]
             results_df = selected_df.rename(columns=columns)
 
-            avg = results_df.select_dtypes(include=["number"]).mean().to_dict()
+            avg = results_df.select_dtypes(include=["number"]).mean(axis=0, numeric_only=True).to_dict()
 
             # Add question identifier
             avg["question"] = "AVERAGE"
-                        
-            # Print average values for reporting
-            for metric, value in avg.items():
-                if metric != "question":
-                    print(f"Average {metric}: {value:.4f}")
-            
+
             # Add averages row to the DataFrame
             results_df = pd.concat([results_df, pd.DataFrame([avg])], ignore_index=True)
         except Exception as e:
