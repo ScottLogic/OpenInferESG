@@ -170,17 +170,16 @@ async def evaluate_with_ragas(
             selected_df = results.to_pandas()[list(columns.keys())]
             results_df = selected_df.rename(columns=columns)
 
-            # Calculate averages for numeric columns
-            numeric_df = results_df.select_dtypes(include=["number"])
-            avg: Dict[str, Any] = {}
-            if not numeric_df.empty:
-                # Convert Series to dict explicitly
-                mean_series = numeric_df.mean()
-                avg = dict(mean_series)
+            avg = results_df.select_dtypes(include=["number"]).mean().to_dict()
 
             # Add question identifier
             avg["question"] = "AVERAGE"
-
+                        
+            # Print average values for reporting
+            for metric, value in avg.items():
+                if metric != "question":
+                    print(f"Average {metric}: {value:.4f}")
+            
             # Add averages row to the DataFrame
             results_df = pd.concat([results_df, pd.DataFrame([avg])], ignore_index=True)
         except Exception as e:
