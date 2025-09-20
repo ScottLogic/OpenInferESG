@@ -170,8 +170,12 @@ async def evaluate_with_ragas(
             selected_df = results.to_pandas()[list(columns.keys())]
             results_df = selected_df.rename(columns=columns)
 
-            avg = results_df.select_dtypes(include=["number"]).mean(axis=0, numeric_only=True).to_dict()
-
+            means = results_df.select_dtypes(include=["number"]).mean()
+            avg = {}
+            if isinstance(means, pd.Series):
+                avg = dict(means.to_dict())
+            else:
+                avg = {"mean": means}
             # Add question identifier
             avg["question"] = "AVERAGE"
 
