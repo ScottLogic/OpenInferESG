@@ -6,7 +6,7 @@ Core functions for running RAGAS evaluations on question-answering data.
 
 import os
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional, Any
 import pandas as pd
 from ragas import evaluate, EvaluationDataset, SingleTurnSample
 from ragas.llms import LangchainLLMWrapper
@@ -167,13 +167,14 @@ async def evaluate_with_ragas(
                 )
 
             # Create DataFrame with only needed columns and renamed according to our convention
-            selected_df = results.to_pandas()[list(columns.keys())]
-            # Explicitly type the columns mapping for the type checker
-            column_mapping: Dict[str, str] = columns
-            results_df = selected_df.rename(columns=column_mapping)
+            full_df = results.to_pandas()
+            selected_df = full_df[list(columns.keys())]
+            # Manually rename columns to avoid pyright issues
+            results_df = selected_df.copy()
+            results_df.columns = [columns[col] for col in selected_df.columns]
 
             means = results_df.select_dtypes(include=["number"]).mean()
-            avg: Dict[str, Any] = {}
+            avg: dict[str, Any] = {}
             if isinstance(means, pd.Series):
                 avg = dict(means.to_dict())
             else:
@@ -183,6 +184,9 @@ async def evaluate_with_ragas(
 
             # Add averages row to the DataFrame
             results_df = pd.concat([results_df, pd.DataFrame([avg])], ignore_index=True)
+
+            # Ensure we return a DataFrame (type assertion for pyright)
+            assert isinstance(results_df, pd.DataFrame), "Expected DataFrame but got Series"
         except Exception as e:
             print(f"Could not process RAGAS results: {e}")
             raise
