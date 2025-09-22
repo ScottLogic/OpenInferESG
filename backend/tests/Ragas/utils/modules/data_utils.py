@@ -2,6 +2,8 @@
 Data processing utilities for Ragas evaluation pipeline.
 """
 
+import bisect
+import datetime
 import json
 from typing import Dict, List, Any, Optional
 
@@ -112,6 +114,7 @@ def load_and_convert_usage_csv(csv_path: str) -> List[Dict[str, Any]]:
         List of usage records with converted types
     """
     import csv
+    import datetime
 
     usage_records = []
     try:
@@ -138,6 +141,15 @@ def load_and_convert_usage_csv(csv_path: str) -> List[Dict[str, Any]]:
                     else:
                         row[field] = 0.0
 
+                # Parse timestamp field
+                if row.get("timestamp"):
+                    try:
+                        # Parse consistent timezone-aware timestamp format
+                        row["timestamp"] = datetime.datetime.fromisoformat(row["timestamp"])
+                    except ValueError:
+                        # If parsing fails, remove the row to avoid comparison issues
+                        continue
+
                 usage_records.append(row)
 
         print(f"Loaded and converted {len(usage_records)} LLM usage records")
@@ -145,3 +157,43 @@ def load_and_convert_usage_csv(csv_path: str) -> List[Dict[str, Any]]:
     except Exception as e:
         print(f"Error loading LLM usage CSV: {str(e)}")
         return []
+
+
+def find_and_remove_usage_in_timerange(usage_data: List[Dict], start_time: str, end_time: str) -> List[Dict]:
+    """
+    Efficiently find usage records within a time range using binary search and remove them from the dataset.
+    Assumes usage_data is sorted by timestamp. Modifies the input list by removing used records.
+
+    Args:
+        usage_data: List of usage records sorted by timestamp (datetime objects) - modified in place
+        start_time: Start time as ISO string
+        end_time: End time as ISO string
+
+    Returns:
+        List of usage records within the time range (removed from input list)
+    """
+    if not usage_data:
+        return []
+
+    # Parse the timestamp strings
+    try:
+        start_dt = datetime.datetime.fromisoformat(start_time.replace("Z", "+00:00"))
+        end_dt = datetime.datetime.fromisoformat(end_time.replace("Z", "+00:00"))
+    except ValueError as e:
+        print(f"Error parsing timestamps: {e}")
+        return []
+
+    # Use binary search to find the range
+    # Find the leftmost insertion point for start_time
+    start_idx = bisect.bisect_left(usage_data, start_dt, key=lambda x: x.get("timestamp", datetime.datetime.min))
+
+    # Find the leftmost insertion point for end_time (exclusive)
+    end_idx = bisect.bisect_left(usage_data, end_dt, key=lambda x: x.get("timestamp", datetime.datetime.min))
+
+    # Extract the matching records
+    matching_records = usage_data[start_idx:end_idx]
+
+    # Remove the used records from the original list (in reverse order to maintain indices)
+    del usage_data[start_idx:end_idx]
+
+    return matching_records

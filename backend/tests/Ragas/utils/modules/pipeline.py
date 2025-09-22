@@ -2,6 +2,7 @@
 Main pipeline for running Ragas evaluations with OpenInferESG.
 """
 
+import bisect
 import os
 import sys
 import time
@@ -15,6 +16,7 @@ from modules.data_utils import (
     write_jsonl,
     save_error_log,
     load_and_convert_usage_csv,
+    find_and_remove_usage_in_timerange,
 )
 from dotenv import load_dotenv
 
@@ -115,6 +117,16 @@ def collect_api_responses(
     print(f"\nAttempting to read LLM usage data from {llm_usage_csv_path}...")
     all_usage_data = load_and_convert_usage_csv(llm_usage_csv_path)
 
+    # Find the starting index for usage data and deletes earlier records
+    first_response_time = datetime.datetime.fromisoformat(
+        enriched_records[0]["response_timestamp"].replace("Z", "+00:00")
+    )
+    start_idx = bisect.bisect_left(
+        all_usage_data, first_response_time, key=lambda x: x.get("timestamp", datetime.datetime.min)
+    )
+    del all_usage_data[:start_idx]
+
+    # Process usage data matching optimized with binary search and removal
     for i, record in enumerate(enriched_records):
         start_time = record["response_timestamp"]
 
@@ -124,11 +136,8 @@ def collect_api_responses(
             # For the last record, use the current time
             end_time = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
-        call_usage = [
-            row
-            for row in all_usage_data
-            if "timestamp" in row and start_time and end_time and start_time <= row["timestamp"] < end_time
-        ]
+        # Use optimized binary search and remove used records to reduce dataset size
+        call_usage = find_and_remove_usage_in_timerange(all_usage_data, start_time, end_time)
 
         total_prompt_tokens = sum(usage.get("prompt_tokens", 0) for usage in call_usage)
         total_completion_tokens = sum(usage.get("completion_tokens", 0) for usage in call_usage)
