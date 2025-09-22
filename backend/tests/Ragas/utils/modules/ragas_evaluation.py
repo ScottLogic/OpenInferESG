@@ -24,6 +24,21 @@ env_path = project_root / ".env"
 load_dotenv(dotenv_path=env_path)
 
 
+def aggregate_usage_field(usage_records, field_name: str, default_value=0):
+    """
+    Aggregate a specific field from usage records.
+
+    Args:
+        usage_records: Collection of usage record objects
+        field_name: Name of the field to aggregate
+        default_value: Default value to use if field is missing
+
+    Returns:
+        Sum of the specified field across all valid records
+    """
+    return sum(record.get(field_name, default_value) for record in usage_records if isinstance(record, dict))
+
+
 def create_ragas_dataset(data):
     """
     Create a RAGAS evaluation dataset from the input data.
@@ -208,19 +223,11 @@ async def evaluate_with_ragas(
         if "llm_usage" in results_df.columns:
             usage_records = results_df["llm_usage"].dropna()
             if len(usage_records) > 0:
-                # Aggregate usage statistics
-                total_prompt_tokens = sum(
-                    record.get("prompt_tokens", 0) for record in usage_records if isinstance(record, dict)
-                )
-                total_completion_tokens = sum(
-                    record.get("completion_tokens", 0) for record in usage_records if isinstance(record, dict)
-                )
-                total_tokens = sum(
-                    record.get("total_tokens", 0) for record in usage_records if isinstance(record, dict)
-                )
-                total_duration = sum(
-                    record.get("duration_seconds", 0) for record in usage_records if isinstance(record, dict)
-                )
+                # Aggregate usage statistics using helper function
+                total_prompt_tokens = aggregate_usage_field(usage_records, "prompt_tokens")
+                total_completion_tokens = aggregate_usage_field(usage_records, "completion_tokens")
+                total_tokens = aggregate_usage_field(usage_records, "total_tokens")
+                total_duration = aggregate_usage_field(usage_records, "duration_seconds")
 
                 avg_data["llm_usage"] = {
                     "total_prompt_tokens": total_prompt_tokens,
