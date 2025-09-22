@@ -99,7 +99,8 @@ class CSVUsageRecorder(UsageRecorder):
             duration: Time taken for the request in seconds
             power_usage: Power usage of the request in watt-hours
         """
-        timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+        # Use consistent timezone-aware timestamp format
+        timestamp = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f+00:00')
         power_usage_wh = f"{power_usage:.4f}" if power_usage is not None else "N/A"
 
         # Extract token information with fallback for missing data
