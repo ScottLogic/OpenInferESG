@@ -152,6 +152,9 @@ def load_and_convert_usage_csv(csv_path: str) -> List[Dict[str, Any]]:
 
                 usage_records.append(row)
 
+        # Sort records by timestamp for efficient binary search operations
+        usage_records.sort(key=lambda x: x.get("timestamp", datetime.datetime.min))
+        
         print(f"Loaded and converted {len(usage_records)} LLM usage records")
         return usage_records
     except Exception as e:
