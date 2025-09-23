@@ -104,7 +104,8 @@ class CSVUsageRecorder(UsageRecorder):
             duration: Time taken for the request in seconds
             power_usage: Power usage of the request in watt-hours
         """
-        timestamp = datetime.datetime.now().isoformat()
+        # Use consistent timezone-aware timestamp format
+        timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f+00:00")
         power_usage_wh = f"{power_usage:.4f}" if power_usage is not None else "N/A"
         cpu_time_seconds = f"{cpu_time:.2f}" if cpu_time is not None else "N/A"
 
