@@ -185,7 +185,11 @@ async def evaluate_with_ragas(
             # Build per-sample rows with metrics and attach llm_usage from original processed_data if present
             rows = []
             for idx in range(len(df)):
-                row_dict = {"question": df.loc[idx, "user_input"] if "user_input" in df.columns else processed_data[idx].get("user_input", "")}
+                row_dict = {
+                    "question": df.loc[idx, "user_input"]
+                    if "user_input" in df.columns
+                    else processed_data[idx].get("user_input", "")
+                }
                 for raw, mapped in expected_metrics:
                     row_dict[mapped] = df.loc[idx, raw]
                 # Attach llm_usage if supplied in original input sample
