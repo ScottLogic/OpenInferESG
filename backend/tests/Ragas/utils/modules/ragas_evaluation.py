@@ -169,21 +169,17 @@ async def evaluate_with_ragas(
             # Create DataFrame with only needed columns and renamed according to our convention
             full_df = results.to_pandas()
             selected_df = full_df[list(columns.keys())]
-            # Manually rename columns to avoid pyright issues
+            # Copy to guarantee standalone DataFrame as opposed to view
+            # See https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
             results_df = selected_df.copy()
             results_df.columns = [columns[col] for col in selected_df.columns]
 
             means = results_df.select_dtypes(include=["number"]).mean()
-            avg: dict[str, Any] = {}
             if isinstance(means, pd.Series):
-                avg = dict(means.to_dict())
-            else:
-                avg = {"mean": means}
-            # Add question identifier
-            avg["question"] = "AVERAGE"
-
-            # Add averages row to the DataFrame
-            results_df = pd.concat([results_df, pd.DataFrame([avg])], ignore_index=True)
+                # Add the question label
+                means.loc["question"] = "AVERAGE"
+                avg_row_df = pd.DataFrame([means.reindex(results_df.columns)])
+                results_df = pd.concat([results_df, avg_row_df], ignore_index=True)
 
             # Ensure we return a DataFrame (type assertion for pyright)
             assert isinstance(results_df, pd.DataFrame), "Expected DataFrame but got Series"
