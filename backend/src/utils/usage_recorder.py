@@ -20,6 +20,7 @@ CSV_HEADERS = [
     "total_tokens",
     "duration_seconds",
     "power_usage_wh",
+    "cpu_time_seconds",
 ]
 
 # Ensure the logs directory exists
@@ -42,6 +43,7 @@ class UsageRecorder(ABC):
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
         power_usage: Optional[float] = None,
+        cpu_time: Optional[float] = None,
     ):
         pass
 
@@ -58,6 +60,7 @@ class ConsoleUsageRecorder(UsageRecorder):
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
         power_usage: Optional[float] = None,
+        cpu_time: Optional[float] = None,
     ):
         logger.info(
             {
@@ -67,6 +70,7 @@ class ConsoleUsageRecorder(UsageRecorder):
                 "token_usage": token_usage,
                 "duration": duration,
                 "power_usage": power_usage,
+                "cpu_time": cpu_time,
             }
         )
 
@@ -87,6 +91,7 @@ class CSVUsageRecorder(UsageRecorder):
         token_usage: Optional[Union[Dict, str]] = None,
         duration: float = 0.0,
         power_usage: Optional[float] = None,
+        cpu_time: Optional[float] = None,
     ) -> None:
         """
         Log LLM usage information to a CSV file.
@@ -99,8 +104,10 @@ class CSVUsageRecorder(UsageRecorder):
             duration: Time taken for the request in seconds
             power_usage: Power usage of the request in watt-hours
         """
-        timestamp = datetime.datetime.now().isoformat()
+        # Use consistent timezone-aware timestamp format
+        timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.%f+00:00")
         power_usage_wh = f"{power_usage:.4f}" if power_usage is not None else "N/A"
+        cpu_time_seconds = f"{cpu_time:.2f}" if cpu_time is not None else "N/A"
 
         # Extract token information with fallback for missing data
         if isinstance(token_usage, dict):
@@ -134,6 +141,7 @@ class CSVUsageRecorder(UsageRecorder):
                     total_tokens,
                     f"{duration:.2f}",
                     power_usage_wh,
+                    cpu_time_seconds,
                 ]
             )
 

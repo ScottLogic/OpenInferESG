@@ -18,5 +18,15 @@
         "batch_size": 8,
         "non_gpu_draw": 0.5,
         "gpu_draw": 1 
+    },
+    "local_lm_studio": {
+        "gpu_power": 28.0,
+        "non_gpu_power": 0,
+        "pue": 1,
+        "assigned_gpus": 1,
+        "gpus_per_node": 1,
+        "batch_size": 1,
+        "non_gpu_draw": 0,
+        "gpu_draw": 1 
     }
 }

@@ -31,8 +31,8 @@ def generate_bar_chart(json_file_path: str) -> Optional[str]:
         avg_row = df[df["question"] == "AVERAGE"]
         plot_df = df[df["question"] != "AVERAGE"]
 
-        # Get metrics columns (all columns except 'question')
-        metrics = [col for col in plot_df.columns if col != "question"]
+        # Get metrics columns (all columns except 'question' and 'llm_usage')
+        metrics = [col for col in plot_df.columns if col != "question" and col != "llm_usage"]
 
         # Filter out metrics that have all None values
         valid_metrics = []

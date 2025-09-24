@@ -210,3 +210,40 @@ async def test_remove_think_tags_with_other_tag():
     assert result == "Based on my analysis, the answer is 42."
     assert "<reasoning>" not in result
     assert "step by step" not in result
+
+
+@pytest.mark.asyncio
+async def test_measure_cpu_time(monkeypatch):
+    """Test measure_cpu_time returns correct sum for matching processes"""
+
+    class MockProc:
+        def __init__(self, name, user, system):
+            self.info = {"name": name}
+            self._user = user
+            self._system = system
+
+        def cpu_times(self):
+            class Times:
+                def __init__(self, user, system):
+                    self.user = user
+                    self.system = system
+
+            return Times(self._user, self._system)
+
+    # Simulate psutil.process_iter returning a mix of matching and non-matching processes
+    mock_procs = [
+        MockProc("LM Studio.exe", 1.5, 0.5),
+        MockProc("python.exe", 2.0, 1.0),
+        MockProc("LM Studio.exe", 3.0, 1.5),
+    ]
+
+    monkeypatch.setattr("psutil.process_iter", lambda attrs=None: mock_procs)
+
+    lmstudio = LMStudio()
+    result = lmstudio.measure_cpu_time()
+
+    # Only LM Studio.exe processes should be summed
+    expected_user = 1.5 + 3.0
+    expected_system = 0.5 + 1.5
+
+    assert result == [expected_user, expected_system]

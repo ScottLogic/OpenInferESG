@@ -24,6 +24,21 @@ env_path = project_root / ".env"
 load_dotenv(dotenv_path=env_path)
 
 
+def aggregate_usage_field(usage_records, field_name: str, default_value=0):
+    """
+    Aggregate a specific field from usage records.
+
+    Args:
+        usage_records: Collection of usage record objects
+        field_name: Name of the field to aggregate
+        default_value: Default value to use if field is missing
+
+    Returns:
+        Sum of the specified field across all valid records
+    """
+    return sum(record.get(field_name, default_value) for record in usage_records if isinstance(record, dict))
+
+
 def create_ragas_dataset(data):
     """
     Create a RAGAS evaluation dataset from the input data.
@@ -32,10 +47,11 @@ def create_ragas_dataset(data):
         data: List of dictionaries containing evaluation samples
 
     Returns:
-        Tuple of (EvaluationDataset object, processed samples list)
+        Tuple of (EvaluationDataset object, processed samples list, processed data list)
     """
 
     samples = []
+    processed_data = []
     for sample in data:
         # Skip samples without responses
         if not sample.get("response"):
@@ -57,10 +73,11 @@ def create_ragas_dataset(data):
             reference=reference,  # Use either provided reference or first context
         )
         samples.append(eval_sample)
+        processed_data.append(sample)  # Keep track of the original data for this sample
 
     print(f"Created {len(samples)} samples for evaluation")
     # Create a dataset using the RAGAS EvaluationDataset class
-    return EvaluationDataset(samples=samples), samples
+    return EvaluationDataset(samples=samples), samples, processed_data
 
 
 def create_ragas_llm():
@@ -131,7 +148,7 @@ async def evaluate_with_ragas(
         llm, embeddings_wrapper = create_ragas_llm()
 
         # Create dataset
-        dataset, samples = create_ragas_dataset(data)
+        dataset, samples, processed_data = create_ragas_dataset(data)
 
         # Define metrics to use for evaluation
         print("Configuring default RAGAS metrics: factual_correctness, semantic_similarity, answer_accuracy")
@@ -146,45 +163,65 @@ async def evaluate_with_ragas(
         results = evaluate(dataset=dataset, metrics=metrics, llm=llm)
 
         try:
-            print("Processing evaluation results...")
-            # Define column mappings for RAGAS output to our desired output format
-            columns = {
-                "nv_accuracy": "answer_accuracy",
-                "factual_correctness(mode=f1)": "factual_correctness",
-                "semantic_similarity": "semantic_similarity",
-                "user_input": "question",
-            }
+            print("Processing evaluation results including llm_usage if present...")
+            # Define expected metrics for alignment and output naming
+            expected_metrics = [
+                ("factual_correctness(mode=f1)", "factual_correctness"),
+                ("semantic_similarity", "semantic_similarity"),
+                ("nv_accuracy", "answer_accuracy"),
+            ]
 
-            # Print available columns for debugging
-            available_columns = list(results.to_pandas().columns)
+            df = results.to_pandas()
+            available_columns = list(df.columns)
             print(f"Results DataFrame columns: {available_columns}")
 
-            # Check that all required columns exist
-            missing_columns = [col for col in columns.keys() if col not in available_columns]
-            if missing_columns:
+            # Verify required columns
+            missing = [raw for raw, _ in expected_metrics if raw not in available_columns]
+            if missing:
                 raise ValueError(
-                    f"Missing expected columns in RAGAS output: {missing_columns}. Update column mappings."
+                    f"Missing expected columns in RAGAS output: {missing}. Update column mappings or metric extraction."
                 )
 
-            # Create DataFrame with only needed columns and renamed according to our convention
-            full_df = results.to_pandas()
-            selected_df = full_df[list(columns.keys())]
-            # Copy to guarantee standalone DataFrame as opposed to view
-            # See https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html#returning-a-view-versus-a-copy
-            results_df = selected_df.copy()
-            results_df.columns = [columns[col] for col in selected_df.columns]
+            # Build per-sample rows with metrics and attach llm_usage from original processed_data if present
+            rows = []
+            for idx in range(len(df)):
+                row_dict = {"question": df.loc[idx, "user_input"] if "user_input" in df.columns else processed_data[idx].get("user_input", "")}
+                for raw, mapped in expected_metrics:
+                    row_dict[mapped] = df.loc[idx, raw]
+                # Attach llm_usage if supplied in original input sample
+                if "llm_usage" in processed_data[idx]:
+                    row_dict["llm_usage"] = processed_data[idx]["llm_usage"]
+                rows.append(row_dict)
 
-            means = results_df.select_dtypes(include=["number"]).mean()
-            if isinstance(means, pd.Series):
-                # Add the question label
-                means.loc["question"] = "AVERAGE"
-                avg_row_df = pd.DataFrame([means.reindex(results_df.columns)])
-                results_df = pd.concat([results_df, avg_row_df], ignore_index=True)
+            results_df = pd.DataFrame(rows)
 
-            # Ensure we return a DataFrame (type assertion for pyright)
-            assert isinstance(results_df, pd.DataFrame), "Expected DataFrame but got Series"
+            # Compute averages manually (exclude llm_usage from mean calc)
+            avg_data: dict = {"question": "AVERAGE"}
+            metric_names = [mapped for _, mapped in expected_metrics]
+            for metric in metric_names:
+                if metric in results_df.columns:
+                    non_null = results_df[metric].dropna()
+                    avg_data[metric] = float(non_null.mean()) if len(non_null) else None
+
+            # Aggregate llm usage across samples
+            if "llm_usage" in results_df.columns:
+                usage_records = results_df["llm_usage"].dropna()
+                if len(usage_records) > 0:
+                    total_prompt_tokens = aggregate_usage_field(usage_records, "prompt_tokens")
+                    total_completion_tokens = aggregate_usage_field(usage_records, "completion_tokens")
+                    total_tokens = aggregate_usage_field(usage_records, "total_tokens")
+                    total_duration = aggregate_usage_field(usage_records, "duration_seconds")
+                    avg_data["llm_usage"] = {
+                        "total_prompt_tokens": total_prompt_tokens,
+                        "total_completion_tokens": total_completion_tokens,
+                        "total_tokens": total_tokens,
+                        "total_duration_seconds": total_duration,
+                    }
+
+            # Append average row
+            results_df = pd.concat([results_df, pd.DataFrame([avg_data])], ignore_index=True)
         except Exception as e:
-            print(f"Could not process RAGAS results: {e}")
+            print(f"Could not process RAGAS results with llm_usage: {e}")
             raise
 
         # Save results and generate visualization

@@ -2,19 +2,31 @@
 Main pipeline for running Ragas evaluations with OpenInferESG.
 """
 
+import bisect
 import os
 import sys
 import time
+import datetime
 from typing import List, Dict, Optional
 from pathlib import Path
 from modules.api_client import OpenInferESGClient
-from modules.data_utils import create_simplified_record, read_jsonl, write_jsonl, save_error_log
+from modules.data_utils import (
+    create_simplified_record,
+    read_jsonl,
+    write_jsonl,
+    save_error_log,
+    load_and_convert_usage_csv,
+    find_and_remove_usage_in_timerange,
+)
 from dotenv import load_dotenv
 
 # Find the project root (where .env is located)
 project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
 env_path = project_root / ".env"
 load_dotenv(dotenv_path=env_path)
+
+# Define the path to the LLM usage CSV
+DEFAULT_LLM_USAGE_CSV = str(project_root / "backend" / "logs" / "llm_usage.csv")
 
 
 def collect_api_responses(
@@ -24,6 +36,7 @@ def collect_api_responses(
     api_url: Optional[str] = None,
     limit: Optional[int] = None,
     batch_size: int = 3,
+    llm_usage_csv_path: Optional[str] = None,
 ) -> None:
     """
     Make API calls to OpenInferESG's endpoint with file reference and collect responses
@@ -35,8 +48,13 @@ def collect_api_responses(
         api_url: The base URL of the OpenInferESG API
         limit: Optional limit on number of questions to process
         batch_size: Number of questions to process in each batch
+        llm_usage_csv_path: Optional path to the LLM usage CSV file
     """
     api_url = os.environ.get("BACKEND_URL", "http://localhost:8250")  # Provide default value
+
+    # Use default LLM usage CSV path if not provided
+    if llm_usage_csv_path is None:
+        llm_usage_csv_path = DEFAULT_LLM_USAGE_CSV
 
     client = OpenInferESGClient(api_url)
 
@@ -95,6 +113,45 @@ def collect_api_responses(
             errors=errors,
         )
 
+    # Try to read LLM usage data
+    print(f"\nAttempting to read LLM usage data from {llm_usage_csv_path}...")
+    all_usage_data = load_and_convert_usage_csv(llm_usage_csv_path)
+
+    if enriched_records:
+        # Find the starting index for usage data and deletes earlier records
+        first_response_time = datetime.datetime.fromisoformat(
+            enriched_records[0]["response_timestamp"].replace("Z", "+00:00")
+        )
+        start_idx = bisect.bisect_left(
+            all_usage_data, first_response_time, key=lambda x: x.get("timestamp", datetime.datetime.min)
+        )
+        del all_usage_data[:start_idx]
+
+        # Process usage data matching optimized with binary search and removal
+        for i, record in enumerate(enriched_records):
+            start_time = record["response_timestamp"]
+
+            if i < len(enriched_records) - 1:
+                end_time = enriched_records[i + 1]["response_timestamp"]
+            else:
+                # For the last record, use the current time
+                end_time = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
+            # Use optimized binary search and remove used records to reduce dataset size
+            call_usage = find_and_remove_usage_in_timerange(all_usage_data, start_time, end_time)
+
+            total_prompt_tokens = sum(usage.get("prompt_tokens", 0) for usage in call_usage)
+            total_completion_tokens = sum(usage.get("completion_tokens", 0) for usage in call_usage)
+            total_tokens = total_prompt_tokens + total_completion_tokens
+            duration_seconds = sum(usage.get("duration_seconds", 0) for usage in call_usage)
+
+            enriched_records[i]["llm_usage"] = {
+                "prompt_tokens": total_prompt_tokens,
+                "completion_tokens": total_completion_tokens,
+                "total_tokens": total_tokens,
+                "duration_seconds": duration_seconds,
+            }
+
     # Write the enriched records to the output JSONL file
     write_jsonl(output_jsonl_path, enriched_records)
 
@@ -151,16 +208,23 @@ def process_batch(
         # Add a pause before starting a new question
         time.sleep(10)
 
+        # Create a timestamp for this response to potentially match with LLM usage data later
+        response_timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
+
         # Get answer from the API
         api_response, error_msg = client.get_answer(original_question, file_id=file_id)
 
         if api_response:
             enriched_record = create_simplified_record(original_question, api_response, record)
+            # Add a timestamp to help match with usage data later
+            enriched_record["response_timestamp"] = response_timestamp
             enriched_records.append(enriched_record)
             print(f"Got API response ({len(str(api_response))} chars)")
         else:
             errors.append({"question": original_question, "error": error_msg})
             enriched_record = create_simplified_record(original_question, None, record)
+            # Add a timestamp to help match with usage data later
+            enriched_record["response_timestamp"] = response_timestamp
             enriched_records.append(enriched_record)
             print(f"Error: {error_msg}")
 
@@ -251,9 +315,19 @@ def main(file_path: Optional[str] = None, question_limit: Optional[int] = None) 
         print("Usage: python enhanced_run_evaluation_pipeline.py [file_path] [question_limit]")
         sys.exit(1)
 
+    # Get the path to the LLM usage CSV file
+    llm_usage_csv = os.path.join(project_root, "backend", "logs", "llm_usage.csv")
+    if os.path.exists(llm_usage_csv):
+        print(f"Found LLM usage data at: {llm_usage_csv}")
+    else:
+        print(f"Note: LLM usage data not found at: {llm_usage_csv}")
+        llm_usage_csv = None
+
     # Step 2: Collect API responses and enrich JSONL with file references
     print(f"\nStep 2: Collecting API responses with file references for {file_path}...")
-    collect_api_responses(input_jsonl_path, output_jsonl_path, file_path, api_url, question_limit)
+    collect_api_responses(
+        input_jsonl_path, output_jsonl_path, file_path, api_url, question_limit, llm_usage_csv_path=llm_usage_csv
+    )
 
     print("\nProcess completed successfully!")
     print(f"Final enriched JSONL file saved to: {output_jsonl_path}")
