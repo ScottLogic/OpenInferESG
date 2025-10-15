@@ -151,9 +151,9 @@ async def evaluate_with_ragas(
 
         # Define metrics to use for evaluation
         print(
-    "Configuring default RAGAS metrics: semantic_similarity, "
-    "answer_relevancy, context_relevance, context_precision"
-)
+            "Configuring default RAGAS metrics: semantic_similarity, "
+            "answer_relevancy, context_relevance, context_precision"
+        )
         metrics = [
             SemanticSimilarity(),
             answer_relevancy,
