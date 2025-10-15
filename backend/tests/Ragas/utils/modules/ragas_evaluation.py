@@ -10,9 +10,8 @@ from typing import Optional
 import pandas as pd
 from ragas import evaluate, EvaluationDataset, SingleTurnSample
 from ragas.llms import LangchainLLMWrapper
-from langchain_openai import ChatOpenAI
-from ragas.metrics import FactualCorrectness, SemanticSimilarity
-from ragas.metrics._nv_metrics import AnswerAccuracy
+from langchain_openai.chat_models import ChatOpenAI
+from ragas.metrics import answer_relevancy, ContextRelevance, SemanticSimilarity, context_precision
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
@@ -151,11 +150,15 @@ async def evaluate_with_ragas(
         dataset, samples, processed_data = create_ragas_dataset(data)
 
         # Define metrics to use for evaluation
-        print("Configuring default RAGAS metrics: factual_correctness, semantic_similarity, answer_accuracy")
+        print(
+            "Configuring default RAGAS metrics: semantic_similarity, "
+            "answer_relevancy, context_relevance, context_precision"
+        )
         metrics = [
-            FactualCorrectness(llm=llm),
-            SemanticSimilarity(embeddings=embeddings_wrapper),
-            AnswerAccuracy(llm=llm),
+            SemanticSimilarity(),
+            answer_relevancy,
+            context_precision,
+            ContextRelevance(llm=llm),
         ]
 
         # Run the evaluation
@@ -166,9 +169,10 @@ async def evaluate_with_ragas(
             print("Processing evaluation results including llm_usage if present...")
             # Define expected metrics for alignment and output naming
             expected_metrics = [
-                ("factual_correctness(mode=f1)", "factual_correctness"),
+                ("nv_context_relevance", "recontext_relevance"),
+                ("context_precision", "context_precision"),
+                ("answer_relevancy", "answer_relevancy"),
                 ("semantic_similarity", "semantic_similarity"),
-                ("nv_accuracy", "answer_accuracy"),
             ]
 
             df = results.to_pandas()
