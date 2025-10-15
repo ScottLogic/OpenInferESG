@@ -30,7 +30,7 @@ async def run_evaluation(input_path: str, output_path: str, llm: str) -> None:
     print(f"Appending results to CSV file... {output_path}")
 
     file_exists = os.path.isfile(output_path)
-    results_df.to_csv(output_path, mode='a', header=not file_exists, index=False)
+    results_df.to_csv(output_path, mode="a", header=not file_exists, index=False)
 
     print("Results appended to CSV file.")
 

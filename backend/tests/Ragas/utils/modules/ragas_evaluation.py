@@ -17,7 +17,6 @@ from dotenv import load_dotenv
 from .ragas_utils import load_jsonl_data
 
 
-
 # Find the project root (where .env is located)
 project_root = Path(__file__).resolve().parent.parent.parent.parent.parent.parent
 env_path = project_root / ".env"
