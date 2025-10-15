@@ -11,7 +11,7 @@ import pandas as pd
 from ragas import evaluate, EvaluationDataset, SingleTurnSample
 from ragas.llms import LangchainLLMWrapper
 from langchain_openai.chat_models import ChatOpenAI
-from ragas.metrics import  answer_relevancy,ContextRelevance,SemanticSimilarity, context_precision, faithfulness
+from ragas.metrics import  answer_relevancy,ContextRelevance,SemanticSimilarity, context_precision
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
@@ -156,7 +156,7 @@ async def evaluate_with_ragas(
             answer_relevancy,
             context_precision,
             ContextRelevance (llm=llm),  
-            faithfulness,
+        
         ]
 
         # Run the evaluation
@@ -171,7 +171,7 @@ async def evaluate_with_ragas(
      ("context_precision", "context_precision"),
     ("answer_relevancy", "answer_relevancy"),
     ("semantic_similarity", "semantic_similarity"),  
-     ("faithfulness", "faithfulness"),
+    
 ]
 
             df = results.to_pandas()
