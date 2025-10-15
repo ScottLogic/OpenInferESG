@@ -48,7 +48,6 @@ async def main():
     parser.add_argument("--llm", "-l", help="LLM model to use for evaluation")
     parser.add_argument("--input", "-i", dest="input_jsonl", help="Path to input JSONL file", default=default_input)
     parser.add_argument("--output", "-o", help="Path to save CSV output", default=default_output)
-    parser.add_argument("--no-chart", action="store_true", help="Skip chart visualization")
     args = parser.parse_args()
 
     # Validate input file
