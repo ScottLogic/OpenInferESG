@@ -11,7 +11,7 @@ import pandas as pd
 from ragas import evaluate, EvaluationDataset, SingleTurnSample
 from ragas.llms import LangchainLLMWrapper
 from langchain_openai.chat_models import ChatOpenAI
-from ragas.metrics import  answer_relevancy,ContextRelevance,SemanticSimilarity, context_precision
+from ragas.metrics import answer_relevancy, ContextRelevance, SemanticSimilarity, context_precision
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
@@ -150,13 +150,14 @@ async def evaluate_with_ragas(
         dataset, samples, processed_data = create_ragas_dataset(data)
 
         # Define metrics to use for evaluation
-        print("Configuring default RAGAS metrics: semantic_similarity, answer_relevancy, context_relevance, context_precision")
+        print(
+            "Configuring default RAGAS metrics: semantic_similarity, answer_relevancy, context_relevance, context_precision"
+        )
         metrics = [
             SemanticSimilarity(),
             answer_relevancy,
             context_precision,
-            ContextRelevance (llm=llm),  
-        
+            ContextRelevance(llm=llm),
         ]
 
         # Run the evaluation
@@ -167,12 +168,11 @@ async def evaluate_with_ragas(
             print("Processing evaluation results including llm_usage if present...")
             # Define expected metrics for alignment and output naming
             expected_metrics = [
-    ("nv_context_relevance", "recontext_relevance"),
-     ("context_precision", "context_precision"),
-    ("answer_relevancy", "answer_relevancy"),
-    ("semantic_similarity", "semantic_similarity"),  
-    
-]
+                ("nv_context_relevance", "recontext_relevance"),
+                ("context_precision", "context_precision"),
+                ("answer_relevancy", "answer_relevancy"),
+                ("semantic_similarity", "semantic_similarity"),
+            ]
 
             df = results.to_pandas()
             available_columns = list(df.columns)
