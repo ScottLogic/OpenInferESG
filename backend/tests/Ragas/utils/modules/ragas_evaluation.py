@@ -10,7 +10,8 @@ import pandas as pd
 from ragas import evaluate, EvaluationDataset, SingleTurnSample
 from ragas.llms import LangchainLLMWrapper
 from langchain_openai.chat_models import ChatOpenAI
-from ragas.metrics import answer_relevancy, ContextRelevance, SemanticSimilarity, context_precision
+from ragas.metrics import AnswerAccuracy , SemanticSimilarity, FactualCorrectness
+
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
@@ -67,7 +68,6 @@ def create_ragas_dataset(data):
         # Create a sample using the RAGAS SingleTurnSample class
         eval_sample = SingleTurnSample(
             user_input=sample.get("user_input", ""),
-            retrieved_contexts=[context for context in sample.get("reference_contexts", []) if context],
             response=sample.get("response", ""),
             reference=reference,  # Use either provided reference or first context
         )
@@ -145,33 +145,31 @@ async def evaluate_with_ragas(jsonl_path: str) -> pd.DataFrame:
 
         # Define metrics to use for evaluation
         print(
-            "Configuring default RAGAS metrics: semantic_similarity, "
-            "answer_relevancy, context_relevance, context_precision"
+            "Configuring default RAGAS metrics: semantic_similarity,factual_correctness, answer_accuracy"
         )
         metrics = [
             SemanticSimilarity(),
-            answer_relevancy,
-            context_precision,
-            ContextRelevance(llm=llm),
+            FactualCorrectness(llm=llm),
+            AnswerAccuracy(llm=llm),
         ]
 
         # Run the evaluation
         print("Running RAGAS evaluation (this may take a while)...")
         results = evaluate(dataset=dataset, metrics=metrics, llm=llm)
-
         try:
             print("Processing evaluation results including llm_usage if present...")
             # Define expected metrics for alignment and output naming
             expected_metrics = [
-                ("nv_context_relevance", "recontext_relevance"),
-                ("context_precision", "context_precision"),
-                ("answer_relevancy", "answer_relevancy"),
-                ("semantic_similarity", "semantic_similarity"),
-            ]
+                  ("factual_correctness(mode=f1)", "factual_correctness"),
+                  ("nv_accuracy", "answer_accuracy"),
+                  ("semantic_similarity", "semantic_similarity"),
+             ]
+
 
             df = results.to_pandas()
             available_columns = list(df.columns)
             print(f"Results DataFrame columns: {available_columns}")
+            
 
             # Verify required columns
             missing = [raw for raw, _ in expected_metrics if raw not in available_columns]
