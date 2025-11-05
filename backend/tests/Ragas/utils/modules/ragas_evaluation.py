@@ -10,8 +10,7 @@ import pandas as pd
 from ragas import evaluate, EvaluationDataset, SingleTurnSample
 from ragas.llms import LangchainLLMWrapper
 from langchain_openai.chat_models import ChatOpenAI
-from ragas.metrics import AnswerAccuracy , SemanticSimilarity, FactualCorrectness
-
+from ragas.metrics import AnswerAccuracy, SemanticSimilarity, FactualCorrectness
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
@@ -144,9 +143,7 @@ async def evaluate_with_ragas(jsonl_path: str) -> pd.DataFrame:
         dataset, samples, processed_data = create_ragas_dataset(data)
 
         # Define metrics to use for evaluation
-        print(
-            "Configuring default RAGAS metrics: semantic_similarity,factual_correctness, answer_accuracy"
-        )
+        print("Configuring default RAGAS metrics: semantic_similarity,factual_correctness, answer_accuracy")
         metrics = [
             SemanticSimilarity(),
             FactualCorrectness(llm=llm),
@@ -160,16 +157,14 @@ async def evaluate_with_ragas(jsonl_path: str) -> pd.DataFrame:
             print("Processing evaluation results including llm_usage if present...")
             # Define expected metrics for alignment and output naming
             expected_metrics = [
-                  ("factual_correctness(mode=f1)", "factual_correctness"),
-                  ("nv_accuracy", "answer_accuracy"),
-                  ("semantic_similarity", "semantic_similarity"),
-             ]
-
+                ("factual_correctness(mode=f1)", "factual_correctness"),
+                ("nv_accuracy", "answer_accuracy"),
+                ("semantic_similarity", "semantic_similarity"),
+            ]
 
             df = results.to_pandas()
             available_columns = list(df.columns)
             print(f"Results DataFrame columns: {available_columns}")
-            
 
             # Verify required columns
             missing = [raw for raw, _ in expected_metrics if raw not in available_columns]
