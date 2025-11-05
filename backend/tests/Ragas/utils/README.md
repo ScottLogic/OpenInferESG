@@ -68,13 +68,10 @@ python enhanced_run_evaluation_pipeline.py /path/to/your/document.pdf 3
 After running the enhanced pipeline which produces the `ragas_evaluation_with_responses.jsonl` file, you must run the RAGAS evaluation script:
 
 ```bash
-python ragas_evaluate.py
+python ragas_evaluate.py --llm 'name-of-llm'
 
 # With custom input/output paths
-python ragas_evaluate.py --input path/to/input.jsonl --output path/to/output.json
-
-# Skip chart generation
-python ragas_evaluate.py --no-chart
+python ragas_evaluate.py --llm 'name-of-llm' --input path/to/input.jsonl --output path/to/output.csv
 ```
 
 ## Environment Variables
@@ -116,8 +113,7 @@ All output files are stored in `../files/`:
 
 - `ragas_evaluation_dataset.jsonl`: Initial questions and references
 - `ragas_evaluation_with_responses.jsonl`: Questions with API responses
-- `ragas_eval_result.json`: Evaluation metrics as configured in RAGAS_METRICS (default: factual_correctness, semantic_similarity, answer_accuracy)
-- `ragas_eval_result_chart.png`: Visualization of evaluation results
+- `ragas_eval_result.csv`: CSV of evaluation metrics, which is appended to on each run. Includes a column for the LLM name to support retrospective graph generation.
 
 ## Troubleshooting
 

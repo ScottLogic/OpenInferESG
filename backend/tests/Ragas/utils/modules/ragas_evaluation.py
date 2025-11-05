@@ -6,15 +6,15 @@ Core functions for running RAGAS evaluations on question-answering data.
 
 import os
 from pathlib import Path
-from typing import Optional
 import pandas as pd
 from ragas import evaluate, EvaluationDataset, SingleTurnSample
 from ragas.llms import LangchainLLMWrapper
 from langchain_openai.chat_models import ChatOpenAI
-from ragas.metrics import answer_relevancy, ContextRelevance, SemanticSimilarity, context_precision
+from ragas.metrics import AnswerAccuracy, SemanticSimilarity, FactualCorrectness
 from ragas.embeddings import LangchainEmbeddingsWrapper
 from langchain_openai import OpenAIEmbeddings
 from dotenv import load_dotenv
+from .ragas_utils import load_jsonl_data
 
 
 # Find the project root (where .env is located)
@@ -67,7 +67,6 @@ def create_ragas_dataset(data):
         # Create a sample using the RAGAS SingleTurnSample class
         eval_sample = SingleTurnSample(
             user_input=sample.get("user_input", ""),
-            retrieved_contexts=[context for context in sample.get("reference_contexts", []) if context],
             response=sample.get("response", ""),
             reference=reference,  # Use either provided reference or first context
         )
@@ -119,23 +118,17 @@ def create_ragas_llm():
     return LangchainLLMWrapper(chat_model), ragas_embeddings
 
 
-async def evaluate_with_ragas(
-    jsonl_path: str, output_json_path: Optional[str] = None, skip_chart: bool = False
-) -> pd.DataFrame:
+async def evaluate_with_ragas(jsonl_path: str) -> pd.DataFrame:
     """
     Evaluate responses using RAGAS metrics
 
     Args:
         jsonl_path: Path to the input JSONL file with responses
-        output_json_path: Path to save the JSON results
-        skip_chart: Whether to skip generating the bar chart
 
     Returns:
         DataFrame with evaluation results
     """
     # Import locally to avoid circular imports
-    from .ragas_utils import load_jsonl_data, save_results_to_json
-    from .ragas_visualization import generate_bar_chart
 
     print("Setting up RAGAS evaluation...")
     print(f"Loading data from {jsonl_path}...")
@@ -150,28 +143,22 @@ async def evaluate_with_ragas(
         dataset, samples, processed_data = create_ragas_dataset(data)
 
         # Define metrics to use for evaluation
-        print(
-            "Configuring default RAGAS metrics: semantic_similarity, "
-            "answer_relevancy, context_relevance, context_precision"
-        )
+        print("Configuring default RAGAS metrics: semantic_similarity,factual_correctness, answer_accuracy")
         metrics = [
             SemanticSimilarity(),
-            answer_relevancy,
-            context_precision,
-            ContextRelevance(llm=llm),
+            FactualCorrectness(llm=llm),
+            AnswerAccuracy(llm=llm),
         ]
 
         # Run the evaluation
         print("Running RAGAS evaluation (this may take a while)...")
         results = evaluate(dataset=dataset, metrics=metrics, llm=llm)
-
         try:
             print("Processing evaluation results including llm_usage if present...")
             # Define expected metrics for alignment and output naming
             expected_metrics = [
-                ("nv_context_relevance", "recontext_relevance"),
-                ("context_precision", "context_precision"),
-                ("answer_relevancy", "answer_relevancy"),
+                ("factual_correctness(mode=f1)", "factual_correctness"),
+                ("nv_accuracy", "answer_accuracy"),
                 ("semantic_similarity", "semantic_similarity"),
             ]
 
@@ -198,7 +185,8 @@ async def evaluate_with_ragas(
                     row_dict[mapped] = df.loc[idx, raw]
                 # Attach llm_usage if supplied in original input sample
                 if "llm_usage" in processed_data[idx]:
-                    row_dict["llm_usage"] = processed_data[idx]["llm_usage"]
+                    for key, val in processed_data[idx]["llm_usage"].items():
+                        row_dict[key] = val
                 rows.append(row_dict)
 
             results_df = pd.DataFrame(rows)
@@ -231,20 +219,6 @@ async def evaluate_with_ragas(
         except Exception as e:
             print(f"Could not process RAGAS results with llm_usage: {e}")
             raise
-
-        # Save results and generate visualization
-        if output_json_path:
-            # Save results to JSON
-            save_results_to_json(results_df, output_json_path)
-
-            # Generate visualization if not disabled
-            if not skip_chart:
-                try:
-                    chart_path = generate_bar_chart(output_json_path)
-                    if chart_path:
-                        print(f"Chart generated: {chart_path}")
-                except Exception as e:
-                    print(f"Chart generation failed: {e}")
 
         return results_df
 
